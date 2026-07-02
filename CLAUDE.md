@@ -50,6 +50,8 @@ Art-focused e-commerce storefront for a single brand (figures, handcrafts, art p
 Project skills live in `.claude/skills/`:
 
 - `/feature` — when starting ANY feature work, even if the owner just says "build X".
+- `/frontend` — when building or modifying any page/component/route (Next.js 16, Tailwind v4, Turkish-locale rules).
+- `/seo` — when creating or modifying any PUBLIC storefront route; run the checklist before committing.
 - `/decision` — the moment the owner answers an open question or makes a new product/technical decision. Never let a decision live only in chat.
 - `/code-check` — before every commit that touches `src/`.
 - `/ui-review` — after building or modifying any UI, before committing it.
