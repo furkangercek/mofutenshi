@@ -40,6 +40,7 @@ Art-focused e-commerce storefront for a single brand (figures, handcrafts, art p
 
 - Commit style: conventional commits (`feat|fix|docs|style|refactor|test|chore|perf(scope): subject`), imperative, ≤50 chars subject.
 - Agent may run commits directly at agreed checkpoints (owner authorized 2026-07-02). NEVER push — the owner pushes manually.
+- Storefront copy is TURKISH (v1); code, comments, identifiers, commits stay English. UI strings live in centralized copy modules, never scattered hardcoded literals (eases Phase 3 i18n). `<html lang="tr">`, Turkish SEO metadata.
 - Prefer server components; add `"use client"` only where interaction requires it.
 - Route naming: storefront `/t/[tagSlug]`, `/p/[productSlug]`, `/sales`; admin under `/admin`.
 - Keep components self-documenting; avoid comment noise.

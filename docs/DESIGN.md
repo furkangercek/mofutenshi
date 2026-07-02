@@ -29,6 +29,10 @@ Contrast rules:
 - `--accent` gold is for highlights/badges, NOT primary button fills.
 - Light theme only in v1; dark theme is Phase 3 — keep the semantic token layer so it's a mapping, not a rewrite.
 
+## Language
+
+UI copy is Turkish (v1) — tone: modern, classy, warm; no machine-translation stiffness. English arrives with Phase 3 i18n. Chosen fonts MUST fully support Turkish glyphs (ı İ ş Ş ğ Ğ ü Ü ö Ö ç Ç) in all used weights — check the display font especially.
+
 ## Typography
 
 - Display: distinctive serif or high-contrast sans for headings/hero (gallery feel). TBD by designer.
