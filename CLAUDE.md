@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # MofuTenshi
 
 Art-focused e-commerce storefront for a single brand (figures, handcrafts, art prints, stickers). A lightweight, self-hosted alternative to Shopify. Cost efficiency and design ownership are first-class priorities.
@@ -34,7 +36,7 @@ Art-focused e-commerce storefront for a single brand (figures, handcrafts, art p
 ## Conventions
 
 - Commit style: conventional commits (`feat|fix|docs|style|refactor|test|chore|perf(scope): subject`), imperative, ≤50 chars subject.
-- Never commit or push automatically — stage and prepare the message, then stop; the owner runs commits manually.
+- Agent may run commits directly at agreed checkpoints (owner authorized 2026-07-02). NEVER push — the owner pushes manually.
 - Prefer server components; add `"use client"` only where interaction requires it.
 - Route naming: storefront `/c/[categorySlug]`, `/p/[productSlug]`; admin under `/admin`.
 - Keep components self-documenting; avoid comment noise.
