@@ -25,13 +25,13 @@ MofuTenshi is a personal, art-forward e-commerce site for a single brand selling
 
 ### 1.2 Goals
 
-| Goal | Description | Measure (see Section 11) |
-|---|---|---|
-| G1 — Sell products | Convert visitors into buyers with a frictionless, variant-aware browse-to-checkout flow | Conversion rate, cart abandonment |
-| G2 — Distinctive brand | Deliver an art-forward aesthetic that differentiates from generic stores | Qualitative design review, bounce rate, time on site |
-| G3 — Low operating cost | Run on a self-hosted VPS with free-tier services wherever viable | Monthly infra cost |
-| G4 — Owner autonomy | Let the store owner manage catalog, variants, tags, sales, and inventory without a developer | Admin task completion without engineering |
-| G5 — Fast + discoverable | Fast loads and good SEO via SSR | LCP, Lighthouse, organic traffic |
+| Goal                     | Description                                                                                  | Measure (see Section 11)                             |
+| ------------------------ | -------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| G1 — Sell products       | Convert visitors into buyers with a frictionless, variant-aware browse-to-checkout flow      | Conversion rate, cart abandonment                    |
+| G2 — Distinctive brand   | Deliver an art-forward aesthetic that differentiates from generic stores                     | Qualitative design review, bounce rate, time on site |
+| G3 — Low operating cost  | Run on a self-hosted VPS with free-tier services wherever viable                             | Monthly infra cost                                   |
+| G4 — Owner autonomy      | Let the store owner manage catalog, variants, tags, sales, and inventory without a developer | Admin task completion without engineering            |
+| G5 — Fast + discoverable | Fast loads and good SEO via SSR                                                              | LCP, Lighthouse, organic traffic                     |
 
 ### 1.3 Non-goals for v1
 
@@ -52,6 +52,7 @@ Marketplace/multi-vendor, subscriptions, digital-goods delivery, marketing autom
 ### 2.1 v1 (MVP)
 
 **Storefront**
+
 - Homepage with large, prominent Sales, New Arrivals, and Featured/Best-Seller sections
 - Tag-based browsing across many product types (see Section 3)
 - Product listing pages (PLP) with filtering, sorting, and **infinite scroll**
@@ -60,12 +61,14 @@ Marketplace/multi-vendor, subscriptions, digital-goods delivery, marketing autom
 - Search (basic, by name/description)
 
 **Cart**
+
 - Add / remove / update quantity, variant-aware
 - Persistent cart (guest via signed cookie; logged-in via DB)
 - Cart drawer (slide-over) + full cart page
 - **Live effective pricing** (cart reflects current sale prices; see Section 7)
 
 **Checkout & payment (in v1)**
+
 - Full checkout: contact + shipping details
 - **Real online payment via a Turkish gateway (iyzico or PayTR)** — see `NOTE` below
 - Shipping: **flat rate + free-over-threshold**, both configurable in admin
@@ -76,11 +79,13 @@ Marketplace/multi-vendor, subscriptions, digital-goods delivery, marketing autom
 `NOTE (payment provider):` The cart and checkout flow are built provider-agnostic. The final choice between **iyzico** (recommended — cleaner API/docs, easier integration) and **PayTR** (lower fees, rougher integration) must be made before the payment step is implemented. This is the only remaining decision and it does not block any other part of the build.
 
 **Auth**
+
 - Register, login, logout, sessions
 - Email/password + at least one social provider
 - Email verification **deferred to Phase 2** (users may log in immediately in v1)
 
 **Admin panel**
+
 - Product CRUD (create/read/update/delete, publish/unpublish)
 - Tag management (hierarchical + flat tags; see Section 3 and Section 5)
 - Variant management with per-variant price and stock
@@ -91,6 +96,7 @@ Marketplace/multi-vendor, subscriptions, digital-goods delivery, marketing autom
 - Configurable settings: flat shipping rate, free-shipping threshold, low-stock threshold, manual-payment fallback copy
 
 **Platform**
+
 - SSR pages for storefront (SEO)
 - Docker-based deploy to a self-hosted VPS via Coolify
 - Cloudflare in front for caching + DDoS protection
@@ -140,12 +146,14 @@ Marketplace/multi-vendor, subscriptions, digital-goods delivery, marketing autom
 ### 3.3 Seed tags (starting set)
 
 Hierarchical:
+
 - `figures` → `anime`, `games`, `scale`, `garage-kits`
 - `handcrafts` → `keychains`, `accessories`, `plush`
 - `art-prints` → `posters`, `framed`, `postcards`
 - `stickers` → `die-cut`, `sheets`
 
 Flat:
+
 - `best-seller`, `limited-edition`, `misc`
 
 `ASSUMPTION:` Two levels of tag depth (parent → child) suffice for v1. The data model supports self-referential nesting so deeper trees are possible later without migration.
@@ -202,6 +210,7 @@ Format: role → story → acceptance criteria (AC). ACs are testable.
 As a shopper, I want the most important items (sales, new arrivals, best sellers) immediately visible.
 
 AC:
+
 - Above the fold on desktop, and after minimal scroll on mobile, the homepage shows a hero/featured block plus clearly labeled "On Sale," "New Arrivals," and "Best Sellers" sections.
 - On-sale items render a sale badge and both original (strikethrough) and discounted price.
 - Each section links to its full view (`/sales`, `/products?sort=newest`, `/t/best-seller`).
@@ -212,6 +221,7 @@ AC:
 As a shopper, I want to jump into a product tag/collection from the homepage.
 
 AC:
+
 - Visible navigation (nav bar + homepage tag grid) lists top-level hierarchical tags.
 - Selecting a tag routes to `/t/[slug]` showing that tag's products (including products under its subtags).
 
@@ -221,6 +231,7 @@ AC:
 As a shopper, I want to filter, sort, and scroll through products.
 
 AC:
+
 - PLP supports filters: tag, price range, on-sale, in-stock.
 - PLP supports sort: newest, price ascending/descending, on-sale first.
 - Filters and sort reflect in the URL (query params) so results are shareable and back/forward works.
@@ -232,6 +243,7 @@ AC:
 As a shopper, I want to search by keyword.
 
 AC:
+
 - A header search input routes to `/search?q=`.
 - Matches product name and description (case-insensitive, partial match).
 - Results reuse the PLP layout with the same filter/sort controls.
@@ -243,6 +255,7 @@ AC:
 As a shopper, I want to choose a product's version (painted vs. unpainted, size) and see exact price/availability.
 
 AC:
+
 - PDP shows all variant options grouped by option type (e.g., "Finish": Painted/Unpainted; "Size": S/M/L).
 - Selecting a combination updates displayed price, stock status, and variant-specific image if defined.
 - Out-of-stock combinations disable add-to-cart with a clear "Out of stock" label.
@@ -254,6 +267,7 @@ AC:
 As a shopper, I want multiple clear images.
 
 AC:
+
 - PDP shows a gallery (multiple images) with a primary image and thumbnails.
 - Images served in optimized/responsive sizes.
 - Images have descriptive alt text.
@@ -264,6 +278,7 @@ AC:
 As a shopper, I want to add a specific variant.
 
 AC:
+
 - Adding a variant creates or increments a cart line for that exact variant.
 - Cart drawer opens (or toast confirms) on add, showing line, quantity, subtotal.
 - Cart persists across reloads for guests (signed cookie) and across devices for logged-in users (DB).
@@ -273,6 +288,7 @@ AC:
 As a shopper, I want to change quantities or remove items.
 
 AC:
+
 - Quantity up/down with immediate subtotal recalculation.
 - Quantity cannot exceed available stock; UI blocks and explains.
 - Removing a line updates cart and subtotal.
@@ -284,6 +300,7 @@ AC:
 As a shopper, I want to enter my details and pay online.
 
 AC:
+
 - Checkout collects name, email, shipping address, and optional notes.
 - Shipping cost computed from admin settings: flat rate, waived when order subtotal ≥ free-shipping threshold.
 - All displayed prices are TRY and KDV-inclusive.
@@ -301,6 +318,7 @@ AC:
 As a user, I want an account so my cart and orders persist.
 
 AC:
+
 - Register with email/password; password stored hashed (never plaintext).
 - Login with email/password and at least one social provider.
 - Logout ends the session.
@@ -314,6 +332,7 @@ AC:
 As the store owner, I want to create a product, add images, define variants, and apply tags.
 
 AC:
+
 - Create product with name, slug (auto from name, editable), description (rich text or markdown), status (draft/published), and any number of tags (hierarchical and/or flat).
 - Add images via upload; optimized on upload (sharp), stored in R2; choose a primary image; reorder images.
 - Define option types (e.g., Finish, Size) and values; system generates variant combinations, each with editable SKU, price, and stock.
@@ -325,6 +344,7 @@ AC:
 As the store owner, I want to create and organize tags.
 
 AC:
+
 - Create/edit/delete tags with name, slug, type (hierarchical or flat), optional parent (for hierarchical), optional image, and sort order.
 - Deleting a tag removes it from products but never deletes the products themselves.
 - Tag sort order controls storefront display order.
@@ -336,6 +356,7 @@ AC:
 As the store owner, I want to discount products or a tag for a period.
 
 AC:
+
 - Create a sale with: name, discount type (percentage or fixed amount), value, scope (specific products or a whole tag), start/end datetime.
 - While active, affected products/variants show sale pricing and badges on the storefront and appear in `/sales` automatically.
 - Sales auto-activate and auto-expire on schedule (server-evaluated; no manual toggle needed).
@@ -348,6 +369,7 @@ AC:
 As the store owner, I want to see and adjust stock across variants.
 
 AC:
+
 - Inventory view lists variants with current stock, product, and low-stock highlight below the configurable threshold.
 - Stock editable inline.
 - Out-of-stock variants are non-purchasable on the storefront.
@@ -357,11 +379,13 @@ AC:
 
 **US-15 — Admin dashboard**
 AC:
+
 - Dashboard shows counts: products, active sales, low-stock items, recent orders, with links to each management screen.
 - `ASSUMPTION:` Revenue analytics are Phase 2+.
 
 **US-16 — Store settings**
 AC:
+
 - Admin can set and change: flat shipping rate, free-shipping threshold, low-stock threshold, and (if used) manual-payment instruction copy — without a developer.
 
 ---
@@ -373,40 +397,50 @@ Schema outline for the implementer, not final Prisma syntax. **Money is stored a
 ### 6.1 Entities
 
 **User**
+
 - `id`, `email` (unique), `passwordHash` (nullable for social-only), `name`, `role` (`CUSTOMER` | `ADMIN`), `emailVerifiedAt?`
 - Relations: `accounts` (Auth.js), `sessions`, `orders`, `cart`
 
 **Account / Session / VerificationToken** — standard Auth.js Prisma adapter tables.
 
 **Tag**
+
 - `id`, `name`, `slug` (unique), `type` (`HIERARCHICAL` | `FLAT`), `parentId?` (self-relation, hierarchical only), `imageKey?`, `sortOrder`
 - Relation: `products` via `ProductTag` join (many-to-many)
 
 **ProductTag** (join)
+
 - `productId`, `tagId` (composite unique). Enables a product in many tags.
 
 **Product**
+
 - `id`, `name`, `slug` (unique), `description`, `status` (`DRAFT` | `PUBLISHED`), `isFeatured` (bool), `publishedAt?`, `createdAt` (powers New Arrivals)
 - Relations: `images` (ProductImage[]), `optionTypes` (OptionType[]), `variants` (Variant[]), `tags` (via ProductTag)
 
 **ProductImage**
+
 - `id`, `productId`, `key` (R2 object key), `alt`, `sortOrder`, `isPrimary`, `variantId?`
 
 **OptionType** (e.g., "Finish", "Size")
+
 - `id`, `productId`, `name`, `sortOrder`
 
 **OptionValue** (e.g., "Painted", "Unpainted")
+
 - `id`, `optionTypeId`, `value`, `sortOrder`
 
 **Variant**
+
 - `id`, `productId`, `sku?` (unique), `priceCents`, `stock` (int), `isActive` (bool)
 - Relation: `optionValues` via `VariantOptionValue`
 - A product with no options has exactly one variant.
 
 **VariantOptionValue** (join)
+
 - `variantId`, `optionValueId` (one value per option type per variant)
 
 **Sale**
+
 - `id`, `name`, `type` (`PERCENT` | `FIXED`), `value` (int; percent 0–100 or fixed minor units), `startsAt`, `endsAt`, `endedEarly` (bool)
 - Scope via join tables:
   - **SaleProduct** (`saleId`, `productId`)
@@ -414,21 +448,26 @@ Schema outline for the implementer, not final Prisma syntax. **Money is stored a
 - Effective price resolved in the application layer at read time (Section 7).
 
 **Cart**
+
 - `id`, `userId?` (null for guest), `sessionToken?` (guest id), timestamps
 - Relation: `items` (CartItem[])
 
 **CartItem**
+
 - `id`, `cartId`, `variantId`, `quantity`; unique (`cartId`, `variantId`).
 
 **Order**
+
 - `id`, `orderNumber` (human-readable, unique), `userId?`, `email`, `status` (`PENDING_PAYMENT` | `PAID` | `CANCELLED` | `FULFILLED`), `subtotalCents`, `discountCents`, `shippingCents`, `totalCents`, `shippingAddress` (JSON or `Address` relation), `notes?`, `paymentProvider?`, `paymentRef?`, `placedAt`
 - Relation: `items` (OrderItem[])
 
 **OrderItem** (immutable snapshot)
+
 - `id`, `orderId`, `variantId?` (nullable if product later deleted), `productNameSnapshot`, `variantLabelSnapshot`, `unitPriceCents`, `quantity`, `lineTotalCents`
 - Snapshots ensure order history never changes when the catalog changes.
 
 **Setting** (single-row or key-value)
+
 - `flatShippingCents`, `freeShippingThresholdCents`, `lowStockThreshold`, `manualPaymentEnabled` (bool), `manualPaymentInstructions?`
 
 ### 6.2 Indexing / integrity notes
@@ -444,6 +483,7 @@ Schema outline for the implementer, not final Prisma syntax. **Money is stored a
 Effective price is **computed at read time, never stored** as a "sale price" field on the variant — this keeps sales schedulable and reversible.
 
 Resolution algorithm (per variant):
+
 1. Start with `variant.priceCents`.
 2. Gather active sales — `now` within `startsAt`/`endsAt` and not `endedEarly` — that apply via `SaleProduct` (product match) or `SaleTag` (any of the product's tags match).
 3. Compute the discounted price for each applicable sale.
@@ -463,22 +503,23 @@ The storefront must feel like an art piece. This section is prescriptive on toke
 ### 8.1 Brand color palette (design tokens)
 
 ```css
---ink:          #000000;   /* body + heading text */
---bg:           #F2F2F2;   /* page background ("white") */
---surface:      #FFFFFF;   /* cards / elevated surfaces */
---primary:      #B6BFF2;   /* primary buttons / interactive */
---primary-2:    #A7B3D9;   /* secondary / hover / darker button state */
---accent:       #D9C99A;   /* gold — highlights, sale badges, emphasis */
+--ink: #000000; /* body + heading text */
+--bg: #f2f2f2; /* page background ("white") */
+--surface: #ffffff; /* cards / elevated surfaces */
+--primary: #b6bff2; /* primary buttons / interactive */
+--primary-2: #a7b3d9; /* secondary / hover / darker button state */
+--accent: #d9c99a; /* gold — highlights, sale badges, emphasis */
 /* Supporting pastels from the original scheme, for surfaces/borders: */
---lavender-grey:   #989DBF;
---ghost-white:     #F4F3F9;
---lavender-grey-2: #A8ADC9;
---pale-slate:      #B8BCD0;
+--lavender-grey: #989dbf;
+--ghost-white: #f4f3f9;
+--lavender-grey-2: #a8adc9;
+--pale-slate: #b8bcd0;
 ```
 
 Semantic tokens the designer should define on top: `--bg`, `--surface`, `--text` (=`--ink`), `--text-muted`, `--border`, `--primary`, `--primary-contrast`, `--accent`, `--sale`, `--focus-ring`.
 
 Contrast guidance:
+
 - Body/heading text is **black** on light pastel backgrounds — meets WCAG AA comfortably.
 - **Black text on `--primary` (`#B6BFF2`) buttons is borderline.** The designer should verify contrast and, if needed, either darken the button toward `--primary-2` or use white button text for primary CTAs. `--accent` gold is for highlighting/badges, not primary button fills.
 - Provide a light theme for v1; leave hooks for dark theme (Phase 3).
@@ -523,20 +564,24 @@ Radix UI primitives / shadcn (headless, accessible) styled custom against the to
 ## 9. Non-functional requirements (NFRs)
 
 ### 9.1 Performance
+
 - LCP ≤ 2.5s, CLS < 0.1, INP < 200ms on mid-tier mobile / 4G.
 - SSR / static optimization where possible; product data cached with tag-based revalidation.
 - Lighthouse performance ≥ 90 on homepage and PDP.
 - Images optimized on upload (sharp) into multiple sizes; served via `next/image` behind Cloudflare cache.
 
 ### 9.2 Responsiveness / mobile
+
 - Mobile-first; fully functional from 360px width up.
 - Touch targets ≥ 44px; cart, filters, and variant selection usable one-handed.
 
 ### 9.3 Accessibility
+
 - WCAG 2.1 AA: contrast, keyboard nav, focus visibility, semantic landmarks, alt text, form labels, ARIA via Radix.
 - `prefers-reduced-motion` respected.
 
 ### 9.4 Security
+
 - Passwords hashed (Auth.js / bcrypt or argon2). Never plaintext.
 - All admin/account routes authorization-checked server-side (not just hidden in UI).
 - CSRF protection on mutations; session cookies `httpOnly`, `secure`, `sameSite`.
@@ -548,11 +593,13 @@ Radix UI primitives / shadcn (headless, accessible) styled custom against the to
 - HTTPS enforced (Coolify + Cloudflare).
 
 ### 9.5 Reliability / operations
+
 - **Nightly automated PostgreSQL backup (`pg_dump`) pushed off-VPS to Cloudflare R2.** Verify restore procedure.
 - Health-check endpoint for the container.
 - Structured logging; **Sentry (free tier)** for error tracking.
 
 ### 9.6 SEO
+
 - SSR HTML for crawlable content; per-page `<title>`/meta/OpenGraph; product structured data (schema.org `Product`/`Offer`); `sitemap.xml` (listing all products, to offset infinite scroll); `robots.txt`; canonical URLs.
 
 ---
@@ -561,21 +608,21 @@ Radix UI primitives / shadcn (headless, accessible) styled custom against the to
 
 ### 10.1 Stack
 
-| Layer | Choice | Notes / cost |
-|---|---|---|
-| Framework | Next.js (App Router), SSR | Storefront + admin + API/server actions in one codebase |
-| Language | TypeScript throughout | — |
-| DB | PostgreSQL, self-hosted via Docker | Free (VPS cost only) |
-| ORM | Prisma (schema = source of truth, migrations) | Free |
-| Auth | Auth.js (NextAuth) — email/password + social; sessions | Free; Prisma adapter |
-| Styling | Tailwind CSS + palette tokens; Radix/shadcn components | Free |
-| Images | Cloudflare R2 (zero egress) storage; sharp on-upload optimize/resize | R2 free tier: 10GB + generous ops |
-| Deploy | Docker, self-hosted VPS; Coolify (git-push deploys, HTTPS, env) | Coolify free/OSS; VPS is main recurring cost |
-| CDN/Security | Cloudflare free tier (cache, bandwidth, DDoS, WAF) | Free |
-| Analytics | Cloudflare Web Analytics | Free |
-| Error tracking | Sentry | Free tier |
-| Payments | iyzico or PayTR (decide before checkout build) | Transaction fees when live |
-| Email/invoicing (Phase 2) | Resend + React Email; server-side PDF | Resend free tier, then usage-based |
+| Layer                     | Choice                                                               | Notes / cost                                            |
+| ------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------- |
+| Framework                 | Next.js (App Router), SSR                                            | Storefront + admin + API/server actions in one codebase |
+| Language                  | TypeScript throughout                                                | —                                                       |
+| DB                        | PostgreSQL, self-hosted via Docker                                   | Free (VPS cost only)                                    |
+| ORM                       | Prisma (schema = source of truth, migrations)                        | Free                                                    |
+| Auth                      | Auth.js (NextAuth) — email/password + social; sessions               | Free; Prisma adapter                                    |
+| Styling                   | Tailwind CSS + palette tokens; Radix/shadcn components               | Free                                                    |
+| Images                    | Cloudflare R2 (zero egress) storage; sharp on-upload optimize/resize | R2 free tier: 10GB + generous ops                       |
+| Deploy                    | Docker, self-hosted VPS; Coolify (git-push deploys, HTTPS, env)      | Coolify free/OSS; VPS is main recurring cost            |
+| CDN/Security              | Cloudflare free tier (cache, bandwidth, DDoS, WAF)                   | Free                                                    |
+| Analytics                 | Cloudflare Web Analytics                                             | Free                                                    |
+| Error tracking            | Sentry                                                               | Free tier                                               |
+| Payments                  | iyzico or PayTR (decide before checkout build)                       | Transaction fees when live                              |
+| Email/invoicing (Phase 2) | Resend + React Email; server-side PDF                                | Resend free tier, then usage-based                      |
 
 ### 10.2 Runtime topology (v1)
 
@@ -619,16 +666,16 @@ Client ──HTTPS──> Cloudflare (CDN cache, WAF, DDoS)
 
 ## 11. Success metrics
 
-| Metric | Target (v1 baseline to refine) |
-|---|---|
-| Conversion rate (visit → paid order) | Establish baseline; improve over time |
-| Cart abandonment rate | Track and benchmark |
-| LCP (mobile) | ≤ 2.5s |
-| Lighthouse performance (home, PDP) | ≥ 90 |
+| Metric                                         | Target (v1 baseline to refine)                            |
+| ---------------------------------------------- | --------------------------------------------------------- |
+| Conversion rate (visit → paid order)           | Establish baseline; improve over time                     |
+| Cart abandonment rate                          | Track and benchmark                                       |
+| LCP (mobile)                                   | ≤ 2.5s                                                    |
+| Lighthouse performance (home, PDP)             | ≥ 90                                                      |
 | Admin task completion without engineering help | Owner can add a product + apply tags + run a sale unaided |
-| Monthly infra cost | Within VPS + free tiers (define ceiling) |
-| Organic sessions | Month-over-month growth (post-SEO) |
-| Error rate | < 1% of requests |
+| Monthly infra cost                             | Within VPS + free tiers (define ceiling)                  |
+| Organic sessions                               | Month-over-month growth (post-SEO)                        |
+| Error rate                                     | < 1% of requests                                          |
 
 ---
 
@@ -692,17 +739,18 @@ Only one decision remains, and it does not block starting the build:
 ## Appendix A — Variant model worked example
 
 A figure "Angel Statue" with two option types:
+
 - "Finish": Painted, Unpainted
 - "Size": 20cm, 40cm
 
 Generates up to 4 variants, each with its own price/stock:
 
-| Variant | priceCents | stock |
-|---|---|---|
-| Painted / 20cm | 4500 | 3 |
-| Painted / 40cm | 8900 | 1 |
-| Unpainted / 20cm | 2900 | 5 |
-| Unpainted / 40cm | 5900 | 0 (out of stock) |
+| Variant          | priceCents | stock            |
+| ---------------- | ---------- | ---------------- |
+| Painted / 20cm   | 4500       | 3                |
+| Painted / 40cm   | 8900       | 1                |
+| Unpainted / 20cm | 2900       | 5                |
+| Unpainted / 40cm | 5900       | 0 (out of stock) |
 
 PDP behavior: selecting Unpainted + 40cm shows ₺59.00, out of stock, add-to-cart disabled. A sale scoped to the `figures` tag ("Figures −15%") active now renders each as strikethrough original + discounted effective price, and all four appear in `/sales` automatically.
 

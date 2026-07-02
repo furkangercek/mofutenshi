@@ -20,14 +20,14 @@ One codebase, one deployable app container. Admin lives under `/admin` in the sa
 
 ## Application layers
 
-| Layer | Where | Notes |
-|---|---|---|
-| Storefront pages | `app/(store)/…` | Server components, SSR/ISR, SEO metadata per page |
-| Admin pages | `app/admin/…` | Server components + client forms, role-gated in layout AND per action |
-| Mutations | Server actions (preferred) or route handlers | zod-validated input, auth-checked |
-| Data access | Prisma client, thin query modules | No raw SQL unless measured need |
-| Auth | Auth.js with Prisma adapter | Session cookie: httpOnly, secure, sameSite |
-| Images | Upload → validate → sharp derivatives → R2 | Store object keys in DB, never full URLs |
+| Layer            | Where                                        | Notes                                                                 |
+| ---------------- | -------------------------------------------- | --------------------------------------------------------------------- |
+| Storefront pages | `app/(store)/…`                              | Server components, SSR/ISR, SEO metadata per page                     |
+| Admin pages      | `app/admin/…`                                | Server components + client forms, role-gated in layout AND per action |
+| Mutations        | Server actions (preferred) or route handlers | zod-validated input, auth-checked                                     |
+| Data access      | Prisma client, thin query modules            | No raw SQL unless measured need                                       |
+| Auth             | Auth.js with Prisma adapter                  | Session cookie: httpOnly, secure, sameSite                            |
+| Images           | Upload → validate → sharp derivatives → R2   | Store object keys in DB, never full URLs                              |
 
 ## Caching strategy
 
@@ -38,10 +38,10 @@ One codebase, one deployable app container. Admin lives under `/admin` in the sa
 
 ## Environments
 
-| Env | Where | DB | Images |
-|---|---|---|---|
-| dev | local, `docker compose up` for Postgres | local container | local disk or dev R2 bucket (TBD) |
-| prod | VPS via Coolify git-push deploy | container + volume | R2 |
+| Env  | Where                                   | DB                 | Images                            |
+| ---- | --------------------------------------- | ------------------ | --------------------------------- |
+| dev  | local, `docker compose up` for Postgres | local container    | local disk or dev R2 bucket (TBD) |
+| prod | VPS via Coolify git-push deploy         | container + volume | R2                                |
 
 Prisma migrations run on deploy (`prisma migrate deploy`).
 

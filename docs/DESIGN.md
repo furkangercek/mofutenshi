@@ -7,18 +7,18 @@ The storefront should feel like an art piece, not a template. Modern, classy, ca
 Raw palette (pastel lavender / ghost-white):
 
 ```css
---lavender-grey:   #989DBF;
---ghost-white:     #F4F3F9;
---lavender-grey-2: #A8ADC9;
---white:           #FFFFFF;
---pale-slate:      #B8BCD0;
+--lavender-grey: #989dbf;
+--ghost-white: #f4f3f9;
+--lavender-grey-2: #a8adc9;
+--white: #ffffff;
+--pale-slate: #b8bcd0;
 ```
 
 **Known gap:** the palette has no ink (text) color and no accent (CTA) color. Both MUST be added before any UI ships — pastels alone fail WCAG contrast. Placeholder direction until the designer decides (DECISIONS Q9):
 
 ```css
---ink:        #2A2A38;  /* deep desaturated plum-charcoal, body text — placeholder */
---accent:     TBD;      /* CTA + sale badges: muted rose / deep lavender / gold */
+--ink: #2a2a38; /* deep desaturated plum-charcoal, body text — placeholder */
+--accent: TBD; /* CTA + sale badges: muted rose / deep lavender / gold */
 ```
 
 Semantic tokens (map in Tailwind config; components use ONLY semantic tokens, never raw hex):
