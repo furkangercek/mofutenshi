@@ -6,7 +6,8 @@ Art-focused e-commerce storefront for a single brand (figures, handcrafts, art p
 
 ## Source of truth
 
-- `docs/PRD.md` — full product requirements. Read before implementing any feature.
+- `docs/STATUS.md` — session checkpoint: where we are, next action, reminders. **READ FIRST every session; update in every commit checkpoint.**
+- `docs/PRD.md` — full product requirements (v2.0, authoritative). Read before implementing any feature.
 - `docs/ARCHITECTURE.md` — technical architecture and runtime topology.
 - `docs/DATA_MODEL.md` — entity/schema reference (Prisma-oriented).
 - `docs/DESIGN.md` — design tokens, typography, motion, imagery rules.

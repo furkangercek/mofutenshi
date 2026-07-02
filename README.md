@@ -19,4 +19,4 @@ Art-focused e-commerce storefront for a single brand — figures, handcrafts, ar
 
 ## Status
 
-Phase 0 — foundation. No application code yet.
+Phase 1 (v1 MVP) — next up: Prisma schema + seed. See [docs/STATUS.md](docs/STATUS.md) for the live checkpoint.
