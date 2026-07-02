@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { Price } from "@/components/product/price";
 import { ProductImage } from "@/components/product/product-image";
 import { productCopy } from "@/lib/copy/catalog";
@@ -120,17 +121,10 @@ export function ProductView({ product }: { product: ProductDetailData }) {
           </fieldset>
         ))}
 
-        <div>
-          {/* Wired up in Phase 1 step 5 (cart); disabled until then. */}
-          <button
-            type="button"
-            disabled
-            className="bg-primary text-primary-contrast inline-flex h-12 items-center rounded-md px-8 font-medium transition disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {productCopy.addToCart}
-          </button>
-          <p className="text-muted mt-2 text-sm">{productCopy.cartComingSoon}</p>
-        </div>
+        <AddToCartButton
+          variantId={selectedVariant?.id}
+          disabled={selectedVariant === undefined || outOfStock}
+        />
 
         <p className="text-muted leading-relaxed whitespace-pre-line">{product.description}</p>
       </div>

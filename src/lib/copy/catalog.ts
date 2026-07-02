@@ -44,7 +44,6 @@ export const productCopy = {
   outOfStock: "Tükendi",
   comboUnavailable: "Bu kombinasyon mevcut değil",
   addToCart: "Sepete Ekle",
-  cartComingSoon: "Sepet özelliği yakında aktif olacak.",
   galleryImageLabel: (index: number) => `Görsel ${index + 1}`,
 };
 

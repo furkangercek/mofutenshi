@@ -33,6 +33,8 @@
   --animate-overlay-out: fade-out 150ms ease-in forwards;
   --animate-drawer-in: drawer-in 250ms ease-out;
   --animate-drawer-out: drawer-out 200ms ease-in forwards;
+  --animate-drawer-in-right: drawer-in-right 250ms ease-out;
+  --animate-drawer-out-right: drawer-out-right 200ms ease-in forwards;
   --animate-accordion-down: accordion-down 200ms ease-out;
   --animate-accordion-up: accordion-up 200ms ease-out;
   --animate-fade-up: fade-up 300ms ease-out backwards;
@@ -67,6 +69,16 @@
   @keyframes drawer-out {
     to {
       transform: translateX(-100%);
+    }
+  }
+  @keyframes drawer-in-right {
+    from {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes drawer-out-right {
+    to {
+      transform: translateX(100%);
     }
   }
   @keyframes accordion-down {

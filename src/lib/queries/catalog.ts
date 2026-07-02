@@ -40,7 +40,7 @@ export type ProductDetailData = {
   }[];
 };
 
-async function loadActiveSales(now: Date): Promise<ActiveSale[]> {
+export async function loadActiveSales(now: Date): Promise<ActiveSale[]> {
   const sales = await prisma.sale.findMany({
     where: { endedEarly: false, startsAt: { lte: now }, endsAt: { gte: now } },
     select: {

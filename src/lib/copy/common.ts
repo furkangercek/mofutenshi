@@ -12,7 +12,6 @@ export const navCopy = {
   menuTitle: "Menü",
   allProducts: "Tüm Ürünler",
   sales: "İndirimler",
-  cart: "Sepet",
   viewAll: "Tümünü gör",
   homeLink: "MofuTenshi ana sayfa",
   mainNavLabel: "Ana menü",

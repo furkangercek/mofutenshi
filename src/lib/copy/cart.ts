@@ -1,0 +1,29 @@
+import { formatKurus } from "@/lib/money";
+
+export const cartCopy = {
+  title: "Sepetim",
+  drawerDescription: "Sepetinizdeki ürünler",
+  open: "Sepeti aç",
+  close: "Sepeti kapat",
+  itemCountBadge: (count: number) => `Sepette ${count} ürün`,
+  empty: "Sepetiniz şu an boş.",
+  emptyCta: "Alışverişe başla",
+  subtotal: "Ara toplam",
+  shippingNote: "Kargo ücreti ödeme adımında hesaplanır.",
+  freeShippingRemaining: (remainingCents: number) =>
+    `Ücretsiz kargo için ${formatKurus(remainingCents)} kaldı.`,
+  freeShippingReached: "Kargonuz ücretsiz!",
+  viewCart: "Sepete git",
+  checkout: "Ödemeye geç",
+  checkoutComingSoon: "Ödeme adımı yakında aktif olacak.",
+  adding: "Ekleniyor…",
+  remove: "Kaldır",
+  increase: "Adet artır",
+  decrease: "Adet azalt",
+  quantity: (count: number) => `${count} adet`,
+  maxStockNote: (stock: number) => `Stokta en fazla ${stock} adet var.`,
+  lineOutOfStock: "Bu ürün tükendi — ödeme öncesi sepetinizden çıkarın.",
+  addError: "Ürün sepete eklenemedi. Lütfen tekrar deneyin.",
+  addOutOfStock: "Bu ürün şu anda stokta yok.",
+  updateError: "Sepet güncellenemedi. Lütfen tekrar deneyin.",
+};

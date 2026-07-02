@@ -2,11 +2,11 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-02 (Phase 1 step 2: design tokens + layout shell landed)
+**Last updated:** 2026-07-03 (Phase 1 step 5: cart landed)
 
 ## Where we are
 
-- **Phase 1 (v1 MVP) is current.** Steps 1 (schema + seed) and 2 (tokens + base UI) done.
+- **Phase 1 (v1 MVP) is current.** Steps 1 (schema + seed), 2 (tokens + base UI), 3+4 (read path + sales engine), and 5 (cart) done.
 - Schema: `prisma/schema.prisma`, migration `20260702191112_init`, idempotent seed (`npm run db:seed`) with PRD tags + Appendix A/B products + active figures sale + settings singleton.
 - Design tokens: Tailwind v4 `@theme` in `src/app/globals.css` — semantic tokens only, default palette disabled (raw `bg-zinc-*` etc. won't compile). Contrast verified (see DESIGN.md).
 - Layout shell: sticky translucent header (logo, Radix NavigationMenu tag nav with subtag flyouts, mobile Dialog drawer with Accordion, cart icon), footer, skip link, branded 404/error pages. Turkish copy centralized in `src/lib/copy/common.ts`.
@@ -16,12 +16,23 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Phase 1, step 5: Cart.**
+**Phase 1, step 6: Auth.**
 
-- Guest signed-cookie cart, drawer (Radix Sheet-style Dialog) + `/cart` page, quantity/stock rules, live effective pricing (reuse `src/lib/pricing.ts` + catalog queries).
-- Wire up the PDP add-to-cart button (currently rendered disabled with a "yakında" note in `product-view.tsx`).
-- Cart reads cookies → dynamic; keep cart UI in Suspense holes so PPR shells stay static. Server actions with zod (see `src/lib/actions/catalog.ts` for the pattern).
+- Auth.js (NextAuth) with Prisma adapter: email/password (credentials) + one social provider, register/login pages, account area shell.
+- `AUTH_SECRET` already exists in `.env`/`.env.example` (introduced for cart cookie signing — reuse it).
+- **Cart merge on login** (PRD US-11): merge guest cookie cart into the user's DB cart — dedupe by variant, sum quantities capped at stock; `Cart.userId` is already unique in the schema. Clear the guest cookie after merge. `getCartView` must learn to resolve the cart by userId when a session exists.
+- Session reads = cookies → keep session-dependent UI in Suspense holes (same pattern as the cart, see `src/components/cart/cart-indicator.tsx`).
+- Server-side authorization on every account mutation; zod at boundaries.
 - Use `/feature`, `/frontend`, `/ui-review` skills.
+
+## Step 5 architecture notes (landed 2026-07-03)
+
+- **Guest cart identity**: HMAC-signed random token in an httpOnly `mofu_cart` cookie (`src/lib/cart-cookie.ts`, signed with `AUTH_SECRET`), token stored on `Cart.sessionToken`. Tampered/forged cookies fail verification and read as an empty cart.
+- **Reads**: `getCartView()` (`src/lib/queries/cart.ts`) is per-user and NEVER `"use cache"`; wrapped in React `cache()` so the header badge and drawer share one DB read per request. Live effective pricing reuses `loadActiveSales` + `resolveEffectivePrice`. Lines with deactivated variants/unpublished products are hidden (checkout re-validates at step 7).
+- **Mutations**: server actions (`src/lib/actions/cart.ts`) with zod; ownership check = the item's cart token must match the request's signed cookie; quantities capped at stock and 99; `refresh()` re-renders the route so drawer/badge update in the same roundtrip.
+- **UI**: drawer is a Radix Dialog shell (`cart-drawer.tsx`) whose contents are server-rendered and passed in as children; `CartUIProvider` holds open state; PDP add-to-cart opens the drawer as the confirmation (PRD US-07). `/cart` mirrors it with `robots: noindex`.
+- **Build shape change**: the homepage is now ◐ PPR (was ○ fully static) — the cart badge/drawer is a dynamic Suspense hole in the layout. Shells remain static; expected and correct.
+- Verified over the wire against the prod server: add → signed cookie + line at ₺24,65 (sale-aware), stock cap (requested 99 → stored 5, `capped: true`), out-of-stock add rejected, quantity update, tampered-cookie and cookie-less mutations rejected, remove → branded empty state.
 
 ## Step 3+4 architecture notes (landed 2026-07-03)
 
@@ -38,6 +49,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 - [ ] Production domain not decided — blocks `metadataBase`/canonical URLs/OG images (needed by step 9 SEO at the latest).
 - [ ] R5: `garage-kits` is a manual subtag — owner should flag if tagging upkeep gets annoying (would become a derived view).
 - [ ] Seed image keys (`seed/*.jpg`) are placeholders; `R2_PUBLIC_URL` unset → all product images render the gradient placeholder (`product-image.tsx`). Becomes real at step 8 (image upload).
+- [ ] **Step 8 gotcha**: `imageUrl()` reads `R2_PUBLIC_URL`, which is server-only — `ProductImage` instances inside client components (PDP gallery, cart panel) would silently fall back to the gradient once R2 is live. Fix at step 8 by resolving image URLs server-side into the view models (do NOT just rename to `NEXT_PUBLIC_`, decide deliberately).
 - [ ] Under PPR, `notFound()` on dynamic routes streams a 200 with `noindex` meta (not a true 404 status). Revisit at step 9 if a true 404 status matters; branded UI + noindex is the current behavior.
 - [ ] Step 9 SEO backlog: sitemap.xml, robots.txt, canonical URLs (blocked on domain), Lighthouse pass.
 

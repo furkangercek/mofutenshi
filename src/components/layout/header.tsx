@@ -1,6 +1,9 @@
 import Link from "next/link";
 import Form from "next/form";
-import { Search, ShoppingBag } from "lucide-react";
+import { Suspense } from "react";
+import { Search } from "lucide-react";
+import { CartIndicator } from "@/components/cart/cart-indicator";
+import { CartTriggerButton } from "@/components/cart/cart-trigger";
 import { MainNav } from "@/components/layout/main-nav";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { searchCopy } from "@/lib/copy/catalog";
@@ -35,13 +38,9 @@ export async function Header() {
         >
           <Search aria-hidden className="size-5" />
         </Link>
-        <Link
-          href="/cart"
-          aria-label={navCopy.cart}
-          className="text-ink hover:bg-background inline-flex size-11 items-center justify-center rounded-md"
-        >
-          <ShoppingBag aria-hidden className="size-5" />
-        </Link>
+        <Suspense fallback={<CartTriggerButton count={0} />}>
+          <CartIndicator />
+        </Suspense>
       </div>
     </header>
   );
