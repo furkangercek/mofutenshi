@@ -10,7 +10,7 @@ Client ──HTTPS──> Cloudflare (CDN cache, WAF, DDoS, DNS)
                       ▼
                   VPS (Docker, managed by Coolify)
                    ├── next-app     Next.js server (storefront + admin + API)
-                   └── postgres     PostgreSQL 16, volume-backed
+                   └── postgres     PostgreSQL 17, volume-backed
                       │
                       ▼
                   Cloudflare R2 (product images, public read)
@@ -20,14 +20,14 @@ One codebase, one deployable app container. Admin lives under `/admin` in the sa
 
 ## Application layers
 
-| Layer            | Where                                        | Notes                                                                 |
-| ---------------- | -------------------------------------------- | --------------------------------------------------------------------- |
-| Storefront pages | `app/(store)/…`                              | Server components, SSR/ISR, SEO metadata per page                     |
-| Admin pages      | `app/admin/…`                                | Server components + client forms, role-gated in layout AND per action |
-| Mutations        | Server actions (preferred) or route handlers | zod-validated input, auth-checked                                     |
-| Data access      | Prisma client, thin query modules            | No raw SQL unless measured need                                       |
-| Auth             | Auth.js with Prisma adapter                  | Session cookie: httpOnly, secure, sameSite                            |
-| Images           | Upload → validate → sharp derivatives → R2   | Store object keys in DB, never full URLs                              |
+| Layer            | Where                                        | Notes                                                                                                                                                                                                  |
+| ---------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Storefront pages | `app/(store)/…`                              | Server components, SSR/ISR, SEO metadata per page                                                                                                                                                      |
+| Admin pages      | `app/admin/…`                                | Server components + client forms, role-gated in layout AND per action                                                                                                                                  |
+| Mutations        | Server actions (preferred) or route handlers | zod-validated input, auth-checked                                                                                                                                                                      |
+| Data access      | Prisma client, thin query modules            | Prisma 7: driver adapter (`@prisma/adapter-pg`), generated client in `src/generated/prisma` (gitignored, `postinstall` regenerates), singleton in `src/lib/prisma.ts`. No raw SQL unless measured need |
+| Auth             | Auth.js with Prisma adapter                  | Session cookie: httpOnly, secure, sameSite                                                                                                                                                             |
+| Images           | Upload → validate → sharp derivatives → R2   | Store object keys in DB, never full URLs                                                                                                                                                               |
 
 ## Caching strategy
 
