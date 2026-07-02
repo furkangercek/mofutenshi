@@ -1,26 +1,59 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Semantic design tokens (docs/DESIGN.md, PRD §8.1).
+ * Components use ONLY these — the default Tailwind palette is disabled
+ * so raw colors (bg-zinc-*, text-red-*, ...) fail to compile.
+ * Contrast verified 2026-07-02: ink-on-primary 11.72:1, ink-on-accent
+ * 12.77:1, muted-on-bg 7.19:1, ring >= 3.75:1 on all adjacent surfaces.
+ */
+@theme {
+  --color-*: initial;
+
+  --color-ink: #000000;
+  --color-background: #f2f2f2;
+  --color-surface: #ffffff;
+  --color-muted: #4b4f66;
+  --color-border: #b8bcd0;
+  --color-primary: #b6bff2;
+  --color-primary-hover: #a7b3d9;
+  --color-primary-contrast: #000000;
+  --color-accent: #d9c99a;
+  --color-sale: #d9c99a;
+  --color-ring: #4f588f;
+  --color-white: #ffffff;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), Georgia, serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    color-scheme: light;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    background-color: var(--color-background);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }

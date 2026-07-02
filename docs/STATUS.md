@@ -2,28 +2,32 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-02 (Phase 1 step 1: schema + migration + seed landed)
+**Last updated:** 2026-07-02 (Phase 1 step 2: design tokens + layout shell landed)
 
 ## Where we are
 
-- **Phase 1 (v1 MVP) is current.** Step 1 (schema + seed) done.
-- Full Prisma schema in `prisma/schema.prisma` (auth, tags, catalog, sales, cart, orders, settings), initial migration `20260702191112_init` applied, idempotent seed in `prisma/seed.ts` (`npm run db:seed`, also wired to `migrations.seed` via tsx).
-- Seeded: PRD §3.3 tags (Turkish names, English slugs), "Angel Statue" (2 option types, 4 variants per Appendix A), "Miku Nendoroid" (1 default variant), active "Figürlerde %15 İndirim" sale scoped to `figures` tag, Setting singleton (flat ₺150 / free over ₺1500 — dev placeholders).
+- **Phase 1 (v1 MVP) is current.** Steps 1 (schema + seed) and 2 (tokens + base UI) done.
+- Schema: `prisma/schema.prisma`, migration `20260702191112_init`, idempotent seed (`npm run db:seed`) with PRD tags + Appendix A/B products + active figures sale + settings singleton.
+- Design tokens: Tailwind v4 `@theme` in `src/app/globals.css` — semantic tokens only, default palette disabled (raw `bg-zinc-*` etc. won't compile). Contrast verified (see DESIGN.md).
+- Layout shell: sticky header (logo, Radix NavigationMenu tag nav with subtag flyouts, mobile Dialog drawer with Accordion, cart icon), footer, skip link, branded 404/error pages, placeholder homepage hero. Turkish copy centralized in `src/lib/copy/common.ts`.
+- Fonts via `next/font` (latin-ext): Inter body; **Fraunces display is an INTERIM pick** pending designer.
 - **PRD v2.0 is authoritative** — tag-based navigation model, payment in v1.
 
 ## NEXT ACTION
 
-**Phase 1, step 2: Design tokens + base UI.**
+**Phase 1, step 3: Storefront read path.**
 
-- Tailwind v4 token mapping from PRD §8.1 palette (`--ink #000000`, `--primary #B6BFF2`, `--accent #D9C99A`) + `docs/DESIGN.md`.
-- Layout shell (header/nav/footer), typography scale. Turkish copy in centralized copy modules (R6).
-- Use `/frontend` + `/ui-review` skills; display font still pending from designer (see reminders).
+- Homepage sections (Sales/New Arrivals/Best Sellers/Featured), `/t/[slug]` (parent includes children), `/sales`, `/products` PLP with filters + infinite scroll + SEO fallback, PDP with variant selection, search.
+- FIRST: decide the caching model — pages currently prerender static at build time with nav tags baked in (build needs DB up). Options: Cache Components (`cacheComponents: true` + `"use cache"` + `revalidateTag` on admin writes) vs. previous model. Read `node_modules/next/dist/docs/01-app/01-getting-started/08-caching.md`.
+- Needs a local placeholder image fallback (no R2 objects yet).
+- Use `/feature`, `/frontend`, `/seo`, `/ui-review` skills.
 
 ## Reminders / open items
 
 - [ ] **Q2 (only open decision): iyzico vs. PayTR** — needed at Phase 1 step 7 (payment), blocks nothing before that. Leaning iyzico.
 - [ ] Verify CI is green on GitHub Actions (pushes have happened; not yet confirmed green from this machine).
-- [ ] Designer inputs pending: display font choice; verify black-on-`#B6BFF2` primary-button contrast (see `docs/DESIGN.md`).
+- [ ] Designer input pending: display font choice (Fraunces is interim; must cover Turkish glyphs / latin-ext). Contrast question RESOLVED: black on `#B6BFF2` = 11.72:1, passes — recorded in DESIGN.md.
+- [ ] Production domain not decided — blocks `metadataBase`/canonical URLs/OG images (needed by step 9 SEO at the latest).
 - [ ] R5: `garage-kits` is a manual subtag — owner should flag if tagging upkeep gets annoying (would become a derived view).
 - [ ] Sale resolution (step 4) must expand a `SaleTag` on a parent tag to products tagged with its children (PRD §3.1 semantics; seeded sale targets `figures` while products carry child tags).
 - [ ] Seed image keys (`seed/*.jpg`) are placeholders — no objects in R2 yet; storefront dev needs a local placeholder image fallback until admin upload (step 8).

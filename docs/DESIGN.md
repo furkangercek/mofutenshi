@@ -25,7 +25,8 @@ Semantic tokens (map in Tailwind config; components use ONLY semantic tokens, ne
 Contrast rules:
 
 - Black text on light pastels passes WCAG AA comfortably.
-- **Black on `--primary` (#B6BFF2) buttons is borderline** — verify; if needed darken toward `--primary-2` or use white text on primary CTAs.
+- **Black on `--primary` (#B6BFF2) verified 2026-07-02: 11.72:1 — passes AA/AAA.** White on primary fails (1.79:1); primary CTAs use black text (`--primary-contrast: #000000`).
+- Implemented values (verified): `--muted: #4b4f66` (7.19:1 on bg), `--focus-ring: #4f588f` (≥3.75:1 on bg/surface/primary), `--border: #b8bcd0`.
 - `--accent` gold is for highlights/badges, NOT primary button fills.
 - Light theme only in v1; dark theme is Phase 3 — keep the semantic token layer so it's a mapping, not a rewrite.
 
