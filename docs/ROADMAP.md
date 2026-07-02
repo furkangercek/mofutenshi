@@ -7,7 +7,7 @@ Build order for v1, then phases. Checkboxes track actual progress — keep them 
 - [x] PRD + docs structure + CLAUDE.md
 - [x] Next.js boilerplate (App Router, TypeScript, Tailwind)
 - [x] Linters, Prettier, editor config
-- [ ] AI skills/commands for the workflow
+- [x] AI skills/commands for the workflow
 - [ ] Docker compose for local Postgres; Prisma init
 - [ ] CI basics (typecheck, lint, build)
 

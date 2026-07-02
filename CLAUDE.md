@@ -41,6 +41,18 @@ Art-focused e-commerce storefront for a single brand (figures, handcrafts, art p
 - Route naming: storefront `/c/[categorySlug]`, `/p/[productSlug]`; admin under `/admin`.
 - Keep components self-documenting; avoid comment noise.
 
+## Skills (invoke at these moments without being asked)
+
+Project skills live in `.claude/skills/`:
+
+- `/feature` — when starting ANY feature work, even if the owner just says "build X".
+- `/decision` — the moment the owner answers an open question or makes a new product/technical decision. Never let a decision live only in chat.
+- `/code-check` — before every commit that touches `src/`.
+- `/ui-review` — after building or modifying any UI, before committing it.
+- `/deploy`, `/test` — placeholders only; no VPS and no test setup yet. Do not deploy or scaffold tests unprompted.
+
+A PostToolUse hook (`.claude/hooks/format-on-edit.js`) auto-formats edited files with Prettier — do not hand-fix formatting.
+
 ## Repo workflow
 
 - Remote: `git@github.com-personal:furkangercek/mofutenshi.git` (SSH alias `github.com-personal` routes the owner's personal key — do not change to bare `github.com` or HTTPS).
