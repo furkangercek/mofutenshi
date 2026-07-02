@@ -12,8 +12,9 @@ Client ──HTTPS──> Cloudflare (CDN cache, WAF, DDoS, DNS)
                    ├── next-app     Next.js server (storefront + admin + API)
                    └── postgres     PostgreSQL 17, volume-backed
                       │
-                      ▼
-                  Cloudflare R2 (product images, public read)
+                      ├──> Cloudflare R2 (product images, public read)
+                      ├──> Cloudflare R2 (nightly pg_dump backups, off-box)
+                      └──> Payment gateway (iyzico / PayTR, hosted/tokenized flow)
 ```
 
 One codebase, one deployable app container. Admin lives under `/admin` in the same Next.js app, gated by role.
@@ -28,10 +29,11 @@ One codebase, one deployable app container. Admin lives under `/admin` in the sa
 | Data access      | Prisma client, thin query modules            | Prisma 7: driver adapter (`@prisma/adapter-pg`), generated client in `src/generated/prisma` (gitignored, `postinstall` regenerates), singleton in `src/lib/prisma.ts`. No raw SQL unless measured need |
 | Auth             | Auth.js with Prisma adapter                  | Session cookie: httpOnly, secure, sameSite                                                                                                                                                             |
 | Images           | Upload → validate → sharp derivatives → R2   | Store object keys in DB, never full URLs                                                                                                                                                               |
+| Payments         | Small provider-agnostic interface            | Gateway hosted/tokenized flow; `PAID` order created only on verified success callback/webhook — never trust client-side success. No raw card data touches server or DB                                 |
 
 ## Caching strategy
 
-- Product/category reads: cache with tag-based revalidation (`revalidateTag`) — bust tags on admin writes.
+- Product/tag reads: cache with tag-based revalidation (`revalidateTag`) — bust cache keys on admin writes.
 - Homepage sections (sales, new arrivals, featured): same tag mechanism.
 - Cloudflare caches static assets and images; HTML stays origin-rendered (auth/cart vary).
 - Cart and account pages: dynamic, never cached.
@@ -48,10 +50,10 @@ Prisma migrations run on deploy (`prisma migrate deploy`).
 ## Known trade-offs (accepted for v1)
 
 - Single VPS, single region: app and DB share fate. Acceptable at this scale; revisit with revenue.
-- Postgres in Docker means backups are our responsibility — needs an off-box backup job before launch (see DECISIONS.md Q13).
+- Postgres in Docker means backups are our responsibility — resolved by the nightly `pg_dump` → R2 job (PRD §9.5); restore procedure must be verified before launch.
 - No external search service; Postgres ILIKE/full-text is v1 search.
 
 ## Cost posture
 
 Free tiers: Cloudflare CDN/WAF, R2 (10GB), Coolify (open-source), self-hosted fonts via `next/font`.
-Paid: VPS (fixed monthly), R2 past free tier, Resend past free tier (Phase 2), payment gateway transaction fees (Phase 2).
+Paid: VPS (fixed monthly), R2 past free tier, payment gateway transaction fees (v1, once live), Resend past free tier (Phase 2).

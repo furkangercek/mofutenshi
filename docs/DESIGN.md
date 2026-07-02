@@ -1,31 +1,33 @@
 # Design System
 
-The storefront should feel like an art piece, not a template. Modern, classy, calm, image-led. This file is the working reference for tokens and UI rules; PRD §8 has the full design requirements.
+The storefront should feel like an art piece, not a template. Modern, classy, calm, image-led. This file is the working reference for tokens and UI rules; PRD v2 §8 has the full design requirements.
 
-## Color tokens
-
-Raw palette (pastel lavender / ghost-white):
+## Color tokens (PRD v2 §8.1)
 
 ```css
+--ink: #000000; /* body + heading text */
+--bg: #f2f2f2; /* page background */
+--surface: #ffffff; /* cards / elevated surfaces */
+--primary: #b6bff2; /* primary buttons / interactive */
+--primary-2: #a7b3d9; /* secondary / hover / darker button state */
+--accent: #d9c99a; /* gold — highlights, sale badges, emphasis */
+/* Supporting pastels, for surfaces/borders: */
 --lavender-grey: #989dbf;
 --ghost-white: #f4f3f9;
 --lavender-grey-2: #a8adc9;
---white: #ffffff;
 --pale-slate: #b8bcd0;
-```
-
-**Known gap:** the palette has no ink (text) color and no accent (CTA) color. Both MUST be added before any UI ships — pastels alone fail WCAG contrast. Placeholder direction until the designer decides (DECISIONS Q9):
-
-```css
---ink: #2a2a38; /* deep desaturated plum-charcoal, body text — placeholder */
---accent: TBD; /* CTA + sale badges: muted rose / deep lavender / gold */
 ```
 
 Semantic tokens (map in Tailwind config; components use ONLY semantic tokens, never raw hex):
 
-`--bg`, `--bg-elevated`, `--surface`, `--text`, `--text-muted`, `--border`, `--accent`, `--accent-contrast`, `--sale`, `--focus-ring`
+`--bg`, `--surface`, `--text` (= `--ink`), `--text-muted`, `--border`, `--primary`, `--primary-contrast`, `--accent`, `--sale`, `--focus-ring`
 
-Light theme only in v1; keep the token layer so dark theme is a Phase 2 mapping, not a rewrite.
+Contrast rules:
+
+- Black text on light pastels passes WCAG AA comfortably.
+- **Black on `--primary` (#B6BFF2) buttons is borderline** — verify; if needed darken toward `--primary-2` or use white text on primary CTAs.
+- `--accent` gold is for highlights/badges, NOT primary button fills.
+- Light theme only in v1; dark theme is Phase 3 — keep the semantic token layer so it's a mapping, not a rewrite.
 
 ## Typography
 
@@ -41,9 +43,16 @@ Light theme only in v1; keep the token layer so dark theme is a Phase 2 mapping,
 - Constrained width for text sections; wide/edge-to-edge for imagery.
 - Product cards: image-led, minimal metadata (name, price, sale badge).
 
+## Navigation (tag-based)
+
+- Nav bar lists top-level hierarchical tags (Figures, Handcrafts, Art Prints, Stickers).
+- Desktop: hover/focus on a top-level tag reveals its subtags; click goes to the parent tag page. Keyboard-accessible (focus opens, Escape closes) — Radix NavigationMenu.
+- Mobile: tap-to-expand accordion in the menu drawer.
+- Homepage: hero + On Sale / New Arrivals / Best Sellers sections (data-driven), plus a tag entry grid.
+
 ## Imagery
 
-- Consistent aspect ratios: 1:1 or 4:5 on cards, larger on PDP gallery.
+- Consistent aspect ratios: 1:1 or 4:5 on cards, larger (3:2 / 4:5) on PDP gallery.
 - Soft shadows or thin `--border` frames; no heavy chrome.
 - Always `next/image`: responsive sizes, lazy below fold, explicit dimensions (zero CLS), meaningful alt text.
 
@@ -55,7 +64,7 @@ Light theme only in v1; keep the token layer so dark theme is a Phase 2 mapping,
 
 ## Components
 
-Radix UI / shadcn primitives styled custom against semantic tokens: Sheet (cart drawer), Dialog, DropdownMenu/Select (variant pickers), Toast, Tabs, Tooltip. Custom styling must not break Radix focus management or ARIA.
+Radix UI / shadcn primitives styled custom against semantic tokens: NavigationMenu (tag nav), Sheet (cart drawer), Dialog, DropdownMenu/Select (variant pickers), Toast, Tabs, Tooltip. Custom styling must not break Radix focus management or ARIA.
 
 ## Accessibility floor
 

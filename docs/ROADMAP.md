@@ -1,6 +1,6 @@
 # Roadmap
 
-Build order for v1, then phases. Checkboxes track actual progress — keep them updated as work lands.
+Build order for v1 (per PRD v2), then phases. Checkboxes track actual progress — keep them updated as work lands.
 
 ## Phase 0 — Foundation (complete)
 
@@ -15,30 +15,31 @@ Build order for v1, then phases. Checkboxes track actual progress — keep them 
 
 Build order chosen so each step is testable against real data:
 
-1. **Schema + seed** — full Prisma schema (see DATA_MODEL.md), seed script with sample categories/products/variants
-2. **Design tokens + base UI** — Tailwind token mapping, layout shell, typography
-3. **Storefront read path** — homepage sections, category PLP, PDP with variant selection, search
-4. **Sales engine** — Sale model + effective-price resolution + badges
-5. **Cart** — guest cookie cart, drawer, quantity/stock rules
-6. **Auth** — Auth.js, register/login, cart merge on login
-7. **Checkout (order capture)** — pending Q1; assume manual-payment `PENDING_PAYMENT` orders
-8. **Admin** — products/variants CRUD, image upload → R2, categories, sales scheduler, inventory
-9. **SEO + polish** — metadata, structured data, sitemap, empty/error states
-10. **Deploy** — Dockerfile, Coolify on VPS, Cloudflare, backups (Q13)
+1. **Schema + seed** — full Prisma schema (see DATA_MODEL.md: tags, products, variants, sales, cart, orders, settings), first migration, seed script with the PRD seed tags and sample products/variants
+2. **Design tokens + base UI** — Tailwind token mapping (PRD §8.1 palette), layout shell, typography
+3. **Storefront read path** — homepage sections (Sales/New/Best Sellers/Featured), tag pages `/t/[slug]` (parent includes children), `/sales` view, `/products` PLP with filters + infinite scroll (+ SEO fallback), PDP with variant selection, search
+4. **Sales engine** — effective-price resolution (best price wins, no stacking), badges, `/sales` auto-population
+5. **Cart** — guest signed-cookie cart, drawer + cart page, quantity/stock rules, live effective pricing
+6. **Auth** — Auth.js, register/login, social provider, cart merge on login
+7. **Checkout + payment** — contact/shipping form, flat-rate + free-threshold shipping from settings, provider-agnostic payment interface; gateway integration (iyzico or PayTR — Q2) as the final swap-in; optional manual-payment fallback behind admin toggle; stock decrement on verified `PAID`
+8. **Admin** — products/variants CRUD, tag manager (hierarchical + flat), image upload → R2, sales scheduler, inventory view, orders list + status, settings screen
+9. **SEO + polish** — metadata, structured data (Product/Offer), full-product `sitemap.xml`, robots, empty/error states
+10. **Deploy** — Dockerfile, Coolify on VPS, Cloudflare DNS/CDN/WAF, nightly `pg_dump` → R2 backup job + restore test
 
 ## Phase 2
 
-- Payment gateway (iyzico or PayTR — Q2)
 - Transactional emails (Resend + React Email)
-- Automatic invoicing (server-side PDF)
+- Email verification at registration
+- Automatic invoicing (server-side PDF, KDV breakdown line)
 - Full order management in admin (status transitions, fulfillment)
-- Address book; email verification (Q11)
-- Product reviews
+- Address book / saved addresses
+- Product reviews/ratings
+- Automatic Best-Sellers ranking (real order data replaces the manual tag)
 
 ## Phase 3+
 
-- Coupon codes, wishlist, multi-admin roles, analytics dashboard, i18n/multi-currency, inventory reservation, dark theme
+- Coupon codes, wishlist, multi-admin roles, analytics dashboard, i18n/multi-currency, inventory reservation with timeout, dark theme
 
 ## Out of scope (v1)
 
-See PRD §15. Highlights: real payment processing, transactional email, invoicing, coupons, reviews, i18n, native app.
+See PRD §14. Highlights: transactional email, invoicing, coupons, reviews, i18n, returns workflow (policy page only), native app.

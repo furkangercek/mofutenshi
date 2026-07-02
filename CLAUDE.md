@@ -24,8 +24,10 @@ Art-focused e-commerce storefront for a single brand (figures, handcrafts, art p
 
 ## Hard rules
 
-- Money is ALWAYS integer minor units (`priceCents`). Never floats. Format only at the view layer.
-- Sale prices are computed at read time, never stored on the variant. See pricing resolution in `docs/PRD.md` §7.
+- Money is ALWAYS integer minor units (`priceCents` = kuruş, TRY only, KDV-inclusive). Never floats. Format only at the view layer.
+- Sale prices are computed at read time, never stored on the variant. See pricing resolution in `docs/PRD.md` §7. Overlap: best price wins, no stacking.
+- Navigation is TAGS, not categories (PRD §3): hierarchical + flat tags, many per product. Sales/New Arrivals are derived views, never tags.
+- Stock decrements ONLY on verified `PAID` (gateway callback/webhook) — never trust client-side payment success.
 - Order items are immutable snapshots (name, variant label, unit price) — catalog changes must never mutate order history.
 - Server-side authorization on every admin/account mutation; UI hiding is not access control.
 - Validate all inputs with zod at API/server-action boundaries.
@@ -38,7 +40,7 @@ Art-focused e-commerce storefront for a single brand (figures, handcrafts, art p
 - Commit style: conventional commits (`feat|fix|docs|style|refactor|test|chore|perf(scope): subject`), imperative, ≤50 chars subject.
 - Agent may run commits directly at agreed checkpoints (owner authorized 2026-07-02). NEVER push — the owner pushes manually.
 - Prefer server components; add `"use client"` only where interaction requires it.
-- Route naming: storefront `/c/[categorySlug]`, `/p/[productSlug]`; admin under `/admin`.
+- Route naming: storefront `/t/[tagSlug]`, `/p/[productSlug]`, `/sales`; admin under `/admin`.
 - Keep components self-documenting; avoid comment noise.
 
 ## Skills (invoke at these moments without being asked)
