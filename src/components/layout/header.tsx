@@ -9,7 +9,7 @@ export async function Header() {
   const tags = await getNavTags();
 
   return (
-    <header className="border-border bg-surface sticky top-0 z-40 border-b">
+    <header className="border-border bg-surface/85 sticky top-0 z-40 border-b backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-2 px-4 sm:px-6">
         <MobileNav tags={tags} />
         <Link href="/" aria-label={navCopy.homeLink} className="font-display text-xl tracking-wide">

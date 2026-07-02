@@ -66,6 +66,11 @@ UI copy is Turkish (v1) — tone: modern, classy, warm; no machine-translation s
 - Restrained and purposeful: 150–300ms, ease-out on enter.
 - Micro-interactions: product-card hover (subtle zoom or secondary-image swap), cart drawer slide, gentle section reveals.
 - Transform/opacity only. Always respect `prefers-reduced-motion`.
+- **Owner direction (2026-07-03): every overlay/menu/drawer must animate open and close — nothing pops in ("cute", soft, small animations). Buttons get a gentle press effect. Keep within the restraint rules above.**
+
+## Placeholder imagery (until real photography)
+
+Owner direction (2026-07-03): the shell should stand out even before real product photos exist. Use soft pastel gradient backgrounds / decorative blobs built from the design tokens as stand-ins for photography (hero, tag tiles). They must be trivially replaceable by real images later (swap a tile background for `next/image`, keep the layout). Real photos, when added, live in `public/` or R2 and always go through `next/image` with explicit dimensions and tuned `sizes`.
 
 ## Components
 

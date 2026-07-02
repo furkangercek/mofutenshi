@@ -1,20 +1,75 @@
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 import { homeCopy, siteCopy } from "@/lib/copy/common";
+import { getNavTags } from "@/lib/queries/tags";
 
-// Placeholder hero — the real homepage (Sales / New Arrivals / Best Sellers /
-// Featured sections) lands with Phase 1 step 3.
-export default function Home() {
+// Pastel gradient stand-ins for tile photography — swap for next/image
+// backgrounds when real photos exist (docs/DESIGN.md, placeholder imagery).
+const tileBackgrounds = [
+  "bg-linear-to-br from-primary/70 via-ghost to-accent/50",
+  "bg-linear-to-br from-accent/60 via-ghost to-primary/40",
+  "bg-linear-to-br from-lavender/50 via-ghost to-primary/50",
+  "bg-linear-to-br from-primary/40 via-ghost to-lavender/60",
+];
+
+export default async function Home() {
+  const tags = await getNavTags();
+
   return (
-    <section className="flex flex-1 flex-col items-center justify-center gap-6 px-4 py-24 text-center">
-      <h1 className="font-display max-w-2xl text-4xl leading-tight sm:text-5xl">
-        {siteCopy.tagline}
-      </h1>
-      <p className="text-muted max-w-xl text-lg">{siteCopy.description}</p>
-      <div className="mt-2">
-        <ButtonLink href="/products" size="lg">
-          {homeCopy.heroCta}
-        </ButtonLink>
-      </div>
-    </section>
+    <>
+      <section className="relative isolate overflow-hidden px-4 py-24 text-center sm:py-32">
+        <div
+          aria-hidden
+          className="bg-primary/40 absolute -top-24 left-1/2 -z-10 size-96 -translate-x-[80%] rounded-full blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="bg-accent/30 absolute top-8 left-1/2 -z-10 size-80 translate-x-[10%] rounded-full blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="bg-lavender/30 absolute -bottom-32 left-1/2 -z-10 size-96 -translate-x-1/4 rounded-full blur-3xl"
+        />
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-6">
+          <h1 className="animate-fade-up font-display text-4xl leading-tight sm:text-6xl">
+            {siteCopy.tagline}
+          </h1>
+          <p className="animate-fade-up text-muted max-w-xl text-lg [animation-delay:120ms]">
+            {siteCopy.description}
+          </p>
+          <div className="animate-fade-up mt-2 [animation-delay:240ms]">
+            <ButtonLink href="/products" size="lg">
+              {homeCopy.heroCta}
+            </ButtonLink>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-6xl px-4 pb-24 sm:px-6">
+        <h2 className="font-display text-2xl sm:text-3xl">{homeCopy.collectionsHeading}</h2>
+        <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {tags.map((tag, index) => (
+            <Link
+              key={tag.id}
+              href={`/t/${tag.slug}`}
+              className="group border-border relative flex aspect-4/5 items-end overflow-hidden rounded-xl border p-4 transition-shadow duration-300 hover:shadow-lg"
+            >
+              <div
+                aria-hidden
+                className={`absolute inset-0 transition-transform duration-300 ease-out group-hover:scale-105 ${tileBackgrounds[index % tileBackgrounds.length]}`}
+              />
+              <span className="relative flex items-center gap-2 font-medium">
+                {tag.name}
+                <ArrowRight
+                  aria-hidden
+                  className="size-4 transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </>
   );
 }

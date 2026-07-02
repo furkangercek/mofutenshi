@@ -32,8 +32,8 @@ export function MobileNav({ tags }: { tags: NavTag[] }) {
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Overlay className="bg-ink/40 fixed inset-0 z-50" />
-        <Dialog.Content className="bg-surface fixed inset-y-0 left-0 z-50 flex w-80 max-w-[85vw] flex-col overflow-y-auto p-4 shadow-lg">
+        <Dialog.Overlay className="bg-ink/40 data-[state=closed]:animate-overlay-out data-[state=open]:animate-overlay-in fixed inset-0 z-50" />
+        <Dialog.Content className="bg-surface data-[state=closed]:animate-drawer-out data-[state=open]:animate-drawer-in fixed inset-y-0 left-0 z-50 flex w-80 max-w-[85vw] flex-col overflow-y-auto p-4 shadow-lg">
           <div className="flex items-center justify-between">
             <Dialog.Title className="font-display text-lg">{siteCopy.name}</Dialog.Title>
             <Dialog.Description className="sr-only">{navCopy.menuTitle}</Dialog.Description>
@@ -68,7 +68,7 @@ export function MobileNav({ tags }: { tags: NavTag[] }) {
                         </Accordion.Trigger>
                       </Accordion.Header>
                     </div>
-                    <Accordion.Content className="overflow-hidden pl-4">
+                    <Accordion.Content className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden pl-4">
                       {tag.children.map((child) => (
                         <DrawerLink key={child.id} href={`/t/${child.slug}`}>
                           {child.name}

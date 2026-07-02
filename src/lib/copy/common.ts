@@ -41,4 +41,5 @@ export const errorCopy = {
 
 export const homeCopy = {
   heroCta: "Ürünleri keşfet",
+  collectionsHeading: "Koleksiyonlar",
 };

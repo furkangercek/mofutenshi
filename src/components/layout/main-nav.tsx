@@ -18,12 +18,15 @@ export function MainNav({ tags }: { tags: NavTag[] }) {
             {tag.children.length > 0 ? (
               <>
                 <NavigationMenu.Trigger asChild>
-                  <Link href={`/t/${tag.slug}`} className={itemLinkClass}>
+                  <Link href={`/t/${tag.slug}`} className={`group ${itemLinkClass}`}>
                     {tag.name}
-                    <ChevronDown aria-hidden className="size-3.5" />
+                    <ChevronDown
+                      aria-hidden
+                      className="size-3.5 transition-transform duration-200 group-data-[state=open]:rotate-180"
+                    />
                   </Link>
                 </NavigationMenu.Trigger>
-                <NavigationMenu.Content className="border-border bg-surface absolute top-full left-0 z-50 min-w-44 rounded-md border p-2 shadow-lg">
+                <NavigationMenu.Content className="border-border bg-surface data-[state=closed]:animate-menu-out data-[state=open]:animate-menu-in absolute top-full left-0 z-50 min-w-44 origin-top rounded-md border p-2 shadow-lg">
                   <ul className="flex flex-col">
                     <li>
                       <NavigationMenu.Link asChild>

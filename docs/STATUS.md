@@ -9,7 +9,8 @@ The single source for "where we are, what's next, what to remember." **AI agents
 - **Phase 1 (v1 MVP) is current.** Steps 1 (schema + seed) and 2 (tokens + base UI) done.
 - Schema: `prisma/schema.prisma`, migration `20260702191112_init`, idempotent seed (`npm run db:seed`) with PRD tags + Appendix A/B products + active figures sale + settings singleton.
 - Design tokens: Tailwind v4 `@theme` in `src/app/globals.css` — semantic tokens only, default palette disabled (raw `bg-zinc-*` etc. won't compile). Contrast verified (see DESIGN.md).
-- Layout shell: sticky header (logo, Radix NavigationMenu tag nav with subtag flyouts, mobile Dialog drawer with Accordion, cart icon), footer, skip link, branded 404/error pages, placeholder homepage hero. Turkish copy centralized in `src/lib/copy/common.ts`.
+- Layout shell: sticky translucent header (logo, Radix NavigationMenu tag nav with subtag flyouts, mobile Dialog drawer with Accordion, cart icon), footer, skip link, branded 404/error pages. Turkish copy centralized in `src/lib/copy/common.ts`.
+- Motion + placeholder look (owner direction 2026-07-03, recorded in DESIGN.md): all overlays animate open/close (`--animate-*` tokens in globals.css), button press effect, homepage = gradient hero with blurred pastel blobs + staggered entrance + tag tile grid (gradient stand-ins for photos, swap for `next/image` later).
 - Fonts via `next/font` (latin-ext): Inter body; **Fraunces display is an INTERIM pick** pending designer.
 - **PRD v2.0 is authoritative** — tag-based navigation model, payment in v1.
 

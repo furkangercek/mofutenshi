@@ -1,9 +1,12 @@
 import Link from "next/link";
 import type { ComponentProps } from "react";
 
+const base =
+  "inline-flex items-center justify-center rounded-md bg-primary font-medium text-primary-contrast transition hover:bg-primary-hover active:scale-[0.97]";
+
 const styles = {
-  md: "inline-flex h-11 items-center justify-center rounded-md bg-primary px-6 font-medium text-primary-contrast transition-colors hover:bg-primary-hover",
-  lg: "inline-flex h-12 items-center justify-center rounded-md bg-primary px-8 font-medium text-primary-contrast transition-colors hover:bg-primary-hover",
+  md: `${base} h-11 px-6`,
+  lg: `${base} h-12 px-8`,
 };
 
 type Size = keyof typeof styles;
