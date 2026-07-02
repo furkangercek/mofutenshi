@@ -8,6 +8,28 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+
+    # `next build` prerenders pages that query Postgres at build time
+    # (Cache Components), so CI needs a reachable, migrated database.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: mofutenshi
+          POSTGRES_PASSWORD: mofutenshi
+          POSTGRES_DB: mofutenshi
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mofutenshi"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://mofutenshi:mofutenshi@localhost:5432/mofutenshi
+      AUTH_SECRET: ci-only-secret-not-used-in-production
+
     steps:
       - uses: actions/checkout@v4
 
@@ -28,6 +50,9 @@ jobs:
 
       - name: Format check
         run: npm run format:check
+
+      - name: Migrate database
+        run: npx prisma migrate deploy
 
       - name: Build
         run: npm run build

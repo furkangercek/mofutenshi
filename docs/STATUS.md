@@ -44,7 +44,8 @@ The single source for "where we are, what's next, what to remember." **AI agents
 ## Reminders / open items
 
 - [ ] **Q2 (only open decision): iyzico vs. PayTR** — needed at Phase 1 step 7 (payment), blocks nothing before that. Leaning iyzico.
-- [ ] Verify CI is green on GitHub Actions (pushes have happened; not yet confirmed green from this machine).
+- [ ] CI was RED (build prerender needs Postgres; runner had none). Fixed 2026-07-03: workflow now runs a postgres:17 service + `prisma migrate deploy` before build; verified locally against an empty DB. Confirm green after next push.
+- [ ] Same constraint applies to the step 10 deploy: the production Docker build needs a reachable, migrated database at `next build` time (Coolify build-time env/network) — plan for it.
 - [ ] Designer input pending: display font choice (Fraunces is interim; must cover Turkish glyphs / latin-ext). Contrast question RESOLVED: black on `#B6BFF2` = 11.72:1, passes — recorded in DESIGN.md.
 - [ ] Production domain not decided — blocks `metadataBase`/canonical URLs/OG images (needed by step 9 SEO at the latest).
 - [ ] R5: `garage-kits` is a manual subtag — owner should flag if tagging upkeep gets annoying (would become a derived view).
