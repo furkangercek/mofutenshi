@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cacheLife } from "next/cache";
 import { footerCopy, siteCopy } from "@/lib/copy/common";
 
 const columns = [
@@ -19,7 +20,12 @@ const columns = [
   },
 ];
 
-export function Footer() {
+export async function Footer() {
+  "use cache";
+  // Cached scope so the copyright year is legal under Cache Components;
+  // daily revalidation keeps it fresh across New Year's.
+  cacheLife("days");
+
   return (
     <footer className="border-border bg-surface border-t">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-3 sm:px-6">

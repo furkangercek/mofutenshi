@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
 export type NavTag = {
@@ -8,6 +9,10 @@ export type NavTag = {
 };
 
 export async function getNavTags(): Promise<NavTag[]> {
+  "use cache";
+  cacheTag("tags");
+  cacheLife("hours");
+
   return prisma.tag.findMany({
     where: { type: "HIERARCHICAL", parentId: null },
     orderBy: { sortOrder: "asc" },

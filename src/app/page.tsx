@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { ProductRow } from "@/components/product/product-row";
 import { ButtonLink } from "@/components/ui/button";
+import { toCardView } from "@/lib/card-view";
+import { homeSectionCopy } from "@/lib/copy/catalog";
 import { homeCopy, siteCopy } from "@/lib/copy/common";
+import { getCatalog } from "@/lib/queries/catalog";
 import { getNavTags } from "@/lib/queries/tags";
 
 // Pastel gradient stand-ins for tile photography — swap for next/image
@@ -13,12 +17,25 @@ const tileBackgrounds = [
   "bg-linear-to-br from-primary/40 via-ghost to-lavender/60",
 ];
 
+const SECTION_SIZE = 4;
+
 export default async function Home() {
-  const tags = await getNavTags();
+  const [tags, catalog] = await Promise.all([getNavTags(), getCatalog()]);
+
+  // All sections are data-driven (PRD US-01): sale schedule, createdAt,
+  // best-seller tag, isFeatured flag.
+  const onSale = catalog.filter((p) => p.onSale).slice(0, SECTION_SIZE);
+  const newArrivals = [...catalog]
+    .sort((a, b) => b.createdAtMs - a.createdAtMs)
+    .slice(0, SECTION_SIZE);
+  const bestSellers = catalog
+    .filter((p) => p.tagSlugs.includes("best-seller"))
+    .slice(0, SECTION_SIZE);
+  const featured = catalog.filter((p) => p.isFeatured).slice(0, SECTION_SIZE);
 
   return (
-    <>
-      <section className="relative isolate overflow-hidden px-4 py-24 text-center sm:py-32">
+    <div className="flex flex-col gap-16 pb-24">
+      <section className="relative isolate overflow-hidden px-4 pt-20 pb-16 text-center sm:pt-28 sm:pb-20">
         <div
           aria-hidden
           className="bg-primary/40 absolute -top-24 left-1/2 -z-10 size-96 -translate-x-[80%] rounded-full blur-3xl"
@@ -46,7 +63,24 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 pb-24 sm:px-6">
+      <ProductRow title={homeSectionCopy.onSale} href="/sales" products={onSale.map(toCardView)} />
+      <ProductRow
+        title={homeSectionCopy.newArrivals}
+        href="/products?sort=newest"
+        products={newArrivals.map(toCardView)}
+      />
+      <ProductRow
+        title={homeSectionCopy.bestSellers}
+        href="/t/best-seller"
+        products={bestSellers.map(toCardView)}
+      />
+      <ProductRow
+        title={homeSectionCopy.featured}
+        href="/products"
+        products={featured.map(toCardView)}
+      />
+
+      <section className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         <h2 className="font-display text-2xl sm:text-3xl">{homeCopy.collectionsHeading}</h2>
         <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {tags.map((tag, index) => (
@@ -70,6 +104,6 @@ export default async function Home() {
           ))}
         </div>
       </section>
-    </>
+    </div>
   );
 }

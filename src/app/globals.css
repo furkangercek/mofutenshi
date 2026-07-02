@@ -101,6 +101,8 @@
 @layer base {
   html {
     color-scheme: light;
+    /* Reduced-motion users get instant jumps via the kill switch below. */
+    scroll-behavior: smooth;
   }
 
   body {

@@ -17,8 +17,8 @@ Build order chosen so each step is testable against real data:
 
 1. [x] **Schema + seed** — full Prisma schema (see DATA_MODEL.md: tags, products, variants, sales, cart, orders, settings), first migration, seed script with the PRD seed tags and sample products/variants
 2. [x] **Design tokens + base UI** — Tailwind token mapping (PRD §8.1 palette), layout shell, typography
-3. [ ] **Storefront read path** — homepage sections (Sales/New/Best Sellers/Featured), tag pages `/t/[slug]` (parent includes children), `/sales` view, `/products` PLP with filters + infinite scroll (+ SEO fallback), PDP with variant selection, search
-4. [ ] **Sales engine** — effective-price resolution (best price wins, no stacking), badges, `/sales` auto-population
+3. [x] **Storefront read path** — homepage sections (Sales/New/Best Sellers/Featured), tag pages `/t/[slug]` (parent includes children), `/sales` view, `/products` PLP with filters + infinite scroll (+ SEO fallback), PDP with variant selection, search
+4. [x] **Sales engine** — effective-price resolution (best price wins, no stacking), badges, `/sales` auto-population (landed with step 3 — the read path needed it)
 5. [ ] **Cart** — guest signed-cookie cart, drawer + cart page, quantity/stock rules, live effective pricing
 6. [ ] **Auth** — Auth.js, register/login, social provider, cart merge on login
 7. [ ] **Checkout + payment** — contact/shipping form, flat-rate + free-threshold shipping from settings, provider-agnostic payment interface; gateway integration (iyzico or PayTR — Q2) as the final swap-in; optional manual-payment fallback behind admin toggle; stock decrement on verified `PAID`

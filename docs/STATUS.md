@@ -16,12 +16,19 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Phase 1, step 3: Storefront read path.**
+**Phase 1, step 5: Cart.**
 
-- Homepage sections (Sales/New Arrivals/Best Sellers/Featured), `/t/[slug]` (parent includes children), `/sales`, `/products` PLP with filters + infinite scroll + SEO fallback, PDP with variant selection, search.
-- FIRST: decide the caching model — pages currently prerender static at build time with nav tags baked in (build needs DB up). Options: Cache Components (`cacheComponents: true` + `"use cache"` + `revalidateTag` on admin writes) vs. previous model. Read `node_modules/next/dist/docs/01-app/01-getting-started/08-caching.md`.
-- Needs a local placeholder image fallback (no R2 objects yet).
-- Use `/feature`, `/frontend`, `/seo`, `/ui-review` skills.
+- Guest signed-cookie cart, drawer (Radix Sheet-style Dialog) + `/cart` page, quantity/stock rules, live effective pricing (reuse `src/lib/pricing.ts` + catalog queries).
+- Wire up the PDP add-to-cart button (currently rendered disabled with a "yakında" note in `product-view.tsx`).
+- Cart reads cookies → dynamic; keep cart UI in Suspense holes so PPR shells stay static. Server actions with zod (see `src/lib/actions/catalog.ts` for the pattern).
+- Use `/feature`, `/frontend`, `/ui-review` skills.
+
+## Step 3+4 architecture notes (landed 2026-07-03)
+
+- **Caching**: Cache Components enabled (`cacheComponents: true`). Catalog queries are `"use cache"` + `cacheTag("catalog")` / `cacheTag("tags")`; catalog revalidates every 5 min (bounds sale-window staleness), tags hourly. Admin writes (step 8) must call `revalidateTag`/`updateTag`. Homepage fully static (5m revalidate); listings/PDP are Partial Prerender.
+- **Small-catalog strategy**: `getCatalog()` loads all PUBLISHED products into one cached snapshot; filter/sort/search/pagination run in JS (`src/lib/listing.ts`). Revisit if catalog grows past a few thousand.
+- **Sales engine** (`src/lib/pricing.ts`): best-price-wins, no stacking; SaleTag on a parent tag expands to child tags. Verified against seed: ₺29,00 → ₺24,65 on PDP, both products in `/sales`.
+- **Infinite scroll**: server action `loadMoreCards` + IntersectionObserver; SSR HTML has a real `?page=N` link until JS mounts (crawlable). Untested with >24 products (seed has 2).
 
 ## Reminders / open items
 
@@ -30,8 +37,9 @@ The single source for "where we are, what's next, what to remember." **AI agents
 - [ ] Designer input pending: display font choice (Fraunces is interim; must cover Turkish glyphs / latin-ext). Contrast question RESOLVED: black on `#B6BFF2` = 11.72:1, passes — recorded in DESIGN.md.
 - [ ] Production domain not decided — blocks `metadataBase`/canonical URLs/OG images (needed by step 9 SEO at the latest).
 - [ ] R5: `garage-kits` is a manual subtag — owner should flag if tagging upkeep gets annoying (would become a derived view).
-- [ ] Sale resolution (step 4) must expand a `SaleTag` on a parent tag to products tagged with its children (PRD §3.1 semantics; seeded sale targets `figures` while products carry child tags).
-- [ ] Seed image keys (`seed/*.jpg`) are placeholders — no objects in R2 yet; storefront dev needs a local placeholder image fallback until admin upload (step 8).
+- [ ] Seed image keys (`seed/*.jpg`) are placeholders; `R2_PUBLIC_URL` unset → all product images render the gradient placeholder (`product-image.tsx`). Becomes real at step 8 (image upload).
+- [ ] Under PPR, `notFound()` on dynamic routes streams a 200 with `noindex` meta (not a true 404 status). Revisit at step 9 if a true 404 status matters; branded UI + noindex is the current behavior.
+- [ ] Step 9 SEO backlog: sitemap.xml, robots.txt, canonical URLs (blocked on domain), Lighthouse pass.
 
 ## Local environment
 

@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import Form from "next/form";
+import { Search, ShoppingBag } from "lucide-react";
 import { MainNav } from "@/components/layout/main-nav";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { searchCopy } from "@/lib/copy/catalog";
 import { navCopy, siteCopy } from "@/lib/copy/common";
 import { getNavTags } from "@/lib/queries/tags";
 
@@ -17,6 +19,22 @@ export async function Header() {
         </Link>
         <div className="flex-1" />
         <MainNav tags={tags} />
+        <Form action="/search" className="hidden items-center md:flex">
+          <input
+            type="search"
+            name="q"
+            placeholder={searchCopy.placeholder}
+            aria-label={searchCopy.placeholder}
+            className="border-border bg-surface focus:outline-ring h-9 w-40 rounded-md border px-3 text-sm transition-[width] duration-300 focus:w-56 focus:outline-2"
+          />
+        </Form>
+        <Link
+          href="/search"
+          aria-label={searchCopy.submit}
+          className="text-ink hover:bg-background inline-flex size-11 items-center justify-center rounded-md md:hidden"
+        >
+          <Search aria-hidden className="size-5" />
+        </Link>
         <Link
           href="/cart"
           aria-label={navCopy.cart}
