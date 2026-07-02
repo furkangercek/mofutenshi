@@ -20,7 +20,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 - Auth.js (NextAuth) with Prisma adapter: email/password (credentials) + one social provider, register/login pages, account area shell.
 - `AUTH_SECRET` already exists in `.env`/`.env.example` (introduced for cart cookie signing — reuse it).
-- **Cart merge on login** (PRD US-11): merge guest cookie cart into the user's DB cart — dedupe by variant, sum quantities capped at stock; `Cart.userId` is already unique in the schema. Clear the guest cookie after merge. `getCartView` must learn to resolve the cart by userId when a session exists.
+- **Cart merge on login** (PRD US-10): merge guest cookie cart into the user's DB cart — dedupe by variant, sum quantities capped at stock; `Cart.userId` is already unique in the schema. Clear the guest cookie after merge. `getCartView` must learn to resolve the cart by userId when a session exists.
 - Session reads = cookies → keep session-dependent UI in Suspense holes (same pattern as the cart, see `src/components/cart/cart-indicator.tsx`).
 - Server-side authorization on every account mutation; zod at boundaries.
 - Use `/feature`, `/frontend`, `/ui-review` skills.
@@ -36,7 +36,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## Step 3+4 architecture notes (landed 2026-07-03)
 
-- **Caching**: Cache Components enabled (`cacheComponents: true`). Catalog queries are `"use cache"` + `cacheTag("catalog")` / `cacheTag("tags")`; catalog revalidates every 5 min (bounds sale-window staleness), tags hourly. Admin writes (step 8) must call `revalidateTag`/`updateTag`. Homepage fully static (5m revalidate); listings/PDP are Partial Prerender.
+- **Caching**: Cache Components enabled (`cacheComponents: true`). Catalog queries are `"use cache"` + `cacheTag("catalog")` / `cacheTag("tags")`; catalog revalidates every 5 min (bounds sale-window staleness), tags hourly; shipping settings under `cacheTag("settings")` (hourly, `src/lib/queries/settings.ts`). Admin writes (step 8) must call `revalidateTag`/`updateTag` for all three tags. Homepage fully static (5m revalidate); listings/PDP are Partial Prerender.
 - **Small-catalog strategy**: `getCatalog()` loads all PUBLISHED products into one cached snapshot; filter/sort/search/pagination run in JS (`src/lib/listing.ts`). Revisit if catalog grows past a few thousand.
 - **Sales engine** (`src/lib/pricing.ts`): best-price-wins, no stacking; SaleTag on a parent tag expands to child tags. Verified against seed: ₺29,00 → ₺24,65 on PDP, both products in `/sales`.
 - **Infinite scroll**: server action `loadMoreCards` + IntersectionObserver; SSR HTML has a real `?page=N` link until JS mounts (crawlable). Untested with >24 products (seed has 2).
@@ -65,6 +65,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 - `npx <pkg>@<version>` fails in Git Bash here — use `npm exec -- <pkg>` instead.
 - `rm -rf` style deletions may be permission-denied for the agent — prefer moving files aside, or ask the owner.
 - Commands are proxied through `rtk`; output can look filtered/abbreviated.
+- **2026-07-03 incident**: a leftover Claude Code daemon auto-resumed the previous session's transcript in the background (permissions bypassed) and wrote step 5 concurrently with the interactive session. If files change mid-session or edits fail with "modified since read", run `tasklist | grep claude` and check for stray daemon/fork processes before blaming the formatter.
 
 ## Working conventions recap
 

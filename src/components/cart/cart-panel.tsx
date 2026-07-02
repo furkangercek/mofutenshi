@@ -68,7 +68,7 @@ function CartLine({ line, closeOnNavigate }: { line: CartLineView; closeOnNaviga
             <>
               <button
                 type="button"
-                aria-label={cartCopy.decrease}
+                aria-label={cartCopy.decreaseFor(line.productName)}
                 disabled={isPending || line.quantity <= 1}
                 onClick={() =>
                   mutate(() =>
@@ -85,7 +85,7 @@ function CartLine({ line, closeOnNavigate }: { line: CartLineView; closeOnNaviga
               </span>
               <button
                 type="button"
-                aria-label={cartCopy.increase}
+                aria-label={cartCopy.increaseFor(line.productName)}
                 disabled={isPending || atStockCap}
                 onClick={() =>
                   mutate(() =>
@@ -101,6 +101,7 @@ function CartLine({ line, closeOnNavigate }: { line: CartLineView; closeOnNaviga
           <button
             type="button"
             disabled={isPending}
+            aria-label={cartCopy.removeFor(line.productName)}
             onClick={() => mutate(() => removeCartItem({ itemId: line.itemId }))}
             className="text-muted hover:text-ink ml-auto inline-flex h-11 items-center px-2 text-sm underline underline-offset-4 disabled:opacity-40"
           >
