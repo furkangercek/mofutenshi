@@ -2,16 +2,16 @@
 
 Build order for v1, then phases. Checkboxes track actual progress — keep them updated as work lands.
 
-## Phase 0 — Foundation (current)
+## Phase 0 — Foundation (complete)
 
 - [x] PRD + docs structure + CLAUDE.md
 - [x] Next.js boilerplate (App Router, TypeScript, Tailwind)
 - [x] Linters, Prettier, editor config
 - [x] AI skills/commands for the workflow
 - [x] Docker compose for local Postgres; Prisma init
-- [ ] CI basics (typecheck, lint, build)
+- [x] CI basics (typecheck, lint, build)
 
-## Phase 1 — v1 MVP
+## Phase 1 — v1 MVP (current)
 
 Build order chosen so each step is testable against real data:
 
