@@ -76,7 +76,7 @@ Marketplace/multi-vendor, subscriptions, digital-goods delivery, marketing autom
 - **Guest checkout allowed**
 - Order creation with immutable line-item snapshot
 
-`NOTE (payment provider):` The cart and checkout flow are built provider-agnostic. The final choice between **iyzico** (recommended — cleaner API/docs, easier integration) and **PayTR** (lower fees, rougher integration) must be made before the payment step is implemented. This is the only remaining decision and it does not block any other part of the build.
+`NOTE (payment provider):` **RESOLVED 2026-07-03 (R7): iyzico.** The cart and checkout flow are still built provider-agnostic so a later switch stays a contained swap.
 
 **Auth**
 
@@ -730,9 +730,7 @@ Client ──HTTPS──> Cloudflare (CDN cache, WAF, DDoS)
 
 ## 15. Remaining decision
 
-Only one decision remains, and it does not block starting the build:
-
-- **Payment provider: iyzico vs. PayTR.** Recommendation: **iyzico** for easier integration and documentation; PayTR if lower transaction fees are the priority. Must be finalized before the payment step is implemented. The checkout is built provider-agnostic so this is a swap-in at the end.
+**RESOLVED 2026-07-03 (DECISIONS.md R7): payment provider = iyzico** — chosen for easier integration and documentation over PayTR's lower fees. The checkout is built provider-agnostic so a provider switch remains a swap-in.
 
 ---
 

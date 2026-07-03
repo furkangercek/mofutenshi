@@ -21,7 +21,7 @@ Build order chosen so each step is testable against real data:
 4. [x] **Sales engine** — effective-price resolution (best price wins, no stacking), badges, `/sales` auto-population (landed with step 3 — the read path needed it)
 5. [x] **Cart** — guest signed-cookie cart, drawer + cart page, quantity/stock rules, live effective pricing
 6. [x] **Auth** — Auth.js, register/login, social provider (Google, pending OAuth creds), cart merge on login
-7. [ ] **Checkout + payment** — contact/shipping form, flat-rate + free-threshold shipping from settings, provider-agnostic payment interface; gateway integration (iyzico or PayTR — Q2) as the final swap-in; optional manual-payment fallback behind admin toggle; stock decrement on verified `PAID`
+7. [ ] **Checkout + payment** — contact/shipping form, flat-rate + free-threshold shipping from settings, provider-agnostic payment interface; iyzico gateway integration (R7) as the final swap-in; optional manual-payment fallback behind admin toggle; stock decrement on verified `PAID`
 8. [ ] **Admin** — products/variants CRUD, tag manager (hierarchical + flat), image upload → R2, sales scheduler, inventory view, orders list + status, settings screen
 9. [ ] **SEO + polish** — metadata, structured data (Product/Offer), full-product `sitemap.xml`, robots, empty/error states
 10. [ ] **Deploy** — Dockerfile, Coolify on VPS, Cloudflare DNS/CDN/WAF, nightly `pg_dump` → R2 backup job + restore test

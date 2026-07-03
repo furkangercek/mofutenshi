@@ -18,7 +18,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 **Phase 1, step 7: Checkout + payment.**
 
-- **Q2 (iyzico vs. PayTR) must be answered by the owner before the gateway integration** — but build the checkout provider-agnostic first: contact/shipping form (guests by email, logged-in prefilled per PRD US-09), flat-rate + free-threshold shipping from `getSettings()`, order creation with immutable item snapshots, stock decrement ONLY on verified `PAID` callback, optional manual-payment fallback behind the admin toggle.
+- **Gateway = iyzico (R7, 2026-07-03)** — still build the checkout provider-agnostic (payment behind an interface): contact/shipping form (guests by email, logged-in prefilled per PRD US-09), flat-rate + free-threshold shipping from `getSettings()`, order creation with immutable item snapshots, stock decrement ONLY on verified `PAID` callback, optional manual-payment fallback behind the admin toggle.
 - Cart re-validation at checkout: hidden cart lines (deactivated variant / unpublished product) must be dropped/re-checked server-side before payment.
 - Rate limiting exists (`src/lib/rate-limit.ts`) — reuse for checkout endpoints if needed.
 - Use `/feature`, `/frontend`, `/seo` (confirmation page is noindex), `/ui-review` skills.
@@ -52,7 +52,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## Reminders / open items
 
-- [ ] **Q2 (only open decision): iyzico vs. PayTR** — NOW BLOCKING the gateway half of step 7 (checkout form itself is provider-agnostic). Leaning iyzico.
+- [x] **Q2 RESOLVED (R7, 2026-07-03): payment gateway = iyzico.** No open decisions remain. Owner still needs an iyzico merchant account + sandbox keys before the gateway goes live.
 - [ ] **Google OAuth credentials pending owner** — the Google login button stays hidden until `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` exist; US-10 "at least one social provider" is code-complete but not user-visible until then. Callback URL to register in Google Console: `<origin>/api/auth/callback/google`.
 - [ ] CI was RED (build prerender needs Postgres; runner had none). Fixed 2026-07-03: workflow now runs a postgres:17 service + `prisma migrate deploy` before build; verified locally against an empty DB. Confirm green after next push.
 - [ ] Same constraint applies to the step 10 deploy: the production Docker build needs a reachable, migrated database at `next build` time (Coolify build-time env/network) — plan for it.
