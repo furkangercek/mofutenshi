@@ -4,6 +4,11 @@ import { ButtonLink } from "@/components/ui/button";
 import { logoutAction } from "@/lib/actions/auth";
 import { auth } from "@/lib/auth";
 import { authCopy } from "@/lib/copy/auth";
+import { accountOrdersCopy } from "@/lib/copy/checkout";
+import { formatKurus } from "@/lib/money";
+import { getOrdersForUser } from "@/lib/queries/orders";
+
+const dateFormatter = new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium" });
 
 export const metadata: Metadata = {
   title: authCopy.accountTitle,
@@ -15,6 +20,7 @@ export default async function AccountPage() {
   if (!session?.user) redirect("/login?callbackUrl=%2Faccount");
 
   const displayName = session.user.name?.trim() || session.user.email || "";
+  const orders = await getOrdersForUser(session.user.id);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
@@ -23,10 +29,31 @@ export default async function AccountPage() {
 
       <section className="border-border mt-8 rounded-lg border p-6">
         <h2 className="font-display text-xl">{authCopy.ordersHeading}</h2>
-        <p className="text-muted mt-2 text-sm">{authCopy.ordersEmpty}</p>
-        <ButtonLink href="/products" className="mt-4">
-          {authCopy.browseCta}
-        </ButtonLink>
+        {orders.length === 0 ? (
+          <>
+            <p className="text-muted mt-2 text-sm">{authCopy.ordersEmpty}</p>
+            <ButtonLink href="/products" className="mt-4">
+              {authCopy.browseCta}
+            </ButtonLink>
+          </>
+        ) : (
+          <ul className="divide-border mt-2 divide-y">
+            {orders.map((order) => (
+              <li key={order.id} className="flex items-baseline justify-between gap-3 py-3">
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium">{order.orderNumber}</span>
+                  <span className="text-muted block text-sm">
+                    {dateFormatter.format(order.placedAt)} ·{" "}
+                    {accountOrdersCopy.statusLabels[order.status]}
+                  </span>
+                </span>
+                <span className="text-sm font-semibold whitespace-nowrap">
+                  {formatKurus(order.totalCents)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <form action={logoutAction} className="mt-8">

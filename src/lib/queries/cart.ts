@@ -3,6 +3,7 @@ import { getCartIdentity } from "@/lib/cart-identity";
 import { resolveEffectivePrice } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 import { loadActiveSales } from "@/lib/queries/catalog";
+import { variantLabel } from "@/lib/variant-label";
 
 // Per-user data: never "use cache". React cache() dedupes the header badge
 // and drawer reads within a single request render.
@@ -90,10 +91,6 @@ export const getCartView = cache(async (): Promise<CartView> => {
         { id: variant.product.id, tagIds: variant.product.tags.map((t) => t.tagId) },
         activeSales,
       );
-      const label = variant.optionValues
-        .toSorted((a, b) => a.optionValue.optionType.sortOrder - b.optionValue.optionType.sortOrder)
-        .map((v) => v.optionValue.value)
-        .join(" / ");
       const image =
         variant.product.images.find((img) => img.variantId === variant.id) ??
         variant.product.images[0];
@@ -103,7 +100,7 @@ export const getCartView = cache(async (): Promise<CartView> => {
         variantId: variant.id,
         productName: variant.product.name,
         productSlug: variant.product.slug,
-        variantLabel: label || null,
+        variantLabel: variantLabel(variant.optionValues),
         imageKey: image?.key ?? null,
         imageAlt: image?.alt ?? null,
         quantity: item.quantity,

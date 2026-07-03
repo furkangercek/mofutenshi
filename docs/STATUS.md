@@ -2,11 +2,11 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-03 (Phase 1 step 6: auth landed)
+**Last updated:** 2026-07-03 (Phase 1 step 7: checkout + payment landed)
 
 ## Where we are
 
-- **Phase 1 (v1 MVP) is current.** Steps 1 (schema + seed), 2 (tokens + base UI), 3+4 (read path + sales engine), 5 (cart), and 6 (auth) done.
+- **Phase 1 (v1 MVP) is current.** Steps 1 (schema + seed), 2 (tokens + base UI), 3+4 (read path + sales engine), 5 (cart), 6 (auth), and 7 (checkout + payment) done — the iyzico card path is code-complete but unverified until the owner has sandbox keys.
 - Schema: `prisma/schema.prisma`, migration `20260702191112_init`, idempotent seed (`npm run db:seed`) with PRD tags + Appendix A/B products + active figures sale + settings singleton.
 - Design tokens: Tailwind v4 `@theme` in `src/app/globals.css` — semantic tokens only, default palette disabled (raw `bg-zinc-*` etc. won't compile). Contrast verified (see DESIGN.md).
 - Layout shell: sticky translucent header (logo, Radix NavigationMenu tag nav with subtag flyouts, mobile Dialog drawer with Accordion, cart icon), footer, skip link, branded 404/error pages. Turkish copy centralized in `src/lib/copy/common.ts`.
@@ -16,12 +16,25 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Phase 1, step 7: Checkout + payment.**
+**Phase 1, step 8: Admin.**
 
-- **Gateway = iyzico (R7, 2026-07-03)** — still build the checkout provider-agnostic (payment behind an interface): contact/shipping form (guests by email, logged-in prefilled per PRD US-09), flat-rate + free-threshold shipping from `getSettings()`, order creation with immutable item snapshots, stock decrement ONLY on verified `PAID` callback, optional manual-payment fallback behind the admin toggle.
-- Cart re-validation at checkout: hidden cart lines (deactivated variant / unpublished product) must be dropped/re-checked server-side before payment.
-- Rate limiting exists (`src/lib/rate-limit.ts`) — reuse for checkout endpoints if needed.
-- Use `/feature`, `/frontend`, `/seo` (confirmation page is noindex), `/ui-review` skills.
+- Products/variants CRUD, tag manager (hierarchical + flat), image upload → R2 (sharp on upload), sales scheduler, inventory view, orders list + status, settings screen.
+- **Authorization**: `/admin/*` requires the `ADMIN` role server-side on every page AND mutation (`session.user.role` is already in the JWT). No admin user exists yet — add a seed/promote path.
+- **Manual order confirmation must reuse `markOrderPaid`** (`src/lib/order-paid.ts`) — it is the single PENDING→PAID transition and the only place stock decrements.
+- **Admin writes must revalidate caches**: `revalidateTag("catalog"/"tags"/"settings", "max")` after each relevant mutation (see step 3+4 notes).
+- **Step 8 gotcha (from step 3)**: `imageUrl()` reads server-only `R2_PUBLIC_URL` — resolve image URLs server-side into view models before R2 goes live (see reminder below).
+- Use `/feature`, `/frontend`, `/ui-review` skills. Admin is desktop-first acceptable (PRD §8).
+
+## Step 7 architecture notes (landed 2026-07-03)
+
+- **Order lifecycle**: order rows are created `PENDING_PAYMENT` up front (stable id for the gateway `conversationId`), flipped to `PAID` only via `markOrderPaid()` (`src/lib/order-paid.ts`) — a guarded `updateMany` makes replays no-ops; stock decrements exactly once there (clamped at 0 with an oversell log; reservation is Phase 3). Gateway failure callback → `CANCELLED`; init failure → `CANCELLED`; abandoned card orders linger `PENDING_PAYMENT` (admin can cancel at step 8).
+- **Provider-agnostic boundary** (`src/lib/payments/`): `PaymentGateway` interface with iyzico as sole implementation (official `iyzipay` SDK, hosted CheckoutForm — no card data touches us; `serverExternalPackages: ["iyzipay"]` because the SDK self-assembles via dynamic require). Callback route (`/api/payments/iyzico/callback`) verifies server-to-server via `checkoutForm.retrieve` and cross-checks the paid amount against the order before flipping; a mismatch stays PENDING for manual review. `@types/iyzipay` is WRONG (demands paymentCard, omits paymentPageUrl) — we ship our own minimal `src/types/iyzipay.d.ts`.
+- **Checkout math** (`src/lib/checkout.ts`): reads FRESH DB state (never "use cache") — visibility rules match the cart view; quantity-over-stock aborts with a Turkish "cart changed" error instead of silently capping money. Shipping: flat rate, waived at the free threshold, from the settings row read fresh.
+- **Order numbers**: Postgres sequence `order_number_seq` → `MT-000001` (gaps are fine).
+- **Confirmation access**: `/checkout/confirmation?order=<id>&token=<hmac>` — HMAC (AUTH_SECRET) gates guest access; sequential order numbers never authorize reads.
+- **Manual fallback**: order stays PENDING_PAYMENT, confirmation shows `manualPaymentInstructions` (or a fallback line); cart cleared on placement. Card path clears the cart only on verified PAID.
+- **Account**: `/account` now lists the user's orders (number, date, status, total).
+- Verified E2E against the prod build (manual path over the wire; `markOrderPaid` exercised directly): sale-priced immutable snapshots, both shipping branches, stock untouched while PENDING, decrement exactly once on PAID, idempotent replay, oversell clamp, forged confirmation token rejected, over-stock cart rejected, account listing. **NOT verified: the live iyzico flow (no sandbox keys yet)** — form posts to iyzico, 3DS, and the real callback need a merchant account.
 
 ## Step 6 architecture notes (landed 2026-07-03)
 
@@ -52,7 +65,10 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## Reminders / open items
 
-- [x] **Q2 RESOLVED (R7, 2026-07-03): payment gateway = iyzico.** No open decisions remain. Owner still needs an iyzico merchant account + sandbox keys before the gateway goes live.
+- [x] **Q2 RESOLVED (R7, 2026-07-03): payment gateway = iyzico.** No open decisions remain.
+- [ ] **iyzico merchant account + sandbox keys needed from the owner** to verify the card path end-to-end (set `IYZICO_API_KEY`/`IYZICO_SECRET_KEY`; the card option appears automatically). Register the callback origin; callback path is `/api/payments/iyzico/callback`. Until then the card option is hidden and manual payment carries orders.
+- [ ] **Local DB has `manualPaymentEnabled: true` with PLACEHOLDER IBAN instructions** (set 2026-07-03 for checkout testing; not part of the seed). Owner: replace with real bank details in admin (step 8) before launch or disable the toggle.
+- [ ] Abandoned card-payment orders linger as `PENDING_PAYMENT` (provider `iyzico`) — admin orders view (step 8) should surface/cancel them.
 - [ ] **Google OAuth credentials pending owner** — the Google login button stays hidden until `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` exist; US-10 "at least one social provider" is code-complete but not user-visible until then. Callback URL to register in Google Console: `<origin>/api/auth/callback/google`.
 - [ ] CI was RED (build prerender needs Postgres; runner had none). Fixed 2026-07-03: workflow now runs a postgres:17 service + `prisma migrate deploy` before build; verified locally against an empty DB. Confirm green after next push.
 - [ ] Same constraint applies to the step 10 deploy: the production Docker build needs a reachable, migrated database at `next build` time (Coolify build-time env/network) — plan for it.

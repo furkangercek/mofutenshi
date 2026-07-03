@@ -15,7 +15,6 @@ export const cartCopy = {
   freeShippingReached: "Kargonuz ücretsiz!",
   viewCart: "Sepete git",
   checkout: "Ödemeye geç",
-  checkoutComingSoon: "Ödeme adımı yakında aktif olacak.",
   adding: "Ekleniyor…",
   remove: "Kaldır",
   removeFor: (name: string) => `Kaldır: ${name}`,

@@ -2,13 +2,11 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
+import { inputClass } from "@/components/ui/form";
 import { loginAction, registerAction, type AuthFormState } from "@/lib/actions/auth";
 import { authCopy } from "@/lib/copy/auth";
 
 const initialState: AuthFormState = { error: null };
-
-const inputClass =
-  "border-border bg-surface focus:outline-ring mt-1 h-11 w-full rounded-md border px-3 text-sm focus:outline-2";
 
 export function CredentialsForm({
   mode,

@@ -1,0 +1,175 @@
+"use server";
+
+import { refresh } from "next/cache";
+import { redirect } from "next/navigation";
+import { z } from "zod";
+import { auth } from "@/lib/auth";
+import { clearCartAfterOrder } from "@/lib/cart-clear";
+import { loadCheckoutCart, type CheckoutCart } from "@/lib/checkout";
+import { checkoutCopy } from "@/lib/copy/checkout";
+import { nextOrderNumber } from "@/lib/order-number";
+import { orderAccessToken } from "@/lib/order-token";
+import { getCardGateway } from "@/lib/payments";
+import type { ShippingAddress } from "@/lib/payments/types";
+import { prisma } from "@/lib/prisma";
+import { consumeRateLimit } from "@/lib/rate-limit";
+import { clientIp, requestOrigin } from "@/lib/request-context";
+
+export type CheckoutFormState = { error: string | null };
+
+const checkoutSchema = z.object({
+  fullName: z.string().trim().min(3, checkoutCopy.nameRequired).max(100, checkoutCopy.invalidInput),
+  email: z.email(checkoutCopy.invalidEmail).max(200, checkoutCopy.invalidEmail),
+  phone: z.string().trim().min(10, checkoutCopy.phoneRequired).max(20, checkoutCopy.invalidInput),
+  address: z
+    .string()
+    .trim()
+    .min(10, checkoutCopy.addressRequired)
+    .max(500, checkoutCopy.invalidInput),
+  city: z.string().trim().min(2, checkoutCopy.cityRequired).max(50, checkoutCopy.invalidInput),
+  district: z
+    .string()
+    .trim()
+    .min(2, checkoutCopy.districtRequired)
+    .max(50, checkoutCopy.invalidInput),
+  postalCode: z.string().trim().max(10, checkoutCopy.invalidInput).default(""),
+  notes: z.string().trim().max(500, checkoutCopy.invalidInput).default(""),
+  paymentMethod: z.enum(["card", "manual"], { message: checkoutCopy.invalidInput }),
+});
+
+function confirmationPath(orderId: string): string {
+  return `/checkout/confirmation?order=${orderId}&token=${orderAccessToken(orderId)}`;
+}
+
+async function createPendingOrder(
+  cart: CheckoutCart,
+  input: z.infer<typeof checkoutSchema>,
+  userId: string | null,
+  provider: string,
+) {
+  const shippingAddress: ShippingAddress = {
+    fullName: input.fullName,
+    phone: input.phone,
+    address: input.address,
+    city: input.city,
+    district: input.district,
+    ...(input.postalCode ? { postalCode: input.postalCode } : {}),
+  };
+
+  return prisma.order.create({
+    data: {
+      orderNumber: await nextOrderNumber(),
+      userId,
+      email: input.email.toLowerCase(),
+      status: "PENDING_PAYMENT",
+      subtotalCents: cart.subtotalCents,
+      discountCents: cart.discountCents,
+      shippingCents: cart.shippingCents,
+      totalCents: cart.totalCents,
+      shippingAddress,
+      notes: input.notes || null,
+      paymentProvider: provider,
+      items: {
+        create: cart.lines.map((line) => ({
+          variantId: line.variantId,
+          productNameSnapshot: line.productName,
+          variantLabelSnapshot: line.variantLabel ?? "",
+          unitPriceCents: line.unitCents,
+          quantity: line.quantity,
+          lineTotalCents: line.lineCents,
+        })),
+      },
+    },
+    select: { id: true },
+  });
+}
+
+export async function placeOrder(
+  _prev: CheckoutFormState,
+  formData: FormData,
+): Promise<CheckoutFormState> {
+  const parsed = checkoutSchema.safeParse({
+    fullName: formData.get("fullName"),
+    email: formData.get("email"),
+    phone: formData.get("phone"),
+    address: formData.get("address"),
+    city: formData.get("city"),
+    district: formData.get("district"),
+    postalCode: formData.get("postalCode"),
+    notes: formData.get("notes"),
+    paymentMethod: formData.get("paymentMethod"),
+  });
+  if (!parsed.success)
+    return { error: parsed.error.issues[0]?.message ?? checkoutCopy.invalidInput };
+
+  const ip = await clientIp();
+  if (!consumeRateLimit(`checkout:${ip}`, 10, 10 * 60 * 1000))
+    return { error: checkoutCopy.tooManyAttempts };
+
+  const cartResult = await loadCheckoutCart();
+  if (!cartResult.ok) {
+    if (cartResult.reason === "changed") {
+      refresh();
+      return { error: checkoutCopy.cartChanged };
+    }
+    return { error: checkoutCopy.cartEmpty };
+  }
+  const { cart } = cartResult;
+
+  const gateway = getCardGateway();
+  const method = parsed.data.paymentMethod;
+  if (method === "card" && !gateway) return { error: checkoutCopy.noPaymentMethod };
+  if (method === "manual" && !cart.settings.manualPaymentEnabled)
+    return { error: checkoutCopy.noPaymentMethod };
+
+  const session = await auth();
+  const userId = session?.user?.id ?? null;
+
+  if (method === "manual") {
+    const order = await createPendingOrder(cart, parsed.data, userId, "manual");
+    await clearCartAfterOrder(userId);
+    refresh();
+    redirect(confirmationPath(order.id));
+  }
+
+  const order = await createPendingOrder(cart, parsed.data, userId, gateway!.id);
+  let init;
+  try {
+    init = await gateway!.initPayment(
+      {
+        id: order.id,
+        email: parsed.data.email.toLowerCase(),
+        buyerIp: ip,
+        subtotalCents: cart.subtotalCents,
+        totalCents: cart.totalCents,
+        shippingAddress: {
+          fullName: parsed.data.fullName,
+          phone: parsed.data.phone,
+          address: parsed.data.address,
+          city: parsed.data.city,
+          district: parsed.data.district,
+          ...(parsed.data.postalCode ? { postalCode: parsed.data.postalCode } : {}),
+        },
+        items: cart.lines.map((line) => ({
+          variantId: line.variantId,
+          name: line.variantLabel ? `${line.productName} (${line.variantLabel})` : line.productName,
+          quantity: line.quantity,
+          lineCents: line.lineCents,
+        })),
+      },
+      `${await requestOrigin()}/api/payments/iyzico/callback`,
+    );
+  } catch (error) {
+    console.error("payment init threw", error);
+    init = { ok: false as const };
+  }
+
+  if (!init.ok) {
+    // Nothing was charged; the cart is untouched, the order leaves the flow.
+    await prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED" } });
+    return { error: checkoutCopy.paymentInitFailed };
+  }
+
+  await prisma.order.update({ where: { id: order.id }, data: { paymentRef: init.paymentRef } });
+  redirect(init.redirectUrl);
+}

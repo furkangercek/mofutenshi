@@ -6,7 +6,7 @@ import { Minus, Plus } from "lucide-react";
 import { useCartUI } from "@/components/cart/cart-ui";
 import { Price } from "@/components/product/price";
 import { ProductImage } from "@/components/product/product-image";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import { removeCartItem, updateCartItemQuantity, type CartActionResult } from "@/lib/actions/cart";
 import { cartCopy } from "@/lib/copy/cart";
 import { formatKurus } from "@/lib/money";
@@ -176,13 +176,9 @@ export function CartPanel({
             {cartCopy.viewCart}
           </ButtonLink>
         ) : (
-          <div className="mt-4">
-            {/* Wired up in Phase 1 step 7 (checkout); disabled until then. */}
-            <Button size="lg" disabled>
-              {cartCopy.checkout}
-            </Button>
-            <p className="text-muted mt-2 text-sm">{cartCopy.checkoutComingSoon}</p>
-          </div>
+          <ButtonLink href="/checkout" size="lg" className="mt-4 w-full sm:w-auto">
+            {cartCopy.checkout}
+          </ButtonLink>
         )}
       </div>
     </div>

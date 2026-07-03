@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { AuthError } from "next-auth";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
@@ -9,13 +8,9 @@ import { safeCallbackPath } from "@/lib/callback-url";
 import { authCopy } from "@/lib/copy/auth";
 import { prisma } from "@/lib/prisma";
 import { consumeRateLimit } from "@/lib/rate-limit";
+import { clientIp } from "@/lib/request-context";
 
 export type AuthFormState = { error: string | null };
-
-async function clientIp(): Promise<string> {
-  const forwarded = (await headers()).get("x-forwarded-for");
-  return forwarded?.split(",")[0]?.trim() || "unknown";
-}
 
 const emailSchema = z.email(authCopy.invalidEmail).max(200, authCopy.invalidEmail);
 
