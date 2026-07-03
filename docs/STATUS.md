@@ -2,11 +2,11 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-03 (Phase 1 step 5: cart landed)
+**Last updated:** 2026-07-03 (Phase 1 step 6: auth landed)
 
 ## Where we are
 
-- **Phase 1 (v1 MVP) is current.** Steps 1 (schema + seed), 2 (tokens + base UI), 3+4 (read path + sales engine), and 5 (cart) done.
+- **Phase 1 (v1 MVP) is current.** Steps 1 (schema + seed), 2 (tokens + base UI), 3+4 (read path + sales engine), 5 (cart), and 6 (auth) done.
 - Schema: `prisma/schema.prisma`, migration `20260702191112_init`, idempotent seed (`npm run db:seed`) with PRD tags + Appendix A/B products + active figures sale + settings singleton.
 - Design tokens: Tailwind v4 `@theme` in `src/app/globals.css` — semantic tokens only, default palette disabled (raw `bg-zinc-*` etc. won't compile). Contrast verified (see DESIGN.md).
 - Layout shell: sticky translucent header (logo, Radix NavigationMenu tag nav with subtag flyouts, mobile Dialog drawer with Accordion, cart icon), footer, skip link, branded 404/error pages. Turkish copy centralized in `src/lib/copy/common.ts`.
@@ -16,14 +16,23 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Phase 1, step 6: Auth.**
+**Phase 1, step 7: Checkout + payment.**
 
-- Auth.js (NextAuth) with Prisma adapter: email/password (credentials) + one social provider, register/login pages, account area shell.
-- `AUTH_SECRET` already exists in `.env`/`.env.example` (introduced for cart cookie signing — reuse it).
-- **Cart merge on login** (PRD US-10): merge guest cookie cart into the user's DB cart — dedupe by variant, sum quantities capped at stock; `Cart.userId` is already unique in the schema. Clear the guest cookie after merge. `getCartView` must learn to resolve the cart by userId when a session exists.
-- Session reads = cookies → keep session-dependent UI in Suspense holes (same pattern as the cart, see `src/components/cart/cart-indicator.tsx`).
-- Server-side authorization on every account mutation; zod at boundaries.
-- Use `/feature`, `/frontend`, `/ui-review` skills.
+- **Q2 (iyzico vs. PayTR) must be answered by the owner before the gateway integration** — but build the checkout provider-agnostic first: contact/shipping form (guests by email, logged-in prefilled per PRD US-09), flat-rate + free-threshold shipping from `getSettings()`, order creation with immutable item snapshots, stock decrement ONLY on verified `PAID` callback, optional manual-payment fallback behind the admin toggle.
+- Cart re-validation at checkout: hidden cart lines (deactivated variant / unpublished product) must be dropped/re-checked server-side before payment.
+- Rate limiting exists (`src/lib/rate-limit.ts`) — reuse for checkout endpoints if needed.
+- Use `/feature`, `/frontend`, `/seo` (confirmation page is noindex), `/ui-review` skills.
+
+## Step 6 architecture notes (landed 2026-07-03)
+
+- **Auth.js v5 (next-auth beta.31) + Prisma adapter, JWT sessions** (`src/lib/auth.ts`) — JWT strategy is required for the credentials provider; the adapter still persists users/OAuth accounts. `User.emailVerifiedAt` was renamed `emailVerified` (migration `20260703165755`) to match the stock adapter.
+- **Providers**: credentials (bcryptjs, cost 10, dummy-hash compare against user enumeration timing) + Google, which stays hidden until `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` are set (owner must provision OAuth creds; `.env.example` documents it).
+- **Session shape**: `session.user.id` + `role` via jwt/session callbacks; type augmentation in `src/types/next-auth.d.ts` (augment `@auth/core/jwt`, not `next-auth/jwt` — the interface lives there).
+- **Cart merge on login** (`src/lib/cart-merge.ts`) runs in the Auth.js `signIn` EVENT, so it covers credentials and OAuth paths with one code path; transactional, dedupes by variant, caps at min(stock, 99), deletes guest cart + clears cookie. A merge failure logs but never fails the login.
+- **Cart identity** (`src/lib/cart-identity.ts`): session userId first, else signed guest cookie; `getCartView` and all cart-action ownership checks resolve through it.
+- **Server actions** (`src/lib/actions/auth.ts`): register/login/logout/Google with zod, Turkish errors from `src/lib/copy/auth.ts`, in-memory fixed-window rate limiting (`src/lib/rate-limit.ts` — per-instance; Cloudflare edge layer arrives at step 10), open-redirect-safe `callbackUrl` (`src/lib/callback-url.ts`).
+- **UI**: `/login` + `/register` share `AuthPage` (noindex, PPR with loading.tsx skeletons — under cacheComponents a page reading searchParams/session MUST have a Suspense boundary or the build fails), `/account` shell redirects anonymous users to `/login?callbackUrl=…`, header account icon is a Suspense hole like the cart badge.
+- Verified over the wire against the prod build (progressive-enhancement form posts, no JS): register → 303 + session + bcrypt hash in DB; duplicate email rejected; wrong password rejected; guest cart (qty 3) + user cart (qty 4) merged to stock cap 3 with guest cart deleted + cookie cleared; merged badge renders for the session; logout clears session; 11 bad logins trip the rate limit; tampered cart cookie still reads as empty.
 
 ## Step 5 architecture notes (landed 2026-07-03)
 
@@ -43,7 +52,8 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## Reminders / open items
 
-- [ ] **Q2 (only open decision): iyzico vs. PayTR** — needed at Phase 1 step 7 (payment), blocks nothing before that. Leaning iyzico.
+- [ ] **Q2 (only open decision): iyzico vs. PayTR** — NOW BLOCKING the gateway half of step 7 (checkout form itself is provider-agnostic). Leaning iyzico.
+- [ ] **Google OAuth credentials pending owner** — the Google login button stays hidden until `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET` exist; US-10 "at least one social provider" is code-complete but not user-visible until then. Callback URL to register in Google Console: `<origin>/api/auth/callback/google`.
 - [ ] CI was RED (build prerender needs Postgres; runner had none). Fixed 2026-07-03: workflow now runs a postgres:17 service + `prisma migrate deploy` before build; verified locally against an empty DB. Confirm green after next push.
 - [ ] Same constraint applies to the step 10 deploy: the production Docker build needs a reachable, migrated database at `next build` time (Coolify build-time env/network) — plan for it.
 - [ ] Designer input pending: display font choice (Fraunces is interim; must cover Turkish glyphs / latin-ext). Contrast question RESOLVED: black on `#B6BFF2` = 11.72:1, passes — recorded in DESIGN.md.
@@ -57,6 +67,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 ## Local environment
 
 - Postgres: `npm run db:up` (compose service `db`, postgres:17-alpine, container `mofutenshi-db-1`). **Start Docker Desktop first** — it does not auto-start on this machine.
+- **Host port is 15432** (2026-07-03): Windows WinNAT reserved an excluded range covering 5432 after a reboot and silently blocked the bind ("access permissions" error on `docker compose up`). Compose now maps `15432:5432`; `.env`/`.env.example` updated. If a port bind fails again, check `netsh interface ipv4 show excludedportrange protocol=tcp`; the permanent fix (`net stop winnat` + persistent exclusion) needs an elevated shell the agent doesn't have.
 - `.env` exists locally (gitignored); values match `.env.example`.
 - Prisma 7.8 specifics: config in `prisma.config.ts` (needs dotenv, no auto-.env-loading), client generated into `src/generated/prisma` (gitignored, regenerated by `postinstall`), driver adapter `@prisma/adapter-pg`, app singleton `src/lib/prisma.ts`.
 - Next.js 16.2: read `node_modules/next/dist/docs/` before writing app code (APIs differ from training data — see AGENTS.md).
@@ -64,6 +75,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 ## Machine/tooling gotchas (Windows, this machine)
 
 - `npx <pkg>@<version>` fails in Git Bash here — use `npm exec -- <pkg>` instead.
+- After a schema change, run `npx prisma generate` explicitly and REBUILD before trusting a running server — a stale generated client caused P2022 (column does not exist) during step 6 verification even though `migrate dev` had run.
 - `rm -rf` style deletions may be permission-denied for the agent — prefer moving files aside, or ask the owner.
 - Commands are proxied through `rtk`; output can look filtered/abbreviated.
 - **2026-07-03 incident**: a leftover Claude Code daemon auto-resumed the previous session's transcript in the background (permissions bypassed) and wrote step 5 concurrently with the interactive session. If files change mid-session or edits fail with "modified since read", run `tasklist | grep claude` and check for stray daemon/fork processes before blaming the formatter.

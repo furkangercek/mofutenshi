@@ -26,6 +26,11 @@ export async function readCartToken(): Promise<string | null> {
 }
 
 // Only callable where cookies may be written (server actions, route handlers).
+export async function clearCartToken(): Promise<void> {
+  (await cookies()).delete(COOKIE_NAME);
+}
+
+// Only callable where cookies may be written (server actions, route handlers).
 export async function issueCartToken(): Promise<string> {
   const token = randomBytes(24).toString("base64url");
   (await cookies()).set(COOKIE_NAME, `${token}.${sign(token)}`, {

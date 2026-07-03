@@ -2,10 +2,12 @@ import Link from "next/link";
 import Form from "next/form";
 import { Suspense } from "react";
 import { Search } from "lucide-react";
+import { AccountIndicator, AccountLink } from "@/components/account/account-indicator";
 import { CartIndicator } from "@/components/cart/cart-indicator";
 import { CartTriggerButton } from "@/components/cart/cart-trigger";
 import { MainNav } from "@/components/layout/main-nav";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { authCopy } from "@/lib/copy/auth";
 import { searchCopy } from "@/lib/copy/catalog";
 import { navCopy, siteCopy } from "@/lib/copy/common";
 import { getNavTags } from "@/lib/queries/tags";
@@ -38,6 +40,9 @@ export async function Header() {
         >
           <Search aria-hidden className="size-5" />
         </Link>
+        <Suspense fallback={<AccountLink href="/login" label={authCopy.loginTitle} />}>
+          <AccountIndicator />
+        </Suspense>
         <Suspense fallback={<CartTriggerButton count={0} />}>
           <CartIndicator />
         </Suspense>

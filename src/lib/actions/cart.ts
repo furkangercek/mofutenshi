@@ -2,17 +2,17 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { issueCartToken, readCartToken } from "@/lib/cart-cookie";
+import { MAX_CART_QUANTITY } from "@/lib/cart-constants";
+import { issueCartToken } from "@/lib/cart-cookie";
+import { getCartIdentity, ownsCart } from "@/lib/cart-identity";
 import { cartCopy } from "@/lib/copy/cart";
 import { prisma } from "@/lib/prisma";
-
-const MAX_QUANTITY = 99;
 
 export type CartActionResult = { ok: true; capped: boolean } | { ok: false; error: string };
 
 const addSchema = z.object({
   variantId: z.cuid(),
-  quantity: z.number().int().min(1).max(MAX_QUANTITY).default(1),
+  quantity: z.number().int().min(1).max(MAX_CART_QUANTITY).default(1),
 });
 
 export async function addCartItem(input: unknown): Promise<CartActionResult> {
@@ -28,15 +28,14 @@ export async function addCartItem(input: unknown): Promise<CartActionResult> {
     return { ok: false, error: cartCopy.addError };
   if (variant.stock < 1) return { ok: false, error: cartCopy.addOutOfStock };
 
-  const token = await readCartToken();
-  let cart = token
-    ? await prisma.cart.findUnique({ where: { sessionToken: token }, select: { id: true } })
+  const identity = await getCartIdentity();
+  let cart = identity
+    ? await prisma.cart.findUnique({ where: identity, select: { id: true } })
     : null;
   if (!cart) {
-    cart = await prisma.cart.create({
-      data: { sessionToken: await issueCartToken() },
-      select: { id: true },
-    });
+    const owner =
+      identity && "userId" in identity ? identity : { sessionToken: await issueCartToken() };
+    cart = await prisma.cart.create({ data: owner, select: { id: true } });
   }
 
   const existing = await prisma.cartItem.findUnique({
@@ -44,7 +43,7 @@ export async function addCartItem(input: unknown): Promise<CartActionResult> {
     select: { quantity: true },
   });
   const requested = (existing?.quantity ?? 0) + quantity;
-  const nextQuantity = Math.min(requested, variant.stock, MAX_QUANTITY);
+  const nextQuantity = Math.min(requested, variant.stock, MAX_CART_QUANTITY);
   await prisma.cartItem.upsert({
     where: { cartId_variantId: { cartId: cart.id, variantId } },
     create: { cartId: cart.id, variantId, quantity: nextQuantity },
@@ -57,23 +56,23 @@ export async function addCartItem(input: unknown): Promise<CartActionResult> {
 
 const updateSchema = z.object({
   itemId: z.cuid(),
-  quantity: z.number().int().min(0).max(MAX_QUANTITY),
+  quantity: z.number().int().min(0).max(MAX_CART_QUANTITY),
 });
 
-// Ownership: the item must belong to the cart named by this request's signed
-// cookie — an item id alone must never authorize a mutation.
+// Ownership: the item must belong to the cart named by this request's session
+// or signed cookie — an item id alone must never authorize a mutation.
 async function findOwnedItem(itemId: string) {
-  const token = await readCartToken();
-  if (!token) return null;
+  const identity = await getCartIdentity();
+  if (!identity) return null;
   const item = await prisma.cartItem.findUnique({
     where: { id: itemId },
     select: {
       id: true,
-      cart: { select: { sessionToken: true } },
+      cart: { select: { userId: true, sessionToken: true } },
       variant: { select: { stock: true } },
     },
   });
-  if (!item || item.cart.sessionToken !== token) return null;
+  if (!item || !ownsCart(identity, item.cart)) return null;
   return item;
 }
 

@@ -50,7 +50,7 @@ Entity reference for the Prisma schema, aligned to PRD v2 §6. Once `prisma/sche
 
 ### Auth
 
-- **User** — `id, email (unique), passwordHash?, name, role (CUSTOMER|ADMIN), emailVerifiedAt?`
+- **User** — `id, email (unique), passwordHash?, name, role (CUSTOMER|ADMIN), emailVerified?` (named to match the stock Auth.js Prisma adapter)
 - **Account / Session / VerificationToken** — standard Auth.js Prisma adapter tables.
 
 ## Indexes

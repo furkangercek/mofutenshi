@@ -7,7 +7,9 @@ services:
       POSTGRES_PASSWORD: mofutenshi
       POSTGRES_DB: mofutenshi
     ports:
-      - "5432:5432"
+      # Host port avoids Windows WinNAT excluded ranges (which cover 5432 after
+      # some reboots and silently block the bind).
+      - "15432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:

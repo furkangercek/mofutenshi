@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { readCartToken } from "@/lib/cart-cookie";
+import { getCartIdentity } from "@/lib/cart-identity";
 import { resolveEffectivePrice } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 import { loadActiveSales } from "@/lib/queries/catalog";
@@ -32,11 +32,11 @@ export type CartView = {
 const emptyCart: CartView = { lines: [], itemCount: 0, subtotalCents: 0 };
 
 export const getCartView = cache(async (): Promise<CartView> => {
-  const token = await readCartToken();
-  if (!token) return emptyCart;
+  const identity = await getCartIdentity();
+  if (!identity) return emptyCart;
 
   const cart = await prisma.cart.findUnique({
-    where: { sessionToken: token },
+    where: identity,
     select: {
       items: {
         orderBy: { createdAt: "asc" },
