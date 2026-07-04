@@ -14,7 +14,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 **Phase 1, step 9: SEO + polish.**
 
-- Full-product `sitemap.xml`, `robots.txt` (disallow `/admin`, `/cart`, `/checkout`, `/account`), canonical URLs (**blocked on the production domain decision** — `metadataBase` too), Lighthouse pass, empty/error state sweep.
+- Full-product `sitemap.xml`, `robots.txt` (disallow `/admin`, `/cart`, `/checkout`, `/account`), canonical URLs + `metadataBase` (domain resolved: `https://mofutenshi.com`, R8 — keep it env-configurable), Lighthouse pass, empty/error state sweep.
 - Product/Offer structured data already exists on the PDP (step 3); review it against final SEO checklist.
 - Revisit the PPR `notFound()` 200-status behavior (see reminders) if a true 404 status matters for SEO.
 - Use `/seo` + `/frontend` skills; run `/ui-review` on anything touched.
@@ -73,7 +73,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 - [ ] CI: confirm green after next push (postgres service fix landed 2026-07-03; step 8 adds no build-time DB reads beyond existing patterns).
 - [ ] Step 10 deploy: production Docker build needs a reachable, migrated DB at `next build` time; also provision R2 + iyzico + Google env on Coolify.
 - [ ] Designer input pending: display font choice (Fraunces interim; must cover latin-ext).
-- [ ] Production domain not decided — blocks `metadataBase`/canonicals/OG images (step 9 needs it).
+- [x] **Production domain RESOLVED (R8, 2026-07-04): `mofutenshi.com`** (working decision — owner said "probably"; reconfirm before purchase/DNS). Unblocks step 9 `metadataBase`/canonicals/OG.
 - [ ] R5: `garage-kits` is a manual subtag — owner flags if upkeep gets annoying.
 - [ ] Seed image keys (`seed/*.jpg`) are placeholders; with R2 unset all product images render the gradient placeholder.
 - [ ] Under PPR, `notFound()`/redirects on dynamic routes stream a 200 (noindex meta for 404s). Revisit at step 9 if true status codes matter.

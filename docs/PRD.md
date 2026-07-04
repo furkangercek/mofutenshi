@@ -683,7 +683,7 @@ Client ──HTTPS──> Cloudflare (CDN cache, WAF, DDoS)
 
 - **VPS availability** — v1 deployment depends on securing a VPS (a friend's may be available). Until then, dev runs locally via Docker Compose.
 - Cloudflare account (free) for DNS, CDN, WAF, R2, Analytics.
-- Domain name registration.
+- Domain name registration (`mofutenshi.com` — R8, not yet purchased).
 - Social login provider credentials (e.g., Google) for OAuth.
 - Coolify installed on the VPS.
 - **Payment gateway merchant account** (iyzico or PayTR) — required before the payment step goes live.
