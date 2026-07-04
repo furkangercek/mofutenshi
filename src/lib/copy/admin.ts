@@ -1,0 +1,60 @@
+export const adminCopy = {
+  panelName: "Yönetim Paneli",
+  navLabel: "Yönetim menüsü",
+  backToStore: "Mağazaya dön",
+  nav: {
+    dashboard: "Panel",
+    products: "Ürünler",
+    tags: "Etiketler",
+    sales: "İndirimler",
+    inventory: "Stok",
+    orders: "Siparişler",
+    settings: "Ayarlar",
+  },
+  common: {
+    save: "Kaydet",
+    saving: "Kaydediliyor…",
+    saved: "Kaydedildi.",
+    cancel: "Vazgeç",
+    delete: "Sil",
+    edit: "Düzenle",
+    create: "Oluştur",
+    back: "Geri",
+    invalidInput: "Lütfen bilgileri kontrol edin.",
+    unauthorized: "Bu işlem için yetkiniz yok.",
+    notFoundRow: "Kayıt bulunamadı.",
+    genericError: "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
+  },
+};
+
+export const adminSettingsCopy = {
+  title: "Ayarlar",
+  shippingHeading: "Kargo",
+  flatShippingLabel: "Sabit kargo ücreti (TL)",
+  freeThresholdLabel: "Ücretsiz kargo alt limiti (TL)",
+  freeThresholdHint: "Bu tutar ve üzeri siparişlerde kargo ücretsiz olur.",
+  inventoryHeading: "Stok",
+  lowStockLabel: "Düşük stok eşiği (adet)",
+  lowStockHint: "Stok bu adedin altına düşünce panelde ve stok ekranında vurgulanır.",
+  paymentHeading: "Ödeme",
+  manualEnabledLabel: "Havale / EFT ile ödemeyi aç",
+  manualInstructionsLabel: "Havale / EFT talimatları",
+  manualInstructionsHint:
+    "Sipariş onay sayfasında gösterilir: banka, IBAN ve açıklama bilgilerini yazın.",
+  invalidMoney: "Geçerli bir tutar girin (örn. 149,90).",
+  invalidThreshold: "Geçerli bir adet girin.",
+};
+
+export const adminDashboardCopy = {
+  title: "Panel",
+  products: "Ürün",
+  productsPublished: (published: number, draft: number) => `${published} yayında, ${draft} taslak`,
+  activeSales: "Aktif indirim",
+  lowStock: "Düşük stok",
+  lowStockHint: (threshold: number) => `Eşik: ${threshold} adet altı`,
+  pendingOrders: "Bekleyen sipariş",
+  pendingOrdersHint: "Ödeme bekleyen siparişler",
+  recentOrdersHeading: "Son siparişler",
+  recentOrdersEmpty: "Henüz sipariş yok.",
+  viewAll: "Tümünü gör",
+};

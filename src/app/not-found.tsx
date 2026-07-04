@@ -1,14 +1,11 @@
-import { ButtonLink } from "@/components/ui/button";
-import { errorCopy } from "@/lib/copy/common";
+import { NotFoundContent } from "@/components/layout/not-found-content";
 
+// Global 404 for URLs matching no route: renders in the bare root layout, so
+// it provides its own #main landmark for the skip link.
 export default function NotFound() {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-24 text-center">
-      <h1 className="font-display text-3xl">{errorCopy.notFoundTitle}</h1>
-      <p className="text-muted max-w-md">{errorCopy.notFoundBody}</p>
-      <div className="mt-2">
-        <ButtonLink href="/">{errorCopy.backHome}</ButtonLink>
-      </div>
-    </div>
+    <main id="main" className="flex flex-1 flex-col">
+      <NotFoundContent />
+    </main>
   );
 }
