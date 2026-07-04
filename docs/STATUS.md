@@ -2,7 +2,7 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-04 (Phase 1 step 9: SEO + polish landed)
+**Last updated:** 2026-07-05 (Phase 1 step 10: deploy prep landed — provisioning pending owner)
 
 ## Where we are
 
@@ -12,12 +12,15 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Phase 1, step 10: Deploy.**
+**Phase 1, step 10: provisioning day — everything code-side is done and verified locally; all remaining work is blocked on the owner.**
 
-- Dockerfile, Coolify on VPS, Cloudflare DNS/CDN/WAF, nightly `pg_dump` → R2 backup job + restore test.
-- Blocked on owner: VPS provisioning, domain purchase (R8 reconfirm), R2 + iyzico + Google credentials.
-- Production Docker build needs a reachable, migrated DB at `next build` time (build prerenders all PDP/tag pages).
-- `/deploy` skill is a placeholder — plan the setup with the owner before touching infra.
+Owner must provide: VPS, domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production/sandbox keys, Google OAuth credentials, fresh production `AUTH_SECRET`. Then follow `docs/DEPLOY.md` top to bottom (Coolify setup → Cloudflare → first-deploy smoke → first backup verification). After deploy, close out the env-gated verification backlog: live R2 upload, iyzico sandbox card flow.
+
+## Step 10 prep notes (landed 2026-07-05)
+
+- **Dockerfile** (multi-stage, `output: "standalone"` added to next.config): deps → builder → runner (non-root `node`, healthcheck on `/robots.txt`). The builder runs `prisma migrate deploy && npm run build` with `DATABASE_URL` as a build ARG — deliberate single-host trade-off (Coolify builds on the VPS where the DB is reachable; migrations therefore must stay backward-compatible for one release). Verified locally: image builds against `host.docker.internal:15432`, serves all key routes, admin leaks nothing to anonymous, and `sharp`/`iyzipay`/`@aws-sdk/client-s3` are traced into the standalone output.
+- **Backup job** (`scripts/backup-db.mjs`, baked into the image): `pg_dump -Fc` piped from the DB container into the app container's node; uploads to R2 `backups/`, prunes beyond `BACKUP_KEEP` (14). Pipe mechanics + env-gate verified locally; actual upload untestable until R2 creds exist. **Restore procedure verified**: `-Fc` roundtrip into a scratch DB preserves row counts AND `order_number_seq`.
+- **Runbook**: `docs/DEPLOY.md` — Coolify resources + env table, Cloudflare rules (no Rocket Loader; WAF must not challenge the iyzico callback), backup schedule, restore steps, rollback notes, repeatable local image verification. `/deploy` skill now points there.
 
 ## Step 9 architecture notes (landed 2026-07-04)
 
@@ -85,7 +88,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 - [ ] **Local dev DB contains test data from step 8 verification**: users `admin@test.local` (ADMIN) / `customer@test.local` (password `test-password-1`), orders `MT-TEST-1` (PAID) / `MT-TEST-2` (CANCELLED), and settings changed to flat 79,50 TL / threshold 1.500 TL / low-stock 5 / manual payment ON with placeholder instructions. Owner: replace instructions with real bank details or disable before launch; re-run `npm run db:seed` any time (idempotent, restores seed sales).
 - [ ] Admin delete/confirm dialogs use native `window.confirm` — pragmatic for v1 desktop-first admin; swap for Radix AlertDialog if the owner wants the animated overlay treatment in admin too.
 - [ ] CI: confirm green after next push (postgres service fix landed 2026-07-03; step 8 adds no build-time DB reads beyond existing patterns).
-- [ ] Step 10 deploy: production Docker build needs a reachable, migrated DB at `next build` time; also provision R2 + iyzico + Google env on Coolify.
+- [x] Step 10 deploy prep done — build-time DB requirement is handled inside the Dockerfile (`migrate deploy` before `next build`); env provisioning on Coolify documented in `docs/DEPLOY.md`.
 - [ ] Designer input pending: display font choice (Fraunces interim; must cover latin-ext).
 - [x] **Production domain RESOLVED (R8, 2026-07-04): `mofutenshi.com`** (working decision — owner said "probably"; reconfirm before purchase/DNS). Unblocks step 9 `metadataBase`/canonicals/OG.
 - [ ] R5: `garage-kits` is a manual subtag — owner flags if upkeep gets annoying.

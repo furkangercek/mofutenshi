@@ -1,28 +1,30 @@
 ---
 name: deploy
-description: "PLACEHOLDER - deployment is not set up yet (no VPS provisioned). If invoked, explain the status and what is planned; do not attempt to deploy anything."
+description: "Deploy prep is DONE (Dockerfile, backup job, runbook — all locally verified); the VPS is NOT provisioned yet. If invoked, follow docs/DEPLOY.md; do not attempt to deploy until the owner provisions the VPS/domain."
 ---
 
-# Deploy (NOT IMPLEMENTED)
+# Deploy
 
-There is no deployment target yet. Do not attempt to deploy.
+**No deployment target exists yet** — the owner has not provisioned the VPS
+or purchased the domain (reconfirm R8 before DNS). Do not attempt to deploy.
 
-## Planned setup (fill in when the VPS is available)
+What IS ready (verified locally 2026-07-05):
 
-Per `docs/ARCHITECTURE.md` and ROADMAP Phase 1 step 10:
+- `Dockerfile` — multi-stage standalone image; the build stage runs
+  `prisma migrate deploy && next build` against a reachable DB (build-time
+  `DATABASE_URL`). Local verification steps are at the bottom of
+  `docs/DEPLOY.md`.
+- `scripts/backup-db.mjs` — nightly `pg_dump` → R2 uploader with pruning,
+  baked into the image.
+- `docs/DEPLOY.md` — the runbook: Coolify setup, env table, Cloudflare
+  config, backup schedule, verified restore procedure, rollback notes.
 
-- Dockerfile for the Next.js app (standalone output)
-- Docker compose: app + PostgreSQL (volume-backed)
-- Coolify on the VPS: git-push deploys, HTTPS, env management
-- Cloudflare: DNS, CDN caching, WAF in front
-- `prisma migrate deploy` on release
-- Off-VPS Postgres backup job (DECISIONS Q13 - must be answered before launch)
+## On provisioning day
 
-## TODO when VPS is ready
+Work through `docs/DEPLOY.md` top to bottom with the owner. Blockers that
+must come from the owner first: VPS, domain (R8 reconfirm), R2 + iyzico
+production + Google OAuth credentials, and a fresh production `AUTH_SECRET`.
 
-- [ ] Provision VPS, install Coolify
-- [ ] Write Dockerfile + compose
-- [ ] Configure domains + Cloudflare
-- [ ] Set up env/secrets in Coolify
-- [ ] Backup job + restore test
-- [ ] Rewrite this skill with the real deploy/rollback procedure
+After the first successful deploy: run the smoke checklist in the runbook,
+verify the first backup object lands in R2, then update this skill and
+`docs/STATUS.md` with the real container names and any deviations.
