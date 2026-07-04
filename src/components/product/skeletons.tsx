@@ -7,15 +7,25 @@ function CardSkeleton() {
   );
 }
 
-export function ListingSkeleton({ withHeading = true }: { withHeading?: boolean }) {
+export function ListingContentSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-      {withHeading && <div className="bg-ghost h-9 w-56 animate-pulse rounded" />}
-      <div className="bg-ghost mt-6 h-11 w-full max-w-xl animate-pulse rounded" />
-      <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+    <div className="flex flex-col gap-6">
+      <div className="bg-ghost h-11 w-full max-w-xl animate-pulse rounded" />
+      <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
         {Array.from({ length: 8 }, (_, i) => (
           <CardSkeleton key={i} />
         ))}
+      </div>
+    </div>
+  );
+}
+
+export function ListingSkeleton() {
+  return (
+    <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+      <div className="bg-ghost h-9 w-56 animate-pulse rounded" />
+      <div className="mt-6">
+        <ListingContentSkeleton />
       </div>
     </div>
   );

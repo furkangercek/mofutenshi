@@ -8,28 +8,35 @@ import { getCatalog } from "@/lib/queries/catalog";
 
 const knownParamKeys = ["q", "tag", "min", "max", "sale", "stock", "sort"] as const;
 
+type ListingSearchParams = Record<string, string | string[] | undefined>;
+
+// searchParams stays a promise so pages can render their static frame
+// (h1, chips) in the PPR shell and suspend only this subtree on it.
 export async function ProductListing({
   searchParams,
+  overrides,
   basePath,
   scopeTagIds,
   scopeTagSlug,
   showSaleFilter = true,
   tagOptions,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: ListingSearchParams | Promise<ListingSearchParams>;
+  overrides?: Record<string, string>;
   basePath: string;
   scopeTagIds?: string[];
   scopeTagSlug?: string;
   showSaleFilter?: boolean;
   tagOptions?: { slug: string; name: string }[];
 }) {
-  const params = parseListingParams(searchParams);
+  const resolvedParams = { ...(await searchParams), ...overrides };
+  const params = parseListingParams(resolvedParams);
   const catalog = await getCatalog();
   const { cards, totalCount, hasMore } = applyListing(catalog, params, scopeTagIds);
 
   const rawParams: Record<string, string> = {};
   for (const key of knownParamKeys) {
-    const value = searchParams[key];
+    const value = resolvedParams[key];
     if (typeof value === "string" && value !== "") rawParams[key] = value;
   }
   const nextQuery = new URLSearchParams({ ...rawParams, page: String(params.page + 1) });

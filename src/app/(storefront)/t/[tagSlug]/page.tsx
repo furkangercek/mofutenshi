@@ -1,24 +1,36 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductListing } from "@/components/product/product-listing";
+import { ListingContentSkeleton } from "@/components/product/skeletons";
 import { listingCopy } from "@/lib/copy/catalog";
-import { getTagPageData } from "@/lib/queries/catalog";
+import { getSitemapData, getTagPageData } from "@/lib/queries/catalog";
 
 type Props = { params: Promise<{ tagSlug: string }> };
+
+// Prerender every tag page (small catalog); unknown slugs still stream.
+export async function generateStaticParams() {
+  const { tags } = await getSitemapData();
+  return tags.map((tag) => ({ tagSlug: tag.slug }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { tagSlug } = await params;
   const tag = await getTagPageData(tagSlug);
   if (!tag) return {};
-  return { title: tag.name, description: listingCopy.tagDescription(tag.name) };
+  return {
+    title: tag.name,
+    description: listingCopy.tagDescription(tag.name),
+    alternates: { canonical: `/t/${tag.slug}` },
+  };
 }
 
 export default async function TagPage({
   params,
   searchParams,
 }: Props & { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  const [{ tagSlug }, resolvedParams] = await Promise.all([params, searchParams]);
+  const { tagSlug } = await params;
   const tag = await getTagPageData(tagSlug);
   if (!tag) notFound();
 
@@ -39,12 +51,14 @@ export default async function TagPage({
         </div>
       )}
       <div className="mt-6">
-        <ProductListing
-          searchParams={resolvedParams}
-          basePath={`/t/${tag.slug}`}
-          scopeTagIds={tag.tagIds}
-          scopeTagSlug={tag.slug}
-        />
+        <Suspense fallback={<ListingContentSkeleton />}>
+          <ProductListing
+            searchParams={searchParams}
+            basePath={`/t/${tag.slug}`}
+            scopeTagIds={tag.tagIds}
+            scopeTagSlug={tag.slug}
+          />
+        </Suspense>
       </div>
     </div>
   );

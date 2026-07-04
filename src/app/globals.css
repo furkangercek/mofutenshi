@@ -38,6 +38,9 @@
   --animate-accordion-down: accordion-down 200ms ease-out;
   --animate-accordion-up: accordion-up 200ms ease-out;
   --animate-fade-up: fade-up 300ms ease-out backwards;
+  /* Transform-only entrance for LCP elements: an opacity-0 start delays
+     the recorded paint and tanks LCP (hero h1). */
+  --animate-rise: rise 300ms ease-out backwards;
 
   @keyframes menu-in {
     from {
@@ -100,6 +103,11 @@
   @keyframes fade-up {
     from {
       opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+  @keyframes rise {
+    from {
       transform: translateY(12px);
     }
   }

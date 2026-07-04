@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ProductRow } from "@/components/product/product-row";
@@ -16,6 +17,10 @@ const tileBackgrounds = [
   "bg-linear-to-br from-lavender/50 via-ghost to-primary/50",
   "bg-linear-to-br from-primary/40 via-ghost to-lavender/60",
 ];
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const SECTION_SIZE = 4;
 
@@ -49,7 +54,7 @@ export default async function Home() {
           className="bg-lavender/30 absolute -bottom-32 left-1/2 -z-10 size-96 -translate-x-1/4 rounded-full blur-3xl"
         />
         <div className="mx-auto flex max-w-2xl flex-col items-center gap-6">
-          <h1 className="animate-fade-up font-display text-4xl leading-tight sm:text-6xl">
+          <h1 className="animate-rise font-display text-4xl leading-tight sm:text-6xl">
             {siteCopy.tagline}
           </h1>
           <p className="animate-fade-up text-muted max-w-xl text-lg [animation-delay:120ms]">

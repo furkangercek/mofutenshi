@@ -33,7 +33,7 @@ export function ProductCard({ product }: { product: ProductCardView }) {
         )}
       </div>
       <div className="mt-2 flex items-start justify-between gap-2">
-        <h3 className="text-sm font-medium">{product.name}</h3>
+        <h2 className="text-sm font-medium">{product.name}</h2>
         <Price
           priceCents={product.priceCents}
           originalCents={product.originalCents}

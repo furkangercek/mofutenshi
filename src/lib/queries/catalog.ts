@@ -221,6 +221,49 @@ export async function getAllTags(): Promise<TagOption[]> {
   });
 }
 
+export type SitemapData = {
+  products: { slug: string; updatedAt: Date; imageSrc: string | null }[];
+  tags: { slug: string }[];
+};
+
+// Feeds app/sitemap.ts — only products that resolve to a live PDP
+// (published + at least one active variant, mirroring getProductDetail).
+export async function getSitemapData(): Promise<SitemapData> {
+  "use cache";
+  cacheTag("catalog");
+  cacheTag("tags");
+  cacheLife({ revalidate: 300, expire: 3600 });
+
+  const [products, tags] = await Promise.all([
+    prisma.product.findMany({
+      where: { status: "PUBLISHED", variants: { some: { isActive: true } } },
+      orderBy: { createdAt: "desc" },
+      select: {
+        slug: true,
+        updatedAt: true,
+        images: {
+          orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
+          take: 1,
+          select: { key: true },
+        },
+      },
+    }),
+    prisma.tag.findMany({
+      orderBy: [{ type: "asc" }, { sortOrder: "asc" }],
+      select: { slug: true },
+    }),
+  ]);
+
+  return {
+    products: products.map((product) => ({
+      slug: product.slug,
+      updatedAt: product.updatedAt,
+      imageSrc: imageUrl(product.images[0]?.key),
+    })),
+    tags,
+  };
+}
+
 export type TagPageData = {
   id: string;
   name: string;

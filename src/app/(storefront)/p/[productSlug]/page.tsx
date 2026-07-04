@@ -1,20 +1,28 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductView } from "@/components/product/product-view";
-import { getProductDetail } from "@/lib/queries/catalog";
+import { siteCopy } from "@/lib/copy/common";
+import { getProductDetail, getSitemapData } from "@/lib/queries/catalog";
 
 type Props = { params: Promise<{ productSlug: string }> };
+
+// Prerender every PDP (small catalog); unknown slugs still stream.
+export async function generateStaticParams() {
+  const { products } = await getSitemapData();
+  return products.map((product) => ({ productSlug: product.slug }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { productSlug } = await params;
   const product = await getProductDetail(productSlug);
   if (!product) return {};
 
-  const description = product.description.slice(0, 160);
+  const description = product.description.slice(0, 160) || siteCopy.description;
   const image = product.images[0]?.src ?? null;
   return {
     title: product.name,
     description,
+    alternates: { canonical: `/p/${product.slug}` },
     openGraph: image ? { images: [{ url: image, alt: product.images[0].alt }] } : undefined,
   };
 }

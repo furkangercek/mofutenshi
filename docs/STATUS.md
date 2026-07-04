@@ -2,22 +2,35 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-04 (Phase 1 step 8: admin panel landed)
+**Last updated:** 2026-07-04 (Phase 1 step 9: SEO + polish landed)
 
 ## Where we are
 
-- **Phase 1 (v1 MVP) is current.** Steps 1–8 done: schema + seed, tokens + base UI, read path + sales engine, cart, auth, checkout + payment (iyzico code-complete, sandbox pending), and now the full admin panel. Two integrations remain env-gated until the owner provisions credentials: iyzico card payments and R2 image uploads.
+- **Phase 1 (v1 MVP) is current.** Steps 1–9 done: schema + seed, tokens + base UI, read path + sales engine, cart, auth, checkout + payment (iyzico code-complete, sandbox pending), admin panel, and now SEO + polish. Two integrations remain env-gated until the owner provisions credentials: iyzico card payments and R2 image uploads.
 - Schema: `prisma/schema.prisma`, migrations through `20260703165755`, idempotent seed (`npm run db:seed`).
 - **PRD v2.0 is authoritative** — tag-based navigation model, payment in v1.
 
 ## NEXT ACTION
 
-**Phase 1, step 9: SEO + polish.**
+**Phase 1, step 10: Deploy.**
 
-- Full-product `sitemap.xml`, `robots.txt` (disallow `/admin`, `/cart`, `/checkout`, `/account`), canonical URLs + `metadataBase` (domain resolved: `https://mofutenshi.com`, R8 — keep it env-configurable), Lighthouse pass, empty/error state sweep.
-- Product/Offer structured data already exists on the PDP (step 3); review it against final SEO checklist.
-- Revisit the PPR `notFound()` 200-status behavior (see reminders) if a true 404 status matters for SEO.
-- Use `/seo` + `/frontend` skills; run `/ui-review` on anything touched.
+- Dockerfile, Coolify on VPS, Cloudflare DNS/CDN/WAF, nightly `pg_dump` → R2 backup job + restore test.
+- Blocked on owner: VPS provisioning, domain purchase (R8 reconfirm), R2 + iyzico + Google credentials.
+- Production Docker build needs a reachable, migrated DB at `next build` time (build prerenders all PDP/tag pages).
+- `/deploy` skill is a placeholder — plan the setup with the owner before touching infra.
+
+## Step 9 architecture notes (landed 2026-07-04)
+
+- **Site origin** (`src/lib/site.ts`): `SITE_URL` env, default `https://mofutenshi.com` (R8). Feeds `metadataBase` (root layout, plus site-wide `twitter.card`), `app/sitemap.ts`, `app/robots.ts`.
+- **Sitemap** (`app/sitemap.ts`): static pages + all tags + all live products (published + ≥1 active variant, `lastModified`, primary image when R2 is set), via `getSitemapData()` in `catalog.ts` — `"use cache"` tagged `catalog`+`tags`, so admin writes refresh it (5 min revalidate). **Robots** (`app/robots.ts`): disallow `/admin`, `/api/`, `/cart`, `/checkout`, `/account`, `/login`, `/register`, `/search`.
+- **Canonicals** are per-page literals (Next has no relative canonical): `/`, `/products`, `/sales`, `/t/[slug]`, `/p/[slug]`, static pages. Filter/sort query params never create indexable duplicates. Private/search pages were already `noindex`.
+- **Static pages**: `/about`, `/contact`, `/legal/{terms,privacy,shipping-returns}` render `StaticPage` from `src/lib/copy/static-pages.ts`. **Legal/contact copy is placeholder** (see reminders).
+- **Listing perf architecture**: `/products`, `/sales`, `/t/[slug]` render their static frame (h1, chips) in the PPR shell; `ProductListing` now takes the `searchParams` **promise** and only the listing subtree suspends (`ListingContentSkeleton`). Do not await `searchParams` at page level on these routes — it pushes the h1 out of the shell and tanks LCP/CLS.
+- **Full prerender of PDP + tag pages**: `generateStaticParams` from `getSitemapData()` (small catalog). Unknown slugs still stream (dynamicParams default). ISR via cache tags keeps them fresh.
+- **Hero/LCP rule**: never start an LCP element at `opacity: 0` — the recorded paint waits for the animation. Hero h1 uses transform-only `animate-rise`; keep `animate-fade-up` for subordinate elements.
+- Product card title `h3`→`h2` (heading-order a11y); PDP meta description falls back to `siteCopy.description` when the product description is empty; `global-error.tsx` added (branded root-layout failure page, own html/body).
+- **Lighthouse (prod build, mobile sim)**: perf 90–92 on home/PDP/products/sales/tag; 100 accessibility/best-practices/SEO on all. LCP ~3.5s everywhere is bound by ~200KB of variable fonts (Inter + Fraunces latin-ext) — revisit when the designer finalizes the display font, not before.
+- **PPR `notFound()` 200-status: assessed and kept.** Streams 200 + `noindex` meta; Google honors noindex, and a true 404 would mean dropping PPR on dynamic routes. Revisit only if crawl-budget data says otherwise post-launch.
 
 ## Step 8 architecture notes (landed 2026-07-04)
 
@@ -65,6 +78,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## Reminders / open items
 
+- [ ] **Legal/contact copy is PLACEHOLDER (step 9)**: `/legal/*` texts are generic (Turkish e-commerce legally needs reviewed mesafeli satış sözleşmesi + ön bilgilendirme + KVKK aydınlatma metni) and the contact email `destek@mofutenshi.com` is invented. Owner must replace both in `src/lib/copy/static-pages.ts` before launch.
 - [ ] **R2 credentials needed from the owner** (Cloudflare account → R2 bucket + API token): set all five `R2_*` vars per `.env.example`, then verify a real upload end-to-end (admin → product edit → Görseller). Also confirm `images.remotePatterns` picks up the public URL after env is set.
 - [ ] **iyzico merchant account + sandbox keys needed from the owner** to verify the card path (set `IYZICO_API_KEY`/`IYZICO_SECRET_KEY`; callback path `/api/payments/iyzico/callback`).
 - [ ] **Google OAuth credentials pending owner** — button hidden until `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET`; callback `<origin>/api/auth/callback/google`.
@@ -75,9 +89,9 @@ The single source for "where we are, what's next, what to remember." **AI agents
 - [ ] Designer input pending: display font choice (Fraunces interim; must cover latin-ext).
 - [x] **Production domain RESOLVED (R8, 2026-07-04): `mofutenshi.com`** (working decision — owner said "probably"; reconfirm before purchase/DNS). Unblocks step 9 `metadataBase`/canonicals/OG.
 - [ ] R5: `garage-kits` is a manual subtag — owner flags if upkeep gets annoying.
-- [ ] Seed image keys (`seed/*.jpg`) are placeholders; with R2 unset all product images render the gradient placeholder.
-- [ ] Under PPR, `notFound()`/redirects on dynamic routes stream a 200 (noindex meta for 404s). Revisit at step 9 if true status codes matter.
-- [ ] Step 9 SEO backlog: sitemap.xml, robots.txt (disallow admin/cart/checkout/account), canonical URLs (blocked on domain), Lighthouse pass.
+- [ ] Seed image keys (`seed/*.jpg`) are placeholders; with R2 unset all product images render the gradient placeholder (and the sitemap/OG omit images).
+- [x] Under PPR, `notFound()` streams a 200 with noindex meta — assessed at step 9 and kept (see step 9 notes).
+- [x] Step 9 SEO backlog done: sitemap.xml, robots.txt, canonicals + metadataBase, Lighthouse pass, static pages.
 
 ## Local environment
 
