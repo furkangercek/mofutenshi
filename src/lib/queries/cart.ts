@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { getCartIdentity } from "@/lib/cart-identity";
+import { imageUrl } from "@/lib/image";
 import { resolveEffectivePrice } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 import { loadActiveSales } from "@/lib/queries/catalog";
@@ -14,7 +15,7 @@ export type CartLineView = {
   productName: string;
   productSlug: string;
   variantLabel: string | null;
-  imageKey: string | null;
+  imageSrc: string | null;
   imageAlt: string | null;
   quantity: number;
   stock: number;
@@ -101,7 +102,7 @@ export const getCartView = cache(async (): Promise<CartView> => {
         productName: variant.product.name,
         productSlug: variant.product.slug,
         variantLabel: variantLabel(variant.optionValues),
-        imageKey: image?.key ?? null,
+        imageSrc: imageUrl(image?.key),
         imageAlt: image?.alt ?? null,
         quantity: item.quantity,
         stock: variant.stock,

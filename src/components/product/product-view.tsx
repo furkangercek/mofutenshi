@@ -50,7 +50,7 @@ export function ProductView({ product }: { product: ProductDetailData }) {
       <div>
         <div className="border-border bg-surface relative aspect-4/5 overflow-hidden rounded-xl border">
           <ProductImage
-            imageKey={activeImage?.key ?? null}
+            src={activeImage?.src ?? null}
             alt={activeImage?.alt ?? product.name}
             sizes="(min-width: 1024px) 50vw, 100vw"
             priority
@@ -60,7 +60,7 @@ export function ProductView({ product }: { product: ProductDetailData }) {
           <div className="mt-3 flex gap-2">
             {product.images.map((image, index) => (
               <button
-                key={image.key}
+                key={image.src ?? index}
                 type="button"
                 onClick={() => setImageIndex(index)}
                 aria-label={image.alt || productCopy.galleryImageLabel(index)}
@@ -69,7 +69,7 @@ export function ProductView({ product }: { product: ProductDetailData }) {
                   index === activeIndex ? "" : "opacity-60 hover:opacity-100"
                 }`}
               >
-                <ProductImage imageKey={image.key} alt="" sizes="64px" />
+                <ProductImage src={image.src} alt="" sizes="64px" />
               </button>
             ))}
           </div>

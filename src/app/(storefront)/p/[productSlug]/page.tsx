@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductView } from "@/components/product/product-view";
-import { imageUrl } from "@/lib/image";
 import { getProductDetail } from "@/lib/queries/catalog";
 
 type Props = { params: Promise<{ productSlug: string }> };
@@ -12,7 +11,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) return {};
 
   const description = product.description.slice(0, 160);
-  const image = imageUrl(product.images[0]?.key);
+  const image = product.images[0]?.src ?? null;
   return {
     title: product.name,
     description,
@@ -27,7 +26,7 @@ function jsonLd(product: NonNullable<Awaited<ReturnType<typeof getProductDetail>
   const low = Math.min(...prices);
   const high = Math.max(...prices);
   const inStock = product.variants.some((variant) => variant.stock > 0);
-  const image = imageUrl(product.images[0]?.key);
+  const image = product.images[0]?.src ?? null;
 
   return {
     "@context": "https://schema.org",

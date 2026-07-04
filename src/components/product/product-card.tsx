@@ -7,7 +7,7 @@ export type ProductCardView = {
   id: string;
   slug: string;
   name: string;
-  imageKey: string | null;
+  imageSrc: string | null;
   imageAlt: string | null;
   priceCents: number;
   originalCents: number;
@@ -20,7 +20,7 @@ export function ProductCard({ product }: { product: ProductCardView }) {
     <Link href={`/p/${product.slug}`} className="group block">
       <div className="border-border bg-surface relative aspect-4/5 overflow-hidden rounded-xl border">
         <ProductImage
-          imageKey={product.imageKey}
+          src={product.imageSrc}
           alt={product.imageAlt ?? product.name}
           sizes="(min-width: 1024px) 25vw, 50vw"
           className="transition-transform duration-300 ease-out group-hover:scale-105"

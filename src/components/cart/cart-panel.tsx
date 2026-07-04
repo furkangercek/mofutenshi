@@ -41,7 +41,7 @@ function CartLine({ line, closeOnNavigate }: { line: CartLineView; closeOnNaviga
         aria-hidden
         className="border-border relative block aspect-4/5 w-16 shrink-0 overflow-hidden rounded-md border"
       >
-        <ProductImage imageKey={line.imageKey} alt="" sizes="64px" />
+        <ProductImage src={line.imageSrc} alt="" sizes="64px" />
       </Link>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">

@@ -117,6 +117,147 @@ export async function getParentTagOptions(
   return tags;
 }
 
+export type AdminProductRow = {
+  id: string;
+  name: string;
+  slug: string;
+  status: "DRAFT" | "PUBLISHED";
+  updatedAt: Date;
+  variantCount: number;
+  stockTotal: number;
+  minPriceCents: number | null;
+  maxPriceCents: number | null;
+};
+
+export async function getAdminProducts(): Promise<AdminProductRow[]> {
+  const products = await prisma.product.findMany({
+    orderBy: { updatedAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      status: true,
+      updatedAt: true,
+      variants: { select: { priceCents: true, stock: true } },
+    },
+  });
+
+  return products.map((product) => {
+    const prices = product.variants.map((v) => v.priceCents);
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      status: product.status,
+      updatedAt: product.updatedAt,
+      variantCount: product.variants.length,
+      stockTotal: product.variants.reduce((sum, v) => sum + v.stock, 0),
+      minPriceCents: prices.length ? Math.min(...prices) : null,
+      maxPriceCents: prices.length ? Math.max(...prices) : null,
+    };
+  });
+}
+
+export type AdminProductDetail = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  status: "DRAFT" | "PUBLISHED";
+  isFeatured: boolean;
+  tagIds: string[];
+  optionTypes: {
+    id: string;
+    name: string;
+    values: { id: string; value: string }[];
+  }[];
+  variants: {
+    id: string;
+    sku: string | null;
+    priceCents: number;
+    stock: number;
+    isActive: boolean;
+    optionValueIds: string[];
+  }[];
+  images: { id: string; key: string; alt: string; sortOrder: number; isPrimary: boolean }[];
+};
+
+export async function getAdminProduct(id: string): Promise<AdminProductDetail | null> {
+  const product = await prisma.product.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      status: true,
+      isFeatured: true,
+      tags: { select: { tagId: true } },
+      optionTypes: {
+        orderBy: { sortOrder: "asc" },
+        select: {
+          id: true,
+          name: true,
+          values: { orderBy: { sortOrder: "asc" }, select: { id: true, value: true } },
+        },
+      },
+      variants: {
+        select: {
+          id: true,
+          sku: true,
+          priceCents: true,
+          stock: true,
+          isActive: true,
+          optionValues: { select: { optionValueId: true } },
+        },
+      },
+      images: {
+        orderBy: { sortOrder: "asc" },
+        select: { id: true, key: true, alt: true, sortOrder: true, isPrimary: true },
+      },
+    },
+  });
+  if (!product) return null;
+
+  return {
+    ...product,
+    tagIds: product.tags.map((t) => t.tagId),
+    variants: product.variants.map((variant) => ({
+      id: variant.id,
+      sku: variant.sku,
+      priceCents: variant.priceCents,
+      stock: variant.stock,
+      isActive: variant.isActive,
+      optionValueIds: variant.optionValues.map((v) => v.optionValueId),
+    })),
+  };
+}
+
+export type TagCheckboxOption = { id: string; label: string; group: string };
+
+// Flattened tag list for the product form checkboxes, grouped by top-level
+// parent (subtags render under their parent's group) with flat tags last.
+export async function getTagCheckboxOptions(flatGroupLabel: string): Promise<TagCheckboxOption[]> {
+  const tags = await prisma.tag.findMany({
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    select: { id: true, name: true, type: true, parentId: true },
+  });
+  const byId = new Map(tags.map((tag) => [tag.id, tag]));
+
+  const hierarchical = tags
+    .filter((tag) => tag.type === "HIERARCHICAL")
+    .map((tag) => ({
+      id: tag.id,
+      label: tag.name,
+      group: tag.parentId ? (byId.get(tag.parentId)?.name ?? tag.name) : tag.name,
+    }));
+  const flat = tags
+    .filter((tag) => tag.type === "FLAT")
+    .map((tag) => ({ id: tag.id, label: tag.name, group: flatGroupLabel }));
+
+  return [...hierarchical, ...flat];
+}
+
 export type AdminSettings = {
   flatShippingCents: number;
   freeShippingThresholdCents: number;

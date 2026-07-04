@@ -8,7 +8,7 @@ export function toCardView(card: ProductCardData): ProductCardView {
     id: card.id,
     slug: card.slug,
     name: card.name,
-    imageKey: card.imageKey,
+    imageSrc: card.imageSrc,
     imageAlt: card.imageAlt,
     priceCents: card.priceCents,
     originalCents: card.originalCents,

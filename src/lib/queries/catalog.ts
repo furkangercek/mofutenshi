@@ -1,4 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
+import { imageUrl } from "@/lib/image";
 import { prisma } from "@/lib/prisma";
 import { resolveEffectivePrice, type ActiveSale } from "@/lib/pricing";
 
@@ -10,7 +11,7 @@ export type ProductCardData = {
   id: string;
   slug: string;
   name: string;
-  imageKey: string | null;
+  imageSrc: string | null;
   imageAlt: string | null;
   priceCents: number;
   originalCents: number;
@@ -28,7 +29,7 @@ export type ProductDetailData = {
   slug: string;
   name: string;
   description: string;
-  images: { key: string; alt: string; isPrimary: boolean; variantId: string | null }[];
+  images: { src: string | null; alt: string; isPrimary: boolean; variantId: string | null }[];
   optionTypes: { id: string; name: string; values: { id: string; value: string }[] }[];
   variants: {
     id: string;
@@ -120,7 +121,7 @@ export async function getCatalog(): Promise<ProductCardData[]> {
         id: product.id,
         slug: product.slug,
         name: product.name,
-        imageKey: image?.key ?? null,
+        imageSrc: imageUrl(image?.key),
         imageAlt: image?.alt ?? null,
         priceCents: best.effectiveCents,
         originalCents: best.originalCents,
@@ -182,7 +183,12 @@ export async function getProductDetail(slug: string): Promise<ProductDetailData 
     slug: product.slug,
     name: product.name,
     description: product.description,
-    images: product.images,
+    images: product.images.map((image) => ({
+      src: imageUrl(image.key),
+      alt: image.alt,
+      isPrimary: image.isPrimary,
+      variantId: image.variantId,
+    })),
     optionTypes: product.optionTypes,
     variants: product.variants.map((variant) => {
       const price = resolveEffectivePrice(
