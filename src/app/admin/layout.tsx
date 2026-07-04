@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AdminNav, type AdminNavItem } from "@/components/admin/admin-nav";
+import { Suspense } from "react";
+import { AdminNav, AdminNavFallback, type AdminNavItem } from "@/components/admin/admin-nav";
 import { adminCopy } from "@/lib/copy/admin";
 import { siteCopy } from "@/lib/copy/common";
 
@@ -37,7 +38,9 @@ export default function AdminLayout({
         </Link>
         <p className="text-muted mt-0.5 text-xs tracking-wide uppercase">{adminCopy.panelName}</p>
         <div className="mt-4">
-          <AdminNav items={navItems} label={adminCopy.navLabel} />
+          <Suspense fallback={<AdminNavFallback items={navItems} label={adminCopy.navLabel} />}>
+            <AdminNav items={navItems} label={adminCopy.navLabel} />
+          </Suspense>
         </div>
         <Link
           href="/"

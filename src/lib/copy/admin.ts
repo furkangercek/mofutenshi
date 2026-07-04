@@ -27,6 +27,37 @@ export const adminCopy = {
   },
 };
 
+export const adminTagsCopy = {
+  title: "Etiketler",
+  newCta: "Yeni etiket",
+  newTitle: "Yeni etiket",
+  editTitle: (name: string) => `Etiketi düzenle: ${name}`,
+  hierarchicalHeading: "Hiyerarşik etiketler",
+  flatHeading: "Düz etiketler",
+  empty: "Henüz etiket yok.",
+  productCount: (count: number) => `${count} ürün`,
+  sortOrderShort: "Sıra",
+  nameLabel: "Ad",
+  slugLabel: "Slug",
+  slugHint: "Mağaza adresinde görünür: /t/slug. Küçük harf ve tire kullanın.",
+  typeLabel: "Tür",
+  typeHierarchical: "Hiyerarşik (menüde görünür)",
+  typeFlat: "Düz (filtre etiketi)",
+  typeLockedHint: "Alt etiketleri olan bir etiketin türü değiştirilemez.",
+  parentLabel: "Üst etiket (isteğe bağlı)",
+  parentNone: "— Üst etiket yok —",
+  parentLockedHint: "Alt etiketleri olan bir etikete üst etiket atanamaz.",
+  sortOrderLabel: "Sıralama (küçük olan önce)",
+  deleteConfirm: (name: string) =>
+    `"${name}" etiketi silinsin mi? Etiket ürünlerden kaldırılır; ürünler silinmez.`,
+  deleteBlockedChildren: "Önce alt etiketlerini silin veya taşıyın.",
+  nameRequired: "Etiket adı girin.",
+  slugInvalid: "Slug yalnızca küçük harf, rakam ve tire içerebilir.",
+  slugTaken: "Bu slug zaten kullanımda.",
+  parentInvalid: "Geçersiz üst etiket seçimi.",
+  notFound: "Etiket bulunamadı.",
+};
+
 export const adminSettingsCopy = {
   title: "Ayarlar",
   shippingHeading: "Kargo",

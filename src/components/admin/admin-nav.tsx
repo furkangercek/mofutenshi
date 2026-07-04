@@ -10,13 +10,33 @@ const linkBase = "block rounded-md px-3 py-3 text-sm font-medium transition lg:p
 export function AdminNav({ items, label }: { items: AdminNavItem[]; label: string }) {
   const pathname = usePathname();
 
+  return <AdminNavList items={items} label={label} pathname={pathname} />;
+}
+
+// Static fallback while the pathname-aware nav streams on dynamic routes
+// (usePathname is uncached data during prerender under cacheComponents).
+export function AdminNavFallback({ items, label }: { items: AdminNavItem[]; label: string }) {
+  return <AdminNavList items={items} label={label} pathname={null} />;
+}
+
+function AdminNavList({
+  items,
+  label,
+  pathname,
+}: {
+  items: AdminNavItem[];
+  label: string;
+  pathname: string | null;
+}) {
   return (
     <nav aria-label={label}>
       <ul className="flex flex-wrap gap-1 lg:flex-col">
         {items.map((item) => {
-          const active = item.exact
-            ? pathname === item.href
-            : pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const active =
+            pathname !== null &&
+            (item.exact
+              ? pathname === item.href
+              : pathname === item.href || pathname.startsWith(`${item.href}/`));
           return (
             <li key={item.href}>
               <Link

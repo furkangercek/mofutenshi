@@ -20,6 +20,103 @@ export type AdminDashboard = {
   }[];
 };
 
+export type AdminTagRow = {
+  id: string;
+  name: string;
+  slug: string;
+  type: "HIERARCHICAL" | "FLAT";
+  parentId: string | null;
+  sortOrder: number;
+  productCount: number;
+  children: AdminTagRow[];
+};
+
+export async function getAdminTags(): Promise<{
+  hierarchical: AdminTagRow[];
+  flat: AdminTagRow[];
+}> {
+  const tags = await prisma.tag.findMany({
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      type: true,
+      parentId: true,
+      sortOrder: true,
+      _count: { select: { products: true } },
+    },
+  });
+
+  const toRow = (tag: (typeof tags)[number]): AdminTagRow => ({
+    id: tag.id,
+    name: tag.name,
+    slug: tag.slug,
+    type: tag.type,
+    parentId: tag.parentId,
+    sortOrder: tag.sortOrder,
+    productCount: tag._count.products,
+    children: tags.filter((t) => t.parentId === tag.id).map(toRow),
+  });
+
+  return {
+    hierarchical: tags.filter((t) => t.type === "HIERARCHICAL" && !t.parentId).map(toRow),
+    flat: tags.filter((t) => t.type === "FLAT").map(toRow),
+  };
+}
+
+export type AdminTagDetail = {
+  id: string;
+  name: string;
+  slug: string;
+  type: "HIERARCHICAL" | "FLAT";
+  parentId: string | null;
+  sortOrder: number;
+  childCount: number;
+};
+
+export async function getAdminTag(id: string): Promise<AdminTagDetail | null> {
+  const tag = await prisma.tag.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      type: true,
+      parentId: true,
+      sortOrder: true,
+      _count: { select: { children: true } },
+    },
+  });
+  if (!tag) return null;
+  return {
+    id: tag.id,
+    name: tag.name,
+    slug: tag.slug,
+    type: tag.type,
+    parentId: tag.parentId,
+    sortOrder: tag.sortOrder,
+    childCount: tag._count.children,
+  };
+}
+
+// Eligible parents for a hierarchical tag: top-level hierarchical tags
+// (the tag tree is two levels deep — parent → subtag, PRD §3).
+export async function getParentTagOptions(
+  excludeId?: string,
+): Promise<{ id: string; name: string }[]> {
+  const tags = await prisma.tag.findMany({
+    where: {
+      type: "HIERARCHICAL",
+      parentId: null,
+      ...(excludeId ? { id: { not: excludeId } } : {}),
+    },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    select: { id: true, name: true },
+  });
+  return tags;
+}
+
 export type AdminSettings = {
   flatShippingCents: number;
   freeShippingThresholdCents: number;
