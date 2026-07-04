@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { variantLabel } from "@/lib/variant-label";
 
 // Admin reads are always fresh — never "use cache". The owner must see the
 // truth, not a revalidating snapshot.
@@ -256,6 +257,257 @@ export async function getTagCheckboxOptions(flatGroupLabel: string): Promise<Tag
     .map((tag) => ({ id: tag.id, label: tag.name, group: flatGroupLabel }));
 
   return [...hierarchical, ...flat];
+}
+
+export type AdminSaleRow = {
+  id: string;
+  name: string;
+  type: "PERCENT" | "FIXED";
+  value: number;
+  startsAt: Date;
+  endsAt: Date;
+  endedEarly: boolean;
+  productCount: number;
+  tagCount: number;
+};
+
+export async function getAdminSales(): Promise<AdminSaleRow[]> {
+  const sales = await prisma.sale.findMany({
+    orderBy: { startsAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      value: true,
+      startsAt: true,
+      endsAt: true,
+      endedEarly: true,
+      _count: { select: { products: true, tags: true } },
+    },
+  });
+  return sales.map((sale) => ({
+    id: sale.id,
+    name: sale.name,
+    type: sale.type,
+    value: sale.value,
+    startsAt: sale.startsAt,
+    endsAt: sale.endsAt,
+    endedEarly: sale.endedEarly,
+    productCount: sale._count.products,
+    tagCount: sale._count.tags,
+  }));
+}
+
+export type AdminSaleDetail = {
+  id: string;
+  name: string;
+  type: "PERCENT" | "FIXED";
+  value: number;
+  startsAt: Date;
+  endsAt: Date;
+  endedEarly: boolean;
+  productIds: string[];
+  tagIds: string[];
+};
+
+export async function getAdminSale(id: string): Promise<AdminSaleDetail | null> {
+  const sale = await prisma.sale.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      value: true,
+      startsAt: true,
+      endsAt: true,
+      endedEarly: true,
+      products: { select: { productId: true } },
+      tags: { select: { tagId: true } },
+    },
+  });
+  if (!sale) return null;
+  return {
+    ...sale,
+    productIds: sale.products.map((p) => p.productId),
+    tagIds: sale.tags.map((t) => t.tagId),
+  };
+}
+
+export async function getProductOptions(): Promise<{ id: string; name: string }[]> {
+  return prisma.product.findMany({
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+}
+
+export type AdminInventoryRow = {
+  variantId: string;
+  productId: string;
+  productName: string;
+  productStatus: "DRAFT" | "PUBLISHED";
+  variantLabel: string | null;
+  sku: string | null;
+  priceCents: number;
+  stock: number;
+  isActive: boolean;
+};
+
+export async function getAdminInventory(): Promise<{
+  rows: AdminInventoryRow[];
+  lowStockThreshold: number;
+}> {
+  const [variants, settings] = await Promise.all([
+    prisma.variant.findMany({
+      orderBy: [{ product: { name: "asc" } }, { id: "asc" }],
+      select: {
+        id: true,
+        sku: true,
+        priceCents: true,
+        stock: true,
+        isActive: true,
+        product: { select: { id: true, name: true, status: true } },
+        optionValues: {
+          select: {
+            optionValue: {
+              select: { value: true, optionType: { select: { sortOrder: true } } },
+            },
+          },
+        },
+      },
+    }),
+    prisma.setting.findUnique({ where: { id: 1 }, select: { lowStockThreshold: true } }),
+  ]);
+
+  return {
+    rows: variants.map((variant) => ({
+      variantId: variant.id,
+      productId: variant.product.id,
+      productName: variant.product.name,
+      productStatus: variant.product.status,
+      variantLabel: variantLabel(variant.optionValues),
+      sku: variant.sku,
+      priceCents: variant.priceCents,
+      stock: variant.stock,
+      isActive: variant.isActive,
+    })),
+    lowStockThreshold: settings?.lowStockThreshold ?? 3,
+  };
+}
+
+export type AdminOrderRow = {
+  id: string;
+  orderNumber: string;
+  email: string;
+  status: "PENDING_PAYMENT" | "PAID" | "CANCELLED" | "FULFILLED";
+  paymentProvider: string | null;
+  totalCents: number;
+  placedAt: Date;
+  itemCount: number;
+};
+
+export async function getAdminOrders(
+  status?: "PENDING_PAYMENT" | "PAID" | "CANCELLED" | "FULFILLED",
+): Promise<AdminOrderRow[]> {
+  const orders = await prisma.order.findMany({
+    where: status ? { status } : undefined,
+    orderBy: { placedAt: "desc" },
+    select: {
+      id: true,
+      orderNumber: true,
+      email: true,
+      status: true,
+      paymentProvider: true,
+      totalCents: true,
+      placedAt: true,
+      items: { select: { quantity: true } },
+    },
+  });
+  return orders.map((order) => ({
+    id: order.id,
+    orderNumber: order.orderNumber,
+    email: order.email,
+    status: order.status,
+    paymentProvider: order.paymentProvider,
+    totalCents: order.totalCents,
+    placedAt: order.placedAt,
+    itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
+  }));
+}
+
+export type AdminOrderDetail = {
+  id: string;
+  orderNumber: string;
+  email: string;
+  status: "PENDING_PAYMENT" | "PAID" | "CANCELLED" | "FULFILLED";
+  subtotalCents: number;
+  discountCents: number;
+  shippingCents: number;
+  totalCents: number;
+  shippingAddress: Record<string, string>;
+  notes: string | null;
+  paymentProvider: string | null;
+  paymentRef: string | null;
+  placedAt: Date;
+  items: {
+    id: string;
+    name: string;
+    label: string;
+    quantity: number;
+    unitPriceCents: number;
+    lineTotalCents: number;
+  }[];
+};
+
+export async function getAdminOrder(id: string): Promise<AdminOrderDetail | null> {
+  const order = await prisma.order.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      orderNumber: true,
+      email: true,
+      status: true,
+      subtotalCents: true,
+      discountCents: true,
+      shippingCents: true,
+      totalCents: true,
+      shippingAddress: true,
+      notes: true,
+      paymentProvider: true,
+      paymentRef: true,
+      placedAt: true,
+      items: {
+        select: {
+          id: true,
+          productNameSnapshot: true,
+          variantLabelSnapshot: true,
+          quantity: true,
+          unitPriceCents: true,
+          lineTotalCents: true,
+        },
+      },
+    },
+  });
+  if (!order) return null;
+
+  const address: Record<string, string> = {};
+  if (order.shippingAddress && typeof order.shippingAddress === "object") {
+    for (const [key, value] of Object.entries(order.shippingAddress)) {
+      if (typeof value === "string") address[key] = value;
+    }
+  }
+
+  return {
+    ...order,
+    shippingAddress: address,
+    items: order.items.map((item) => ({
+      id: item.id,
+      name: item.productNameSnapshot,
+      label: item.variantLabelSnapshot,
+      quantity: item.quantity,
+      unitPriceCents: item.unitPriceCents,
+      lineTotalCents: item.lineTotalCents,
+    })),
+  };
 }
 
 export type AdminSettings = {

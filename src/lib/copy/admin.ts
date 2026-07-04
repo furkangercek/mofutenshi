@@ -137,6 +137,103 @@ export const adminTagsCopy = {
   notFound: "Etiket bulunamadı.",
 };
 
+export const adminSalesCopy = {
+  title: "İndirimler",
+  newCta: "Yeni indirim",
+  newTitle: "Yeni indirim",
+  editTitle: (name: string) => `İndirimi düzenle: ${name}`,
+  empty: "Henüz indirim yok.",
+  statusPlanned: "Planlı",
+  statusActive: "Aktif",
+  statusEnded: "Bitti",
+  statusEndedEarly: "Erken bitirildi",
+  scopeSummary: (products: number, tags: number) => {
+    const parts: string[] = [];
+    if (products > 0) parts.push(`${products} ürün`);
+    if (tags > 0) parts.push(`${tags} etiket`);
+    return parts.join(" + ") || "Kapsam yok";
+  },
+  percentValue: (value: number) => `%${value}`,
+  nameLabel: "İndirim adı",
+  typeLabel: "İndirim türü",
+  typePercent: "Yüzde (%)",
+  typeFixed: "Sabit tutar (TL)",
+  percentValueLabel: "İndirim yüzdesi (1–99)",
+  fixedValueLabel: "İndirim tutarı (TL)",
+  startsAtLabel: "Başlangıç (Türkiye saati)",
+  endsAtLabel: "Bitiş (Türkiye saati)",
+  scopeHeading: "Kapsam",
+  scopeHint:
+    "İndirim seçili ürünlere ve/veya etiketlere uygulanır. Üst etiket seçilirse alt etiketleri de kapsar; müşteri için en iyi fiyat kazanır.",
+  scopeTags: "Etiketler",
+  scopeProducts: "Ürünler",
+  scopeProductsEmpty: "Henüz ürün yok.",
+  endEarlyCta: "İndirimi şimdi bitir",
+  endEarlyConfirm: (name: string) => `"${name}" indirimi şimdi bitirilsin mi?`,
+  deleteConfirm: (name: string) => `"${name}" indirimi silinsin mi?`,
+  nameRequired: "İndirim adı girin.",
+  invalidPercent: "1 ile 99 arasında bir yüzde girin.",
+  invalidFixed: "Geçerli bir indirim tutarı girin (örn. 50 veya 49,90).",
+  invalidDates: "Geçerli başlangıç ve bitiş zamanı girin; bitiş başlangıçtan sonra olmalı.",
+  scopeRequired: "En az bir ürün veya etiket seçin.",
+  notFound: "İndirim bulunamadı.",
+};
+
+export const adminOrdersCopy = {
+  title: "Siparişler",
+  empty: "Sipariş bulunamadı.",
+  filterAll: "Tümü",
+  filterLabel: "Duruma göre filtrele",
+  filterCta: "Filtrele",
+  itemCount: (count: number) => `${count} kalem`,
+  detailTitle: (orderNumber: string) => `Sipariş ${orderNumber}`,
+  itemsHeading: "Ürünler",
+  totalsHeading: "Tutarlar",
+  subtotal: "Ara toplam",
+  discount: "İndirim",
+  shipping: "Kargo",
+  shippingFree: "Ücretsiz",
+  total: "Toplam",
+  customerHeading: "Müşteri ve teslimat",
+  nameLabel: "Ad Soyad",
+  emailLabel: "E-posta",
+  phoneLabel: "Telefon",
+  addressLabel: "Adres",
+  notesLabel: "Sipariş notu",
+  paymentHeading: "Ödeme",
+  providerLabel: "Yöntem",
+  providerNames: { manual: "Havale / EFT", iyzico: "Kart (iyzico)" } as Record<string, string>,
+  paymentRefLabel: "Ödeme referansı",
+  placedAtLabel: "Sipariş tarihi",
+  statusLabel: "Durum",
+  confirmPaidCta: "Ödemeyi onayla (PAID)",
+  confirmPaidHint:
+    "Havale/EFT ödemesini hesapta doğruladıktan sonra onaylayın; stok bu adımda düşer.",
+  confirmPaidConfirm: (orderNumber: string) =>
+    `${orderNumber} ödemesi onaylansın mı? Stok düşecek ve işlem geri alınamaz.`,
+  cancelCta: "Siparişi iptal et",
+  cancelConfirm: (orderNumber: string) => `${orderNumber} iptal edilsin mi?`,
+  alreadyTransitioned: "Sipariş durumu bu arada değişmiş. Sayfayı kontrol edin.",
+};
+
+export const adminInventoryCopy = {
+  title: "Stok",
+  empty: "Henüz varyant yok.",
+  lowStockNote: (threshold: number) =>
+    `Stok ${threshold} adedin altına düşen varyantlar vurgulanır.`,
+  productHeader: "Ürün",
+  skuHeader: "SKU",
+  priceHeader: "Fiyat",
+  stockHeader: "Stok",
+  lowBadge: "Düşük",
+  inactiveBadge: "Satışta değil",
+  draftBadge: "Taslak ürün",
+  stockInputLabel: (product: string) => `${product} stok adedi`,
+  save: "Kaydet",
+  invalidStock: "Geçerli bir stok adedi girin.",
+  notFound: "Varyant bulunamadı.",
+};
+
 export const adminSettingsCopy = {
   title: "Ayarlar",
   shippingHeading: "Kargo",
