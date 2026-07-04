@@ -22,7 +22,7 @@ Build order chosen so each step is testable against real data:
 5. [x] **Cart** — guest signed-cookie cart, drawer + cart page, quantity/stock rules, live effective pricing
 6. [x] **Auth** — Auth.js, register/login, social provider (Google, pending OAuth creds), cart merge on login
 7. [x] **Checkout + payment** — contact/shipping form, flat-rate + free-threshold shipping from settings, provider-agnostic payment interface; iyzico gateway integration (R7, code-complete — sandbox verification pending owner's merchant keys); manual-payment fallback behind admin toggle; stock decrement on verified `PAID`
-8. [ ] **Admin** — products/variants CRUD, tag manager (hierarchical + flat), image upload → R2, sales scheduler, inventory view, orders list + status, settings screen
+8. [x] **Admin** — products/variants CRUD, tag manager (hierarchical + flat), image upload → R2 (code-complete; live upload pending owner's R2 credentials), sales scheduler, inventory view, orders list + status + manual payment confirm/cancel, settings screen
 9. [ ] **SEO + polish** — metadata, structured data (Product/Offer), full-product `sitemap.xml`, robots, empty/error states
 10. [ ] **Deploy** — Dockerfile, Coolify on VPS, Cloudflare DNS/CDN/WAF, nightly `pg_dump` → R2 backup job + restore test
 
