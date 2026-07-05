@@ -16,6 +16,8 @@ const columns = [
       { href: "/legal/terms", label: footerCopy.terms },
       { href: "/legal/privacy", label: footerCopy.privacy },
       { href: "/legal/shipping-returns", label: footerCopy.shippingReturns },
+      { href: "/legal/mesafeli-satis-sozlesmesi", label: footerCopy.distanceSales },
+      { href: "/legal/on-bilgilendirme", label: footerCopy.preInformation },
     ],
   },
 ];

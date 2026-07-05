@@ -81,7 +81,7 @@ Owner must provide: VPS, domain purchase (reconfirm R8 first), R2 bucket + crede
 
 ## Reminders / open items
 
-- [ ] **Legal/contact copy is PLACEHOLDER (step 9)**: `/legal/*` texts are generic (Turkish e-commerce legally needs reviewed mesafeli satış sözleşmesi + ön bilgilendirme + KVKK aydınlatma metni) and the contact email `destek@mofutenshi.com` is invented. Owner must replace both in `src/lib/copy/static-pages.ts` before launch.
+- [ ] **Legal texts DRAFTED (2026-07-05), not lawyer-reviewed**: full mesafeli satış sözleşmesi + ön bilgilendirme (`src/lib/copy/legal.ts`, drafted against 6502/Yönetmelik incl. the 2026-effective seller-pays-return-shipping rule) and KVKK aydınlatma metni + çerez (`static-pages.ts`). Checkout now REQUIRES consent (checkbox + zod `legalConsent`, wire-verified). Before launch the owner must: fill the `[BRACKETED]` company fields (unvan, adres, vergi, kargo firması), set up the real `destek@` email, and get a lawyer's review — these are drafts, not legal advice.
 - [ ] **R2 credentials needed from the owner** (Cloudflare account → R2 bucket + API token): set all five `R2_*` vars per `.env.example`, then verify a real upload end-to-end (admin → product edit → Görseller). Also confirm `images.remotePatterns` picks up the public URL after env is set.
 - [ ] **iyzico merchant account + sandbox keys needed from the owner** to verify the card path (set `IYZICO_API_KEY`/`IYZICO_SECRET_KEY`; callback path `/api/payments/iyzico/callback`).
 - [ ] **Google OAuth credentials pending owner** — button hidden until `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET`; callback `<origin>/api/auth/callback/google`.

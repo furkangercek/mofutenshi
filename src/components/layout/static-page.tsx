@@ -14,6 +14,13 @@ export function StaticPage({ copy }: { copy: StaticPageCopy }) {
               {paragraph}
             </p>
           ))}
+          {section.items && (
+            <ul className="text-muted mt-3 list-disc space-y-2 pl-6 leading-relaxed">
+              {section.items.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          )}
           {section.email && (
             <p className="mt-3">
               <a

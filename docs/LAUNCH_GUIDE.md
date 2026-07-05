@@ -227,22 +227,25 @@ Turkish e-commerce law requires, at minimum:
 - **KVKK Aydınlatma Metni** (personal-data notice) + çerez (cookie) notice
 - Clear cayma hakkı (14-day withdrawal) and shipping/refund terms
 
-How to get real texts:
+**Update (2026-07-05):** full drafts now exist in the codebase — Mesafeli
+Satış Sözleşmesi and Ön Bilgilendirme Formu (`src/lib/copy/legal.ts`, live
+at `/legal/mesafeli-satis-sozlesmesi` and `/legal/on-bilgilendirme`) and a
+KVKK Aydınlatma Metni (`src/lib/copy/static-pages.ts`, at
+`/legal/privacy`), drafted against the current mevzuat including the
+2026-effective rule that return shipping is the seller's cost. Checkout
+requires the customer to confirm both documents before ordering.
 
-1. **Best:** a lawyer who does e-commerce work — one-time fee, texts
-   tailored to your şahıs şirketi. Ask the mali müşavir from step 4 for a
-   referral; this is a routine package.
-2. **Acceptable start:** vetted Turkish e-commerce contract templates
-   (ticaret.gov.tr publishes guidance; template packs circulate with
-   e-commerce accounting services). Read them and fill in your company
-   details — do not launch with my placeholders.
+What remains for you:
+
+1. Fill the `[BRACKETED]` fields in those files once the şahıs şirketi
+   exists: unvan, adres, vergi dairesi/no, MERSİS (varsa), telefon, and the
+   anlaşmalı kargo firması.
+2. **Have a lawyer review the drafts** — they are careful drafts, not
+   legal advice; a routine one-time review for an e-commerce lawyer.
 3. Set up the real support email. Simplest: **Cloudflare Email Routing**
    (free, in the same dashboard) forwards `destek@mofutenshi.com` to your
    personal inbox — 5 minutes, no mail server. (Sending FROM that address
    comes with Phase 2 transactional email.)
-
-Where the texts live in code: `src/lib/copy/static-pages.ts` — paste the
-final texts there (or hand them to the agent to format in).
 
 Also on the legal/financial radar (not blocking launch, but ask the mali
 müşavir): e-Arşiv invoice obligations for online sales — invoicing is

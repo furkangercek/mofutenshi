@@ -35,6 +35,9 @@ const checkoutSchema = z.object({
   postalCode: z.string().trim().max(10, checkoutCopy.invalidInput).default(""),
   notes: z.string().trim().max(500, checkoutCopy.invalidInput).default(""),
   paymentMethod: z.enum(["card", "manual"], { message: checkoutCopy.invalidInput }),
+  // Mesafeli Sözleşmeler Yönetmeliği: the seller must prove pre-purchase
+  // information was confirmed — the consent checkbox is not optional UI.
+  legalConsent: z.literal("on", { message: checkoutCopy.consentRequired }),
 });
 
 function confirmationPath(orderId: string): string {
@@ -98,6 +101,7 @@ export async function placeOrder(
     postalCode: formData.get("postalCode"),
     notes: formData.get("notes"),
     paymentMethod: formData.get("paymentMethod"),
+    legalConsent: formData.get("legalConsent"),
   });
   if (!parsed.success)
     return { error: parsed.error.issues[0]?.message ?? checkoutCopy.invalidInput };

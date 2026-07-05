@@ -124,6 +124,30 @@ export function CheckoutForm({
         )}
       </fieldset>
 
+      <label className="flex items-start gap-3 text-sm">
+        <input type="checkbox" name="legalConsent" required className="accent-ring mt-1" />
+        <span>
+          <a
+            href="/legal/on-bilgilendirme"
+            target="_blank"
+            rel="noopener"
+            className="underline underline-offset-2"
+          >
+            {checkoutCopy.consentPreInfo}
+          </a>
+          {checkoutCopy.consentMiddle}
+          <a
+            href="/legal/mesafeli-satis-sozlesmesi"
+            target="_blank"
+            rel="noopener"
+            className="underline underline-offset-2"
+          >
+            {checkoutCopy.consentContract}
+          </a>
+          {checkoutCopy.consentSuffix}
+        </span>
+      </label>
+
       {state.error && (
         <p role="alert" className="text-muted text-sm">
           {state.error}

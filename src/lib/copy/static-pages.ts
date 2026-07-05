@@ -5,7 +5,7 @@
 export type StaticPageCopy = {
   title: string;
   description: string;
-  sections: { heading?: string; paragraphs: string[]; email?: string }[];
+  sections: { heading?: string; paragraphs: string[]; items?: string[]; email?: string }[];
 };
 
 export const aboutCopy: StaticPageCopy = {
@@ -80,33 +80,70 @@ export const privacyCopy: StaticPageCopy = {
     "MofuTenshi'nin kişisel verilerinizi nasıl işlediğine dair gizlilik politikası ve KVKK aydınlatma metni.",
   sections: [
     {
-      heading: "Topladığımız Veriler",
+      heading: "1. Veri Sorumlusu",
       paragraphs: [
-        "Sipariş verirken paylaştığınız ad, e-posta, telefon ve teslimat adresi bilgileri ile hesap oluşturduğunuzda kaydettiğiniz bilgiler, siparişinizin işlenmesi ve size ulaştırılması amacıyla saklanır.",
+        "6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) uyarınca kişisel verileriniz, veri sorumlusu sıfatıyla [SATICI UNVANI — şirket kurulunca doldurulacak] ([İŞYERİ ADRESİ]) tarafından aşağıda açıklanan kapsamda işlenir.",
       ],
     },
     {
-      heading: "Verilerin Kullanımı",
-      paragraphs: [
-        "Verileriniz yalnızca siparişlerinizin yerine getirilmesi, hesabınızın yönetilmesi ve yasal yükümlülüklerimizin karşılanması için kullanılır. Verileriniz üçüncü taraflara pazarlama amacıyla aktarılmaz.",
+      heading: "2. İşlenen Kişisel Veriler",
+      paragraphs: [],
+      items: [
+        "Kimlik bilgileri: ad, soyad",
+        "İletişim bilgileri: e-posta adresi, telefon numarası, teslimat/fatura adresi",
+        "Müşteri işlem bilgileri: sipariş içeriği, sipariş numarası, sipariş geçmişi",
+        "İşlem güvenliği bilgileri: IP adresi, oturum ve log kayıtları, şifrelenmiş parola",
       ],
     },
     {
-      heading: "Üçüncü Taraflar",
+      heading: "3. İşleme Amaçları ve Hukuki Sebepler",
       paragraphs: [
-        "Ödeme işlemleri, lisanslı ödeme kuruluşları aracılığıyla gerçekleştirilir; kart bilgileriniz sistemlerimizde saklanmaz. Teslimat için gerekli bilgiler yalnızca anlaşmalı kargo firmasıyla paylaşılır.",
+        "Kişisel verileriniz; siparişlerin alınması, hazırlanması ve teslimi, üyelik hesabının oluşturulması ve yönetimi, ödeme süreçlerinin yürütülmesi, sizinle sipariş hakkında iletişim kurulması, yasal yükümlülüklerin yerine getirilmesi ve olası uyuşmazlıklarda hakların kullanılması amaçlarıyla işlenir.",
+        "İşleme; KVKK m. 5/2-c (sözleşmenin kurulması ve ifası), m. 5/2-ç (hukuki yükümlülüğün yerine getirilmesi), m. 5/2-e (bir hakkın tesisi, kullanılması veya korunması) ve m. 5/2-f (meşru menfaat) hukuki sebeplerine dayanır. Pazarlama amaçlı işleme ve ticari elektronik ileti gönderimi yapılmamaktadır.",
       ],
     },
     {
-      heading: "Çerezler",
+      heading: "4. Verilerin Aktarılması",
       paragraphs: [
-        "Sitemiz, sepetinizin hatırlanması ve oturumunuzun yönetilmesi gibi temel işlevler için zorunlu çerezler kullanır.",
+        "Kişisel verileriniz; teslimat için anlaşmalı kargo firmasına, ödemenin gerçekleştirilmesi için lisanslı ödeme kuruluşuna (kart bilgileri sistemlerimizde saklanmaz) ve yasal zorunluluk hâlinde yetkili kurum ve kuruluşlara aktarılabilir.",
+        "Sitenin barındırma, içerik dağıtım (CDN), görsel depolama ve benzeri altyapı hizmetleri yurt dışında yerleşik hizmet sağlayıcılardan alınmaktadır; bu kapsamda veriler KVKK m. 9'daki şartlara ve Kurulca öngörülen uygun güvencelere tabi olarak yurt dışına aktarılabilir.",
       ],
     },
     {
-      heading: "Haklarınız",
+      heading: "5. Toplama Yöntemi",
       paragraphs: [
-        "6698 sayılı KVKK kapsamında verilerinize erişme, düzeltme ve silme talep etme hakkına sahipsiniz. Talepleriniz için iletişim sayfamızdan bize ulaşabilirsiniz.",
+        "Verileriniz; üyelik, sipariş ve iletişim formları aracılığıyla ile sitenin çalışması için zorunlu çerezler üzerinden, kısmen otomatik yollarla toplanır.",
+      ],
+    },
+    {
+      heading: "6. Çerezler",
+      paragraphs: [
+        "Sitemiz yalnızca zorunlu çerezler kullanır: sepetinizin hatırlanması ve oturumunuzun güvenli şekilde yürütülmesi için gerekli olan çerezler. Pazarlama veya profilleme amaçlı çerez kullanılmaz. Zorunlu çerezler için açık rıza gerekmez; tarayıcınızdan çerezleri silebilir veya engelleyebilirsiniz, ancak bu durumda sepet ve oturum işlevleri çalışmaz.",
+      ],
+    },
+    {
+      heading: "7. Saklama Süreleri",
+      paragraphs: [
+        "Üyelik verileri üyelik süresince; sipariş ve fatura kayıtları ile elektronik ticaret işlem kayıtları ilgili mevzuatta öngörülen yasal saklama süreleri boyunca saklanır ve sürenin sonunda silinir, yok edilir veya anonim hâle getirilir.",
+      ],
+    },
+    {
+      heading: "8. KVKK Kapsamındaki Haklarınız",
+      paragraphs: ["KVKK m. 11 uyarınca; kişisel verilerinizin:"],
+      items: [
+        "işlenip işlenmediğini öğrenme ve buna ilişkin bilgi talep etme,",
+        "işlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme,",
+        "yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme,",
+        "eksik veya yanlış işlenmişse düzeltilmesini isteme,",
+        "KVKK m. 7 çerçevesinde silinmesini veya yok edilmesini isteme,",
+        "otomatik sistemlerce analiz sonucu aleyhinize bir sonucun ortaya çıkmasına itiraz etme,",
+        "kanuna aykırı işleme nedeniyle zarara uğramanız hâlinde zararın giderilmesini talep etme haklarına sahipsiniz.",
+      ],
+    },
+    {
+      heading: "9. Başvuru",
+      paragraphs: [
+        "Taleplerinizi, Veri Sorumlusuna Başvuru Usul ve Esasları Hakkında Tebliğ'e uygun olarak destek@mofutenshi.com adresine veya [İŞYERİ ADRESİ] adresine yazılı olarak iletebilirsiniz. Başvurular en geç 30 gün içinde ücretsiz olarak sonuçlandırılır.",
       ],
     },
   ],
@@ -125,8 +162,9 @@ export const shippingReturnsCopy: StaticPageCopy = {
     {
       heading: "İade ve Cayma Hakkı",
       paragraphs: [
-        "Mesafeli satış sözleşmeleri kapsamında, ürünü teslim aldığınız tarihten itibaren 14 gün içinde cayma hakkınızı kullanabilirsiniz. İade etmek istediğiniz ürünün kullanılmamış ve yeniden satılabilir durumda olması gerekir.",
-        "İade talebiniz için iletişim sayfamızdan bize ulaşmanız yeterlidir; süreci birlikte yürütürüz. İade onaylandığında ücret, ödeme yaptığınız yönteme iade edilir.",
+        "Ürünü teslim aldığınız tarihten itibaren 14 gün içinde, gerekçe göstermeksizin cayma hakkınızı kullanabilirsiniz. Cayma bildiriminizi sipariş numaranızla birlikte destek@mofutenshi.com adresine iletmeniz yeterlidir; ürünü bildirimden itibaren 10 gün içinde anlaşmalı kargo firmamız [KARGO FİRMASI] ile göndermeniz gerekir. İade kargo ücreti bize aittir — sizden iade masrafı alınmaz.",
+        "İade edilen bedel (ödediğiniz kargo ücreti dahil), cayma bildiriminizin bize ulaşmasından itibaren en geç 14 gün içinde, ödeme yaptığınız yönteme iade edilir.",
+        "Kişiye özel üretilen veya kişiselleştirilen ürünlerde cayma hakkı bulunmaz; bu durum ilgili ürünün sayfasında açıkça belirtilir. Ayrıntılar için Mesafeli Satış Sözleşmesi ve Ön Bilgilendirme Formu sayfalarına bakabilirsiniz.",
       ],
     },
     {

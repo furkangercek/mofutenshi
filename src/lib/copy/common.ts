@@ -24,8 +24,10 @@ export const footerCopy = {
   contact: "İletişim",
   legalHeading: "Yasal",
   terms: "Kullanım Koşulları",
-  privacy: "Gizlilik Politikası",
+  privacy: "Gizlilik ve KVKK",
   shippingReturns: "Kargo ve İade",
+  distanceSales: "Mesafeli Satış Sözleşmesi",
+  preInformation: "Ön Bilgilendirme Formu",
   rights: "Tüm hakları saklıdır.",
 };
 

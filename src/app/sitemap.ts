@@ -18,6 +18,8 @@ const staticRoutes: {
   { path: "/legal/terms", changeFrequency: "monthly", priority: 0.2 },
   { path: "/legal/privacy", changeFrequency: "monthly", priority: 0.2 },
   { path: "/legal/shipping-returns", changeFrequency: "monthly", priority: 0.2 },
+  { path: "/legal/mesafeli-satis-sozlesmesi", changeFrequency: "monthly", priority: 0.2 },
+  { path: "/legal/on-bilgilendirme", changeFrequency: "monthly", priority: 0.2 },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
