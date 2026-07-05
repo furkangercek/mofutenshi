@@ -14,7 +14,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 **Phase 1, step 10: provisioning day — everything code-side is done and verified locally; all remaining work is blocked on the owner.**
 
-Owner must provide: VPS, domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production/sandbox keys, Google OAuth credentials, fresh production `AUTH_SECRET`. Then follow `docs/DEPLOY.md` top to bottom (Coolify setup → Cloudflare → first-deploy smoke → first backup verification). After deploy, close out the env-gated verification backlog: live R2 upload, iyzico sandbox card flow.
+Owner must provide: VPS, domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production/sandbox keys, Google OAuth credentials, fresh production `AUTH_SECRET`. **Step-by-step owner guide with alternatives and costs: `docs/LAUNCH_GUIDE.md`** (fastest unblock: iyzico sandbox keys — 10 minutes, verifies the last untested code path). Then follow `docs/DEPLOY.md` top to bottom (Coolify setup → Cloudflare → first-deploy smoke → first backup verification). After deploy, close out the env-gated verification backlog: live R2 upload, iyzico sandbox card flow.
 
 ## Step 10 prep notes (landed 2026-07-05)
 

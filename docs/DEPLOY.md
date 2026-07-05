@@ -8,6 +8,10 @@ Topology: see `docs/ARCHITECTURE.md`. One app container (this repo's
 `Dockerfile`) + one Postgres 17 container with a volume, both managed by
 Coolify; Cloudflare in front (DNS, CDN, WAF); R2 for images and backups.
 
+Owner-facing companion (what to buy where, alternatives, costs, legal
+prerequisites): `docs/LAUNCH_GUIDE.md`. This file assumes those accounts
+and credentials already exist.
+
 ## The build needs a migrated, reachable database
 
 `next build` prerenders pages that query Postgres (Cache Components +
