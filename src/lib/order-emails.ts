@@ -2,6 +2,7 @@ import { createElement } from "react";
 import {
   OrderPaidEmail,
   OrderReceivedEmail,
+  OrderShippedEmail,
   type OrderEmailProps,
 } from "@/components/emails/order-emails";
 import { emailCopy } from "@/lib/copy/emails";
@@ -17,7 +18,13 @@ import { siteUrl } from "@/lib/site";
 // transition is the dedupe: callers only send when the flip actually happened,
 // so gateway callback replays cannot double-send.
 
-type LoadedOrder = { to: string; props: OrderEmailProps; paymentProvider: string | null };
+type LoadedOrder = {
+  to: string;
+  props: OrderEmailProps;
+  paymentProvider: string | null;
+  carrier: string | null;
+  trackingNumber: string | null;
+};
 
 async function loadOrderEmail(orderId: string): Promise<LoadedOrder | null> {
   const order = await prisma.order.findUnique({
@@ -35,6 +42,8 @@ async function loadOrderEmail(orderId: string): Promise<LoadedOrder | null> {
   return {
     to: order.email,
     paymentProvider: order.paymentProvider,
+    carrier: order.carrier,
+    trackingNumber: order.trackingNumber,
     props: {
       orderNumber: order.orderNumber,
       greetingName: address.fullName,
@@ -83,6 +92,30 @@ export async function sendOrderReceivedEmail(orderId: string): Promise<void> {
     );
   } catch (error) {
     console.error(`order received email threw for order ${orderId}`, error);
+  }
+}
+
+// Sent on the PAID → FULFILLED transition (admin marks shipped, R13); the
+// tracking box is omitted when both fields were left blank.
+export async function sendOrderShippedEmail(orderId: string): Promise<void> {
+  if (!emailEnabled) {
+    console.log(`email disabled, skipping order shipped email for ${orderId}`);
+    return;
+  }
+  try {
+    const loaded = await loadOrderEmail(orderId);
+    if (!loaded) return;
+    const tracking =
+      loaded.carrier || loaded.trackingNumber
+        ? { carrier: loaded.carrier, trackingNumber: loaded.trackingNumber }
+        : null;
+    await sendEmail(
+      loaded.to,
+      emailCopy.shippedSubject(loaded.props.orderNumber),
+      createElement(OrderShippedEmail, { ...loaded.props, tracking }),
+    );
+  } catch (error) {
+    console.error(`order shipped email threw for order ${orderId}`, error);
   }
 }
 

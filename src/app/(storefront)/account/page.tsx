@@ -46,6 +46,14 @@ export default async function AccountPage() {
                     {dateFormatter.format(order.placedAt)} ·{" "}
                     {accountOrdersCopy.statusLabels[order.status]}
                   </span>
+                  {order.status === "FULFILLED" && (order.carrier || order.trackingNumber) ? (
+                    <span className="text-muted block text-sm">
+                      {accountOrdersCopy.trackingLine(
+                        order.carrier ?? "—",
+                        order.trackingNumber ?? "—",
+                      )}
+                    </span>
+                  ) : null}
                 </span>
                 <span className="text-sm font-semibold whitespace-nowrap">
                   {formatKurus(order.totalCents)}

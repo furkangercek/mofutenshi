@@ -23,6 +23,13 @@ export const emailCopy = {
   viewOrder: "Siparişi görüntüle",
   footerNote: "Bu e-posta, MofuTenshi hesabınız veya siparişinizle ilgili gönderilmiştir.",
   footerQuestions: "Sorunuz mu var? Bu e-postayı yanıtlayabilirsiniz.",
+  shippedSubject: (orderNumber: string) => `Siparişiniz kargoya verildi — ${orderNumber}`,
+  shippedTitle: "Siparişiniz kargoya verildi",
+  shippedLead: "Siparişiniz yola çıktı. Aşağıdaki bilgilerle takip edebilirsiniz.",
+  shippedLeadNoTracking: "Siparişiniz yola çıktı.",
+  trackingHeading: "Kargo bilgileri",
+  carrierLabel: "Kargo firması",
+  trackingNumberLabel: "Takip numarası",
   verifySubject: "E-posta adresinizi doğrulayın — MofuTenshi",
   verifyTitle: "E-posta adresinizi doğrulayın",
   verifyLead:

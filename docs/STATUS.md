@@ -2,7 +2,7 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-05 (Phase 2: transactional emails + email verification + password reset landed, wire-verified)
+**Last updated:** 2026-07-05 (Phase 2: emails, verification+reset, order management landed; empty-DB build fix)
 
 ## Where we are
 
@@ -12,9 +12,16 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Code side: continue Phase 2 — next item is the owner's call.** Remaining Phase 2 items: automatic invoicing (PDF + KDV line), full order management (status transitions + fulfillment, incl. the deferred shipped email), address book, reviews, automatic best-sellers.
+**Code side: continue Phase 2 — next item is the owner's call.** Remaining Phase 2 items: automatic invoicing (PDF + KDV line), address book / saved addresses, product reviews, automatic best-sellers.
 
 **Owner side (Phase 1 step 10, unchanged):** VPS (see R10 — friend's box, confirm root/ports first), domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production keys, Google OAuth credentials, Resend API key + sender domain, fresh production `AUTH_SECRET`. (The step-by-step `docs/LAUNCH_GUIDE.md` was removed by the owner on 2026-07-05 with `docs/ADMIN_GUIDE.md` — `docs/DEPLOY.md` still covers Coolify → Cloudflare → smoke → backup.) After deploy, close out the env-gated verification backlog: live R2 upload, live Resend send.
+
+## Phase 2 — order management notes (landed 2026-07-05)
+
+- **Fulfillment (R13)**: `fulfillOrderAction` — guarded `updateMany` PAID→FULFILLED setting `carrier`/`trackingNumber` (optional, null when blank) + `shippedAt`; fires the shipped email via `after()` (tracking box omitted when both fields blank). Stock untouched (dropped on PAID). Migration `20260705…_add_order_tracking`.
+- **Cancel-paid (R14)**: `cancelPaidOrderAction` — transactional guarded flip PAID→CANCELLED + per-item `stock: increment` (mirror of markOrderPaid's decrement; null variantIds skipped), then `updateTag("catalog")`. **Refund is manual and the UI says so loudly.** Replay-safe: wire-verified the guard rejects a second cancel without double-restocking.
+- Admin order detail: PENDING_PAYMENT → confirm/cancel block (unchanged); PAID → fulfill form (kargo firması + takip no) + cancel-with-warning; FULFILLED → read-only Kargo section. Customer account list shows `carrier · trackingNumber` on FULFILLED orders.
+- Wire-verified on the prod build: confirm→fulfill with Turkish carrier (UTF-8 bytes verified in DB — an earlier mangled row was the curl test harness, NOT the app), full email lifecycle for one order (received→paid→shipped logged), re-fulfill and double-cancel rejected, restock exactly once. **NOT verified: account-page tracking line rendering (guest test orders have no user), real email delivery.**
 
 ## Phase 2 — email verification + password reset notes (landed 2026-07-05)
 
@@ -106,7 +113,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 - [x] **iyzico sandbox VERIFIED E2E (2026-07-05)** — owner's sandbox keys in local `.env` (gitignored, never commit). Full flow driven with a real browser against the hosted page: init → test card 5528790000000008 → callback → PAID, single stock decrement, idempotent replay, amount cross-check incl. live sale discount. **Found+fixed a real bug**: retrieve echoes the RETRIEVE request's `conversationId` (undefined), not the payment's — order id must come from `basketId`, else successful charges bounce as failures (and the failure branch cancels the order). Production merchant keys still pending owner (needs şahıs şirketi).
 - [ ] **Google OAuth credentials pending owner** — button hidden until `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET`; callback `<origin>/api/auth/callback/google`.
 - [ ] **Resend credentials pending owner** (free tier: resend.com → API key; sender domain verification needs the domain/DNS first): set `RESEND_API_KEY` + `EMAIL_FROM` (e.g. `MofuTenshi <siparis@mofutenshi.com>`), then verify a real delivered email and check rendering in Gmail/Outlook.
-- [ ] **Local dev DB contains test data from step 8 verification**: users `admin@test.local` (ADMIN) / `customer@test.local` (password `test-password-1`), orders `MT-TEST-1` (PAID) / `MT-TEST-2` (CANCELLED) / `MT-000044` (PAID, email-feature wire test 2026-07-05; seed re-run restored the stock it consumed), users `verifytest1@test.local` (password `brand-new-pass-9`) / `verifytest2@test.local` (verification wire test), and settings changed to flat 79,50 TL / threshold 1.500 TL / low-stock 5 / manual payment ON with placeholder instructions. Owner: replace instructions with real bank details or disable before launch; re-run `npm run db:seed` any time (idempotent, restores seed sales).
+- [ ] **Local dev DB contains test data from step 8 verification**: users `admin@test.local` (ADMIN) / `customer@test.local` (password `test-password-1`), orders `MT-TEST-1` (PAID) / `MT-TEST-2` (CANCELLED) / `MT-000044`+`MT-000045` (FULFILLED, wire tests) / `MT-000046` (CANCELLED, restock test), users `verifytest1@test.local` (password `brand-new-pass-9`) / `verifytest2@test.local` (verification wire test), and settings changed to flat 79,50 TL / threshold 1.500 TL / low-stock 5 / manual payment ON with placeholder instructions. Owner: replace instructions with real bank details or disable before launch; re-run `npm run db:seed` any time (idempotent, restores seed sales).
 - [ ] Admin delete/confirm dialogs use native `window.confirm` — pragmatic for v1 desktop-first admin; swap for Radix AlertDialog if the owner wants the animated overlay treatment in admin too.
 - [ ] CI: confirm green after next push. **Empty-DB build FIXED 2026-07-05**: Cache Components rejects empty `generateStaticParams` (`EmptyGenerateStaticParamsError`, hit on GitHub) — PDP/tag pages now return a `__placeholder__` param when the catalog is empty (official escape hatch, renders notFound), and CI seeds before building so real pages validate. This also protects the FIRST production deploy, which builds against an empty prod DB (verified locally: migrate + build against a fresh database succeeds).
 - [x] Step 10 deploy prep done — build-time DB requirement is handled inside the Dockerfile (`migrate deploy` before `next build`); env provisioning on Coolify documented in `docs/DEPLOY.md`.

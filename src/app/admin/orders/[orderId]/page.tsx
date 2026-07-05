@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { OrderActions } from "@/components/admin/order-actions";
+import { FulfillActions, OrderActions } from "@/components/admin/order-actions";
 import { requireAdmin } from "@/lib/admin-guard";
 import { adminOrdersCopy } from "@/lib/copy/admin";
 import { accountOrdersCopy } from "@/lib/copy/checkout";
@@ -52,6 +52,42 @@ export default async function AdminOrderDetailPage({
           className="border-border bg-surface rounded-lg border p-6"
         >
           <OrderActions id={order.id} orderNumber={order.orderNumber} />
+        </section>
+      ) : null}
+
+      {order.status === "PAID" ? (
+        <section
+          aria-label={adminOrdersCopy.fulfillHeading}
+          className="border-border bg-surface rounded-lg border p-6"
+        >
+          <FulfillActions id={order.id} orderNumber={order.orderNumber} />
+        </section>
+      ) : null}
+
+      {order.status === "FULFILLED" &&
+      (order.shippedAt || order.carrier || order.trackingNumber) ? (
+        <section className="border-border bg-surface rounded-lg border p-6">
+          <h2 className="font-display text-xl">{adminOrdersCopy.fulfillHeading}</h2>
+          <dl className="mt-2 flex flex-col gap-1 text-sm">
+            {order.shippedAt ? (
+              <div className="flex flex-wrap justify-between gap-2">
+                <dt className="text-muted">{adminOrdersCopy.shippedAtLabel}</dt>
+                <dd>{dateFormatter.format(order.shippedAt)}</dd>
+              </div>
+            ) : null}
+            {order.carrier ? (
+              <div className="flex flex-wrap justify-between gap-2">
+                <dt className="text-muted">{adminOrdersCopy.carrierShortLabel}</dt>
+                <dd>{order.carrier}</dd>
+              </div>
+            ) : null}
+            {order.trackingNumber ? (
+              <div className="flex flex-wrap justify-between gap-2">
+                <dt className="text-muted">{adminOrdersCopy.trackingShortLabel}</dt>
+                <dd>{order.trackingNumber}</dd>
+              </div>
+            ) : null}
+          </dl>
         </section>
       ) : null}
 

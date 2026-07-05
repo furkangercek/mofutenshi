@@ -448,6 +448,9 @@ export type AdminOrderDetail = {
   paymentProvider: string | null;
   paymentRef: string | null;
   placedAt: Date;
+  carrier: string | null;
+  trackingNumber: string | null;
+  shippedAt: Date | null;
   items: {
     id: string;
     name: string;
@@ -475,6 +478,9 @@ export async function getAdminOrder(id: string): Promise<AdminOrderDetail | null
       paymentProvider: true,
       paymentRef: true,
       placedAt: true,
+      carrier: true,
+      trackingNumber: true,
+      shippedAt: true,
       items: {
         select: {
           id: true,

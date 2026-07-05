@@ -58,6 +58,8 @@ export type UserOrderSummary = {
   totalCents: number;
   placedAt: Date;
   itemCount: number;
+  carrier: string | null;
+  trackingNumber: string | null;
 };
 
 export async function getOrdersForUser(userId: string): Promise<UserOrderSummary[]> {
@@ -70,6 +72,8 @@ export async function getOrdersForUser(userId: string): Promise<UserOrderSummary
       status: true,
       totalCents: true,
       placedAt: true,
+      carrier: true,
+      trackingNumber: true,
       items: { select: { quantity: true } },
     },
   });
@@ -80,6 +84,8 @@ export async function getOrdersForUser(userId: string): Promise<UserOrderSummary
     status: order.status,
     totalCents: order.totalCents,
     placedAt: order.placedAt,
+    carrier: order.carrier,
+    trackingNumber: order.trackingNumber,
     itemCount: order.items.reduce((sum, item) => sum + item.quantity, 0),
   }));
 }

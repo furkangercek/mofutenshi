@@ -30,6 +30,7 @@ export type OrderEmailProps = {
   addressLines: string[];
   confirmationUrl: string;
   manualInstructions?: string | null;
+  tracking?: { carrier: string | null; trackingNumber: string | null } | null;
 };
 
 function MultilineText({ value, style }: { value: string; style: CSSProperties }) {
@@ -64,6 +65,34 @@ function OrderEmail({
       <p style={{ ...text, marginTop: "16px" }}>
         {emailCopy.orderNumberLabel}: <strong>{order.orderNumber}</strong>
       </p>
+
+      {order.tracking && (
+        <table
+          role="presentation"
+          width="100%"
+          cellPadding={0}
+          cellSpacing={0}
+          style={{ marginTop: "24px" }}
+        >
+          <tbody>
+            <tr>
+              <td style={{ backgroundColor: palette.ghost, borderRadius: "6px", padding: "16px" }}>
+                <p style={{ ...text, fontWeight: "bold" }}>{emailCopy.trackingHeading}</p>
+                {order.tracking.carrier && (
+                  <p style={{ ...mutedText, marginTop: "8px" }}>
+                    {emailCopy.carrierLabel}: {order.tracking.carrier}
+                  </p>
+                )}
+                {order.tracking.trackingNumber && (
+                  <p style={{ ...mutedText, marginTop: order.tracking.carrier ? "0" : "8px" }}>
+                    {emailCopy.trackingNumberLabel}: {order.tracking.trackingNumber}
+                  </p>
+                )}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      )}
 
       {order.manualInstructions && (
         <table
@@ -149,4 +178,15 @@ export function OrderReceivedEmail(order: OrderEmailProps) {
 
 export function OrderPaidEmail(order: OrderEmailProps) {
   return <OrderEmail title={emailCopy.paidTitle} lead={emailCopy.paidLead} order={order} />;
+}
+
+export function OrderShippedEmail(order: OrderEmailProps) {
+  const hasTracking = Boolean(order.tracking?.carrier || order.tracking?.trackingNumber);
+  return (
+    <OrderEmail
+      title={emailCopy.shippedTitle}
+      lead={hasTracking ? emailCopy.shippedLead : emailCopy.shippedLeadNoTracking}
+      order={order}
+    />
+  );
 }

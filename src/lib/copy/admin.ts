@@ -214,6 +214,22 @@ export const adminOrdersCopy = {
   cancelCta: "Siparişi iptal et",
   cancelConfirm: (orderNumber: string) => `${orderNumber} iptal edilsin mi?`,
   alreadyTransitioned: "Sipariş durumu bu arada değişmiş. Sayfayı kontrol edin.",
+  fulfillHeading: "Kargo",
+  fulfillHint:
+    "Kargo bilgilerini girip siparişi kargolandı olarak işaretleyin; müşteriye e-posta gönderilir. Alanlar isteğe bağlıdır.",
+  carrierLabel: "Kargo firması (isteğe bağlı)",
+  trackingNumberLabel: "Takip numarası (isteğe bağlı)",
+  fulfillCta: "Kargolandı olarak işaretle",
+  fulfillConfirm: (orderNumber: string) =>
+    `${orderNumber} kargolandı olarak işaretlensin mi? Müşteriye kargo e-postası gönderilecek.`,
+  cancelPaidCta: "Siparişi iptal et (iade manuel)",
+  cancelPaidHint:
+    "İptal, stokları geri yükler ve siparişi kapatır. ÜCRET İADESİNİ SİSTEM YAPMAZ — iyzico paneli veya havale ile iadeyi kendiniz yapmalısınız.",
+  cancelPaidConfirm: (orderNumber: string) =>
+    `${orderNumber} iptal edilsin mi? Stok geri yüklenecek. İADEYİ MANUEL YAPMANIZ GEREKİR.`,
+  shippedAtLabel: "Kargoya verilme",
+  carrierShortLabel: "Kargo firması",
+  trackingShortLabel: "Takip numarası",
 };
 
 export const adminInventoryCopy = {

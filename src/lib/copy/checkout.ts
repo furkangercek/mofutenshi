@@ -68,4 +68,5 @@ export const accountOrdersCopy = {
     CANCELLED: "İptal edildi",
     FULFILLED: "Kargolandı",
   } as const,
+  trackingLine: (carrier: string, trackingNumber: string) => `${carrier} · ${trackingNumber}`,
 };

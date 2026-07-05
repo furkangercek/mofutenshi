@@ -32,7 +32,7 @@ Build order chosen so each step is testable against real data:
 - [x] Email verification at registration (R11: blocks credentials login until verified, env-gated) — landed 2026-07-05
 - [x] Password reset via emailed link (R12, bundled with verification) — landed 2026-07-05
 - [ ] Automatic invoicing (server-side PDF, KDV breakdown line)
-- [ ] Full order management in admin (status transitions, fulfillment) — includes the shipped email on FULFILLED
+- [x] Full order management in admin (status transitions, fulfillment) — landed 2026-07-05: PAID→FULFILLED with optional tracking (R13) + shipped email, PAID→CANCELLED with restock (R14, refund manual)
 - [ ] Address book / saved addresses
 - [ ] Product reviews/ratings
 - [ ] Automatic Best-Sellers ranking (real order data replaces the manual tag)
