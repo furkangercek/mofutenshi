@@ -40,6 +40,10 @@ export const errorCopy = {
   backHome: "Ana sayfaya dön",
 };
 
+export const uiCopy = {
+  loading: "Yükleniyor…",
+};
+
 export const homeCopy = {
   heroCta: "Ürünleri keşfet",
   collectionsHeading: "Koleksiyonlar",

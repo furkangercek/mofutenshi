@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { inputClass, textareaClass } from "@/components/ui/form";
+import { LoaderOverlay } from "@/components/ui/loader";
 import { placeOrder, type CheckoutFormState } from "@/lib/actions/checkout";
 import { checkoutCopy } from "@/lib/copy/checkout";
 
@@ -23,7 +24,8 @@ export function CheckoutForm({
   const noMethod = !cardEnabled && !manualEnabled;
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    <form action={formAction} className="relative flex flex-col gap-6">
+      {isPending && <LoaderOverlay label={checkoutCopy.submitting} />}
       <section aria-labelledby="contact-heading" className="flex flex-col gap-4">
         <h2 id="contact-heading" className="font-display text-xl">
           {checkoutCopy.contactHeading}

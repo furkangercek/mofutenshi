@@ -41,6 +41,10 @@
   /* Transform-only entrance for LCP elements: an opacity-0 start delays
      the recorded paint and tanks LCP (hero h1). */
   --animate-rise: rise 300ms ease-out backwards;
+  /* Site loader (src/components/ui/loader.tsx): spin is the placeholder
+     mark's animation; splash-out self-dismisses the boot splash. */
+  --animate-loader-spin: loader-spin 900ms linear infinite;
+  --animate-splash-out: splash-out 300ms ease-out 600ms forwards;
 
   @keyframes menu-in {
     from {
@@ -111,6 +115,17 @@
       transform: translateY(12px);
     }
   }
+  @keyframes loader-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes splash-out {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
 }
 
 @theme inline {
@@ -142,6 +157,7 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;

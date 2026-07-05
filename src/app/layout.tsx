@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
+import { BootSplash } from "@/components/ui/loader";
 import { navCopy, siteCopy } from "@/lib/copy/common";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
@@ -41,6 +42,7 @@ export default function RootLayout({
   return (
     <html lang="tr" className={`${inter.variable} ${fraunces.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
+        <BootSplash />
         <a
           href="#main"
           className="focus:bg-surface sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:px-4 focus:py-2"

@@ -90,6 +90,7 @@ Owner must provide: VPS, domain purchase (reconfirm R8 first), R2 bucket + crede
 - [ ] CI: confirm green after next push (postgres service fix landed 2026-07-03; step 8 adds no build-time DB reads beyond existing patterns).
 - [x] Step 10 deploy prep done — build-time DB requirement is handled inside the Dockerfile (`migrate deploy` before `next build`); env provisioning on Coolify documented in `docs/DEPLOY.md`.
 - [ ] Designer input pending: display font choice (Fraunces interim; must cover latin-ext).
+- [ ] Custom loader animation pending owner: the site loader is a placeholder spinning ring — swap ONLY the marked inner span in `src/components/ui/loader.tsx` (Loader is reused by the boot splash, LoaderOverlay dimmer, and checkout pending state). Boot splash is pure CSS (600ms hold + 300ms fade), never blocks input, skipped under reduced motion; verified Lighthouse-neutral (home perf 92).
 - [x] **Production domain RESOLVED (R8, 2026-07-04): `mofutenshi.com`** (working decision — owner said "probably"; reconfirm before purchase/DNS). Unblocks step 9 `metadataBase`/canonicals/OG.
 - [ ] R5: `garage-kits` is a manual subtag — owner flags if upkeep gets annoying.
 - [ ] Seed image keys (`seed/*.jpg`) are placeholders; with R2 unset all product images render the gradient placeholder (and the sitemap/OG omit images).
