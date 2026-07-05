@@ -108,8 +108,18 @@ export const iyzicoGateway: PaymentGateway = {
       );
     });
 
-    const orderId = typeof result.conversationId === "string" ? result.conversationId : null;
+    // The order id must come from basketId: retrieve echoes conversationId
+    // of the RETRIEVE request (undefined here), not the original payment's —
+    // verified against the live sandbox 2026-07-05.
+    const orderId = typeof result.basketId === "string" ? result.basketId : null;
     if (result.status !== "success" || result.paymentStatus !== "SUCCESS" || !orderId) {
+      console.error(
+        "iyzico verify failed",
+        result.status,
+        result.paymentStatus,
+        result.errorCode,
+        result.errorMessage,
+      );
       return { ok: false, orderId };
     }
     return {

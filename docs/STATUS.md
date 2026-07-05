@@ -6,7 +6,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## Where we are
 
-- **Phase 1 (v1 MVP) is current.** Steps 1–9 done: schema + seed, tokens + base UI, read path + sales engine, cart, auth, checkout + payment (iyzico code-complete, sandbox pending), admin panel, and now SEO + polish. Two integrations remain env-gated until the owner provisions credentials: iyzico card payments and R2 image uploads.
+- **Phase 1 (v1 MVP) is current.** Steps 1–9 done: schema + seed, tokens + base UI, read path + sales engine, cart, auth, checkout + payment (**iyzico sandbox-verified E2E 2026-07-05**), admin panel, SEO + polish. One integration remains env-gated until the owner provisions credentials: R2 image uploads.
 - Schema: `prisma/schema.prisma`, migrations through `20260703165755`, idempotent seed (`npm run db:seed`).
 - **PRD v2.0 is authoritative** — tag-based navigation model, payment in v1.
 
@@ -55,7 +55,7 @@ Owner must provide: VPS, domain purchase (reconfirm R8 first), R2 bucket + crede
 - **Provider-agnostic boundary** (`src/lib/payments/`): iyzico via hosted CheckoutForm (official SDK; `serverExternalPackages`). Callback (`/api/payments/iyzico/callback`) verifies server-to-server and cross-checks the paid amount; mismatch stays PENDING. `@types/iyzipay` is wrong — we ship `src/types/iyzipay.d.ts`.
 - **Checkout math** (`src/lib/checkout.ts`): fresh DB reads; quantity-over-stock aborts with a Turkish "cart changed" error. Flat-rate shipping, waived at the free threshold.
 - **Order numbers**: sequence `order_number_seq` → `MT-000001`. **Confirmation access**: HMAC token gates guest access.
-- Verified E2E at step 7 (manual path over the wire): snapshots, shipping branches, stock timing, idempotent replay, oversell clamp, forged token rejected. **NOT verified: live iyzico flow (no sandbox keys).**
+- Verified E2E at step 7 (manual path over the wire): snapshots, shipping branches, stock timing, idempotent replay, oversell clamp, forged token rejected. Live iyzico flow sandbox-verified 2026-07-05 (see reminders) — verifyCallback reads the order id from `basketId`, never `conversationId`.
 
 ## Step 6 architecture notes (landed 2026-07-03)
 
@@ -83,7 +83,7 @@ Owner must provide: VPS, domain purchase (reconfirm R8 first), R2 bucket + crede
 
 - [ ] **Legal texts DRAFTED (2026-07-05), not lawyer-reviewed**: full mesafeli satış sözleşmesi + ön bilgilendirme (`src/lib/copy/legal.ts`, drafted against 6502/Yönetmelik incl. the 2026-effective seller-pays-return-shipping rule) and KVKK aydınlatma metni + çerez (`static-pages.ts`). Checkout now REQUIRES consent (checkbox + zod `legalConsent`, wire-verified). Before launch the owner must: fill the `[BRACKETED]` company fields (unvan, adres, vergi, kargo firması), set up the real `destek@` email, and get a lawyer's review — these are drafts, not legal advice.
 - [ ] **R2 credentials needed from the owner** (Cloudflare account → R2 bucket + API token): set all five `R2_*` vars per `.env.example`, then verify a real upload end-to-end (admin → product edit → Görseller). Also confirm `images.remotePatterns` picks up the public URL after env is set.
-- [ ] **iyzico merchant account + sandbox keys needed from the owner** to verify the card path (set `IYZICO_API_KEY`/`IYZICO_SECRET_KEY`; callback path `/api/payments/iyzico/callback`).
+- [x] **iyzico sandbox VERIFIED E2E (2026-07-05)** — owner's sandbox keys in local `.env` (gitignored, never commit). Full flow driven with a real browser against the hosted page: init → test card 5528790000000008 → callback → PAID, single stock decrement, idempotent replay, amount cross-check incl. live sale discount. **Found+fixed a real bug**: retrieve echoes the RETRIEVE request's `conversationId` (undefined), not the payment's — order id must come from `basketId`, else successful charges bounce as failures (and the failure branch cancels the order). Production merchant keys still pending owner (needs şahıs şirketi).
 - [ ] **Google OAuth credentials pending owner** — button hidden until `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET`; callback `<origin>/api/auth/callback/google`.
 - [ ] **Local dev DB contains test data from step 8 verification**: users `admin@test.local` (ADMIN) / `customer@test.local` (password `test-password-1`), orders `MT-TEST-1` (PAID) / `MT-TEST-2` (CANCELLED), and settings changed to flat 79,50 TL / threshold 1.500 TL / low-stock 5 / manual payment ON with placeholder instructions. Owner: replace instructions with real bank details or disable before launch; re-run `npm run db:seed` any time (idempotent, restores seed sales).
 - [ ] Admin delete/confirm dialogs use native `window.confirm` — pragmatic for v1 desktop-first admin; swap for Radix AlertDialog if the owner wants the animated overlay treatment in admin too.
