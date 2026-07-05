@@ -1,14 +1,22 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { mergeGuestCartIntoUserCart } from "@/lib/cart-merge";
+import { emailEnabled } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
 // Social login stays hidden until the owner provisions OAuth credentials.
 export const googleEnabled = Boolean(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
+
+// R11: distinguishes "valid password, unverified email" from a bad login so
+// the login form can offer a resend — but only AFTER the password matched,
+// so it reveals nothing to someone probing foreign emails.
+export class EmailNotVerifiedError extends CredentialsSignin {
+  code = "email-not-verified";
+}
 
 const credentialsSchema = z.object({ email: z.email(), password: z.string().min(1) });
 
@@ -36,6 +44,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user?.passwordHash ?? DUMMY_HASH,
         );
         if (!user?.passwordHash || !passwordMatches) return null;
+        // Enforced only while the email integration is configured; with it
+        // off, verification links could never arrive (R11 env-gating).
+        if (emailEnabled && !user.emailVerified) throw new EmailNotVerifiedError();
         return {
           id: user.id,
           email: user.email,
@@ -45,7 +56,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         };
       },
     }),
-    ...(googleEnabled ? [Google] : []),
+    ...(googleEnabled
+      ? [
+          Google({
+            // Google asserts email ownership (email_verified claim), so its
+            // accounts never sit behind the R11 verification gate.
+            profile(profile) {
+              return {
+                id: profile.sub,
+                name: profile.name,
+                email: profile.email,
+                image: profile.picture,
+                role: "CUSTOMER" as const,
+                emailVerified: profile.email_verified ? new Date() : null,
+              };
+            },
+          }),
+        ]
+      : []),
   ],
   callbacks: {
     jwt({ token, user }) {

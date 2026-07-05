@@ -2,7 +2,7 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-05 (Phase 2 opened: transactional emails landed and wire-verified)
+**Last updated:** 2026-07-05 (Phase 2: transactional emails + email verification + password reset landed, wire-verified)
 
 ## Where we are
 
@@ -12,9 +12,20 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Code side: continue Phase 2 — next item is the owner's call (email verification at registration is the natural follow-on now that the email infra exists).**
+**Code side: continue Phase 2 — next item is the owner's call.** Remaining Phase 2 items: automatic invoicing (PDF + KDV line), full order management (status transitions + fulfillment, incl. the deferred shipped email), address book, reviews, automatic best-sellers.
 
 **Owner side (Phase 1 step 10, unchanged):** VPS (see R10 — friend's box, confirm root/ports first), domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production keys, Google OAuth credentials, Resend API key + sender domain, fresh production `AUTH_SECRET`. (The step-by-step `docs/LAUNCH_GUIDE.md` was removed by the owner on 2026-07-05 with `docs/ADMIN_GUIDE.md` — `docs/DEPLOY.md` still covers Coolify → Cloudflare → smoke → backup.) After deploy, close out the env-gated verification backlog: live R2 upload, live Resend send.
+
+## Phase 2 — email verification + password reset notes (landed 2026-07-05)
+
+- **R11 enforcement in `authorize()`** (`src/lib/auth.ts`): after the password matches, an unverified account throws `EmailNotVerifiedError` (`CredentialsSignin` subclass, code `email-not-verified`) — checked only when `emailEnabled`, so the whole feature is dormant until Resend env exists (registration then auto-verifies, v1 behavior; wire-verified both ways). The code is revealed only AFTER a correct password, so it leaks nothing to enumeration. `credentialsErrorCode()` in `actions/auth.ts` reads it off the error or its cause chain.
+- **Tokens** (`src/lib/auth-tokens.ts`): single-use rows on the existing Auth.js `VerificationToken` table (no schema change) — identifier `<purpose>:<email>`, column stores the SHA-256 hash (raw token only ever lives in the emailed link), verify 24h / reset 1h, new token invalidates the previous, purposes cannot cross (wire-verified). Data migration `20260705101606` grandfathers existing users as verified.
+- **Scanner-safe verification**: `/verify-email?token=` GET only peeks; the token is consumed by the confirm button's POST (`verifyEmailAction`) — mail scanners prefetching the link burn nothing. Reuse → invalid page (wire-verified).
+- **Password reset (R12)**: `/forgot-password` answers identically for existing/unknown emails and creates no token for unknown ones (wire-verified); `/reset-password` consumes the token, sets the bcrypt hash, marks the email verified (link click proves ownership), and deletes any pending verify tokens. Old password rejected, new one works (wire-verified). Social-only accounts can set a first password this way. **Known limitation: JWT sessions can't be revoked, so a reset does not kill existing sessions (30-day max age).**
+- **Google accounts skip the gate**: provider `profile()` maps `email_verified` → `emailVerified` at first sign-in (NOT live-verified — no OAuth creds yet).
+- **Build-time env trap (learned here): a fully-static page must never read env-gate flags** — `/forgot-password` prerenders with BUILD-time env, and the production image builds without runtime secrets, so the page would bake "disabled" forever. Gate inside actions (request time) or in dynamic subtrees only. The login page's conditional "Şifremi unuttum" link is safe (dynamic subtree).
+- Resend button on the login form appears via `needsVerification` state (client hydration; no-JS users still see the error text). New routes are noindex + robots-disallowed.
+- **NOT verified: real email delivery and the live Google OAuth path** (no Resend/OAuth credentials yet).
 
 ## Phase 2 — transactional email notes (landed 2026-07-05)
 
@@ -95,7 +106,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 - [x] **iyzico sandbox VERIFIED E2E (2026-07-05)** — owner's sandbox keys in local `.env` (gitignored, never commit). Full flow driven with a real browser against the hosted page: init → test card 5528790000000008 → callback → PAID, single stock decrement, idempotent replay, amount cross-check incl. live sale discount. **Found+fixed a real bug**: retrieve echoes the RETRIEVE request's `conversationId` (undefined), not the payment's — order id must come from `basketId`, else successful charges bounce as failures (and the failure branch cancels the order). Production merchant keys still pending owner (needs şahıs şirketi).
 - [ ] **Google OAuth credentials pending owner** — button hidden until `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET`; callback `<origin>/api/auth/callback/google`.
 - [ ] **Resend credentials pending owner** (free tier: resend.com → API key; sender domain verification needs the domain/DNS first): set `RESEND_API_KEY` + `EMAIL_FROM` (e.g. `MofuTenshi <siparis@mofutenshi.com>`), then verify a real delivered email and check rendering in Gmail/Outlook.
-- [ ] **Local dev DB contains test data from step 8 verification**: users `admin@test.local` (ADMIN) / `customer@test.local` (password `test-password-1`), orders `MT-TEST-1` (PAID) / `MT-TEST-2` (CANCELLED) / `MT-000044` (PAID, email-feature wire test 2026-07-05; seed re-run restored the stock it consumed), and settings changed to flat 79,50 TL / threshold 1.500 TL / low-stock 5 / manual payment ON with placeholder instructions. Owner: replace instructions with real bank details or disable before launch; re-run `npm run db:seed` any time (idempotent, restores seed sales).
+- [ ] **Local dev DB contains test data from step 8 verification**: users `admin@test.local` (ADMIN) / `customer@test.local` (password `test-password-1`), orders `MT-TEST-1` (PAID) / `MT-TEST-2` (CANCELLED) / `MT-000044` (PAID, email-feature wire test 2026-07-05; seed re-run restored the stock it consumed), users `verifytest1@test.local` (password `brand-new-pass-9`) / `verifytest2@test.local` (verification wire test), and settings changed to flat 79,50 TL / threshold 1.500 TL / low-stock 5 / manual payment ON with placeholder instructions. Owner: replace instructions with real bank details or disable before launch; re-run `npm run db:seed` any time (idempotent, restores seed sales).
 - [ ] Admin delete/confirm dialogs use native `window.confirm` — pragmatic for v1 desktop-first admin; swap for Radix AlertDialog if the owner wants the animated overlay treatment in admin too.
 - [ ] CI: confirm green after next push (postgres service fix landed 2026-07-03; step 8 adds no build-time DB reads beyond existing patterns).
 - [x] Step 10 deploy prep done — build-time DB requirement is handled inside the Dockerfile (`migrate deploy` before `next build`); env provisioning on Coolify documented in `docs/DEPLOY.md`.

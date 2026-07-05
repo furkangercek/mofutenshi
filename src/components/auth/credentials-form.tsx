@@ -1,9 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonSecondary } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/form";
-import { loginAction, registerAction, type AuthFormState } from "@/lib/actions/auth";
+import {
+  loginAction,
+  registerAction,
+  resendVerificationAction,
+  type AuthFormState,
+} from "@/lib/actions/auth";
 import { authCopy } from "@/lib/copy/auth";
 
 const initialState: AuthFormState = { error: null };
@@ -17,6 +22,10 @@ export function CredentialsForm({
 }) {
   const [state, formAction, isPending] = useActionState(
     mode === "login" ? loginAction : registerAction,
+    initialState,
+  );
+  const [resendState, resendFormAction, resendPending] = useActionState(
+    resendVerificationAction,
     initialState,
   );
 
@@ -49,6 +58,28 @@ export function CredentialsForm({
           {state.error}
         </p>
       )}
+      {state.needsVerification &&
+        (resendState.message ? (
+          <p role="status" className="text-muted text-sm">
+            {resendState.message}
+          </p>
+        ) : (
+          <>
+            {resendState.error && (
+              <p role="alert" className="text-muted text-sm">
+                {resendState.error}
+              </p>
+            )}
+            <ButtonSecondary
+              type="submit"
+              formAction={resendFormAction}
+              formNoValidate
+              disabled={resendPending}
+            >
+              {resendPending ? authCopy.submitting : authCopy.resendVerification}
+            </ButtonSecondary>
+          </>
+        ))}
       <Button type="submit" disabled={isPending}>
         {isPending
           ? authCopy.submitting

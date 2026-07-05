@@ -1,10 +1,16 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties } from "react";
+import {
+  EmailButton,
+  EmailShell,
+  headingText,
+  mutedText,
+  palette,
+  text,
+} from "@/components/emails/shared";
 import { emailCopy } from "@/lib/copy/emails";
 
-// Transactional email templates: plain React + inline styles + tables so any
-// email client renders them (@react-email/components is deprecated upstream;
-// @react-email/render turns these into html/text in src/lib/email.ts).
-// All money values arrive pre-formatted — kuruş never reaches the templates.
+// Order lifecycle templates. All money values arrive pre-formatted — kuruş
+// never reaches the templates.
 
 type OrderEmailLine = {
   name: string;
@@ -25,104 +31,6 @@ export type OrderEmailProps = {
   confirmationUrl: string;
   manualInstructions?: string | null;
 };
-
-const palette = {
-  ink: "#000000",
-  background: "#f2f2f2",
-  surface: "#ffffff",
-  muted: "#4b4f66",
-  border: "#b8bcd0",
-  primary: "#b6bff2",
-  accent: "#d9c99a",
-  ghost: "#f4f3f9",
-};
-
-const bodyFont = "-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-const displayFont = "Georgia, 'Times New Roman', serif";
-
-const text: CSSProperties = {
-  margin: 0,
-  fontFamily: bodyFont,
-  fontSize: "14px",
-  lineHeight: "22px",
-  color: palette.ink,
-};
-
-const mutedText: CSSProperties = { ...text, color: palette.muted };
-
-function EmailShell({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <html lang="tr">
-      {/* eslint-disable-next-line @next/next/no-head-element -- standalone email document, not a Next.js page */}
-      <head>
-        <meta charSet="utf-8" />
-        <title>{title}</title>
-      </head>
-      <body style={{ margin: 0, padding: 0, backgroundColor: palette.background }}>
-        <table
-          role="presentation"
-          width="100%"
-          cellPadding={0}
-          cellSpacing={0}
-          style={{ backgroundColor: palette.background, padding: "24px 12px" }}
-        >
-          <tbody>
-            <tr>
-              <td align="center">
-                <table
-                  role="presentation"
-                  width={560}
-                  cellPadding={0}
-                  cellSpacing={0}
-                  style={{
-                    width: "100%",
-                    maxWidth: "560px",
-                    backgroundColor: palette.surface,
-                    border: `1px solid ${palette.border}`,
-                    borderRadius: "8px",
-                  }}
-                >
-                  <tbody>
-                    <tr>
-                      <td style={{ padding: "32px 32px 0" }}>
-                        <p
-                          style={{
-                            margin: 0,
-                            fontFamily: displayFont,
-                            fontSize: "22px",
-                            color: palette.ink,
-                          }}
-                        >
-                          MofuTenshi
-                        </p>
-                        <hr
-                          style={{
-                            margin: "16px 0 0",
-                            border: "none",
-                            borderTop: `2px solid ${palette.accent}`,
-                          }}
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: "24px 32px 32px" }}>{children}</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <p style={{ ...mutedText, fontSize: "12px", margin: "16px 8px 0" }}>
-                  {emailCopy.footerNote}
-                </p>
-                <p style={{ ...mutedText, fontSize: "12px", margin: "4px 8px 0" }}>
-                  {emailCopy.footerQuestions}
-                </p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </body>
-    </html>
-  );
-}
 
 function MultilineText({ value, style }: { value: string; style: CSSProperties }) {
   const lines = value.split("\n");
@@ -150,17 +58,7 @@ function OrderEmail({
   const cellBorder = `1px solid ${palette.border}`;
   return (
     <EmailShell title={title}>
-      <h1
-        style={{
-          margin: 0,
-          fontFamily: displayFont,
-          fontSize: "20px",
-          fontWeight: "normal",
-          color: palette.ink,
-        }}
-      >
-        {title}
-      </h1>
+      <h1 style={headingText}>{title}</h1>
       <p style={{ ...text, marginTop: "12px" }}>{emailCopy.greeting(order.greetingName)}</p>
       <p style={{ ...mutedText, marginTop: "8px" }}>{lead}</p>
       <p style={{ ...text, marginTop: "16px" }}>
@@ -226,33 +124,7 @@ function OrderEmail({
         </p>
       ))}
 
-      <table role="presentation" cellPadding={0} cellSpacing={0} style={{ marginTop: "28px" }}>
-        <tbody>
-          <tr>
-            <td
-              style={{
-                backgroundColor: palette.primary,
-                borderRadius: "6px",
-              }}
-            >
-              <a
-                href={order.confirmationUrl}
-                style={{
-                  display: "inline-block",
-                  padding: "12px 24px",
-                  fontFamily: bodyFont,
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  color: palette.ink,
-                  textDecoration: "none",
-                }}
-              >
-                {emailCopy.viewOrder}
-              </a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <EmailButton href={order.confirmationUrl} label={emailCopy.viewOrder} />
     </EmailShell>
   );
 }
