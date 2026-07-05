@@ -106,7 +106,8 @@ Marketplace/multi-vendor, subscriptions, digital-goods delivery, marketing autom
 ### 2.2 Phase 2 (near-term roadmap)
 
 - Transactional emails (order confirmation, shipping) via Resend + React Email
-- Email verification at registration (enabled once email lands)
+- Email verification at registration (enabled once email lands; R11 — credentials login blocked until verified, Google auto-verified, env-gated)
+- Password reset via emailed link (R12 — added to scope 2026-07-05; also lets social-only accounts set a password)
 - Automatic invoicing with server-side PDF generation (with KDV breakdown line)
 - Full order management in admin (status transitions, fulfillment)
 - Address book, saved addresses

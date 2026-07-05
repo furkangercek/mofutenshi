@@ -29,7 +29,8 @@ Build order chosen so each step is testable against real data:
 ## Phase 2 (started 2026-07-05, R9)
 
 - [x] Transactional emails (Resend, React templates) — landed 2026-07-05: order-received (manual payment, with instructions) + payment-confirmed on PAID, env-gated until the owner provisions Resend; the shipping email lands with the fulfillment transition in order management
-- [ ] Email verification at registration
+- [ ] Email verification at registration (R11: blocks credentials login until verified, env-gated)
+- [ ] Password reset via emailed link (R12, bundled with verification)
 - [ ] Automatic invoicing (server-side PDF, KDV breakdown line)
 - [ ] Full order management in admin (status transitions, fulfillment) — includes the shipped email on FULFILLED
 - [ ] Address book / saved addresses
