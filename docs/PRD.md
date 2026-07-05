@@ -459,7 +459,7 @@ Schema outline for the implementer, not final Prisma syntax. **Money is stored a
 
 **Order**
 
-- `id`, `orderNumber` (human-readable, unique), `userId?`, `email`, `status` (`PENDING_PAYMENT` | `PAID` | `CANCELLED` | `FULFILLED`), `subtotalCents`, `discountCents`, `shippingCents`, `totalCents`, `shippingAddress` (JSON or `Address` relation), `notes?`, `paymentProvider?`, `paymentRef?`, `placedAt`
+- `id`, `orderNumber` (human-readable, unique), `userId?`, `email`, `status` (`PENDING_PAYMENT` | `PAID` | `CANCELLED` | `FULFILLED`), `subtotalCents`, `discountCents`, `shippingCents`, `totalCents`, `shippingAddress` (JSON or `Address` relation), `notes?`, `paymentProvider?`, `paymentRef?`, `placedAt`, `carrier?`, `trackingNumber?`, `shippedAt?` (R13, Phase 2)
 - Relation: `items` (OrderItem[])
 
 **OrderItem** (immutable snapshot)
