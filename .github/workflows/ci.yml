@@ -54,5 +54,11 @@ jobs:
       - name: Migrate database
         run: npx prisma migrate deploy
 
+      # Cache Components prerenders PDP/tag pages from generateStaticParams;
+      # seeding makes the build validate real pages, not just the
+      # empty-catalog placeholder path.
+      - name: Seed database
+        run: npm run db:seed
+
       - name: Build
         run: npm run build

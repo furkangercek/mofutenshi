@@ -9,9 +9,11 @@ import { getSitemapData, getTagPageData } from "@/lib/queries/catalog";
 
 type Props = { params: Promise<{ tagSlug: string }> };
 
-// Prerender every tag page (small catalog); unknown slugs still stream.
+// Prerender every tag page (small catalog); unknown slugs still stream. The
+// placeholder keeps empty-database builds green (see /p/[productSlug]).
 export async function generateStaticParams() {
   const { tags } = await getSitemapData();
+  if (tags.length === 0) return [{ tagSlug: "__placeholder__" }];
   return tags.map((tag) => ({ tagSlug: tag.slug }));
 }
 

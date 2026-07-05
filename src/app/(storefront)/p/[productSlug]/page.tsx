@@ -6,9 +6,13 @@ import { getProductDetail, getSitemapData } from "@/lib/queries/catalog";
 
 type Props = { params: Promise<{ productSlug: string }> };
 
-// Prerender every PDP (small catalog); unknown slugs still stream.
+// Prerender every PDP (small catalog); unknown slugs still stream. Cache
+// Components rejects an empty result (build error), and the first production
+// deploy builds against an empty database — the placeholder param renders the
+// notFound path and keeps that build green (official escape hatch).
 export async function generateStaticParams() {
   const { products } = await getSitemapData();
+  if (products.length === 0) return [{ productSlug: "__placeholder__" }];
   return products.map((product) => ({ productSlug: product.slug }));
 }
 
