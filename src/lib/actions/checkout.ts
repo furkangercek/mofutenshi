@@ -2,11 +2,13 @@
 
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { clearCartAfterOrder } from "@/lib/cart-clear";
 import { loadCheckoutCart, type CheckoutCart } from "@/lib/checkout";
 import { checkoutCopy } from "@/lib/copy/checkout";
+import { sendOrderReceivedEmail } from "@/lib/order-emails";
 import { nextOrderNumber } from "@/lib/order-number";
 import { orderAccessToken } from "@/lib/order-token";
 import { getCardGateway } from "@/lib/payments";
@@ -132,6 +134,7 @@ export async function placeOrder(
   if (method === "manual") {
     const order = await createPendingOrder(cart, parsed.data, userId, "manual");
     await clearCartAfterOrder(userId);
+    after(() => sendOrderReceivedEmail(order.id));
     refresh();
     redirect(confirmationPath(order.id));
   }

@@ -26,15 +26,15 @@ Build order chosen so each step is testable against real data:
 9. [x] **SEO + polish** — metadata, structured data (Product/Offer), full-product `sitemap.xml`, robots, canonical URLs, static pages (`/about`, `/contact`, `/legal/*` — placeholder copy pending owner), empty/error states, Lighthouse pass (≥90 perf, 100 SEO/a11y on key pages)
 10. [ ] **Deploy** — Dockerfile, Coolify on VPS, Cloudflare DNS/CDN/WAF, nightly `pg_dump` → R2 backup job + restore test (code-side prep landed 2026-07-05: Dockerfile + backup uploader + `docs/DEPLOY.md` runbook, image and restore verified locally; remaining work is blocked on owner provisioning VPS/domain/credentials)
 
-## Phase 2
+## Phase 2 (started 2026-07-05, R9)
 
-- Transactional emails (Resend + React Email)
-- Email verification at registration
-- Automatic invoicing (server-side PDF, KDV breakdown line)
-- Full order management in admin (status transitions, fulfillment)
-- Address book / saved addresses
-- Product reviews/ratings
-- Automatic Best-Sellers ranking (real order data replaces the manual tag)
+- [x] Transactional emails (Resend, React templates) — landed 2026-07-05: order-received (manual payment, with instructions) + payment-confirmed on PAID, env-gated until the owner provisions Resend; the shipping email lands with the fulfillment transition in order management
+- [ ] Email verification at registration
+- [ ] Automatic invoicing (server-side PDF, KDV breakdown line)
+- [ ] Full order management in admin (status transitions, fulfillment) — includes the shipped email on FULFILLED
+- [ ] Address book / saved addresses
+- [ ] Product reviews/ratings
+- [ ] Automatic Best-Sellers ranking (real order data replaces the manual tag)
 
 ## Phase 3+
 

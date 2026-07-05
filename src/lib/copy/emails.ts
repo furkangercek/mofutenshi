@@ -1,0 +1,26 @@
+export const emailCopy = {
+  receivedSubject: (orderNumber: string) => `Siparişiniz alındı — ${orderNumber}`,
+  paidSubject: (orderNumber: string) => `Ödemeniz alındı — ${orderNumber}`,
+  receivedTitle: "Siparişiniz alındı",
+  receivedLead:
+    "Siparişiniz oluşturuldu. Ödemeniz onaylandığında siparişinizi hazırlamaya başlayacağız.",
+  paidTitle: "Ödemeniz alındı",
+  paidLead: "Ödemeniz onaylandı, siparişiniz hazırlanıyor.",
+  greeting: (name: string) => `Merhaba ${name},`,
+  orderNumberLabel: "Sipariş numarası",
+  manualHeading: "Ödeme talimatları",
+  manualFallback:
+    "Havale/EFT bilgileri için bizimle iletişime geçin; ödemeniz onaylanınca siparişiniz hazırlanacak.",
+  itemsHeading: "Sipariş özeti",
+  quantityLabel: "Adet",
+  subtotal: "Ara toplam",
+  discount: "İndirim",
+  shipping: "Kargo",
+  shippingFree: "Ücretsiz",
+  total: "Toplam",
+  kdvNote: "Tüm fiyatlara KDV dahildir.",
+  addressHeading: "Teslimat adresi",
+  viewOrder: "Siparişi görüntüle",
+  footerNote: "Bu e-posta, MofuTenshi'den verdiğiniz sipariş hakkında gönderilmiştir.",
+  footerQuestions: "Sorunuz mu var? Bu e-postayı yanıtlayabilirsiniz.",
+};

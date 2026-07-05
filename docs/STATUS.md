@@ -2,19 +2,27 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-05 (Phase 1 step 10: deploy prep landed — provisioning pending owner)
+**Last updated:** 2026-07-05 (Phase 2 opened: transactional emails landed and wire-verified)
 
 ## Where we are
 
-- **Phase 1 (v1 MVP) is current.** Steps 1–9 done: schema + seed, tokens + base UI, read path + sales engine, cart, auth, checkout + payment (**iyzico sandbox-verified E2E 2026-07-05**), admin panel, SEO + polish. One integration remains env-gated until the owner provisions credentials: R2 image uploads.
+- **Phase 1 (v1 MVP) is code-complete**; all remaining Phase 1 work is owner provisioning (see NEXT ACTION). **Phase 2 started 2026-07-05 (R9)** with transactional emails — landed and verified same day.
 - Schema: `prisma/schema.prisma`, migrations through `20260703165755`, idempotent seed (`npm run db:seed`).
 - **PRD v2.0 is authoritative** — tag-based navigation model, payment in v1.
 
 ## NEXT ACTION
 
-**Phase 1, step 10: provisioning day — everything code-side is done and verified locally; all remaining work is blocked on the owner.**
+**Code side: continue Phase 2 — next item is the owner's call (email verification at registration is the natural follow-on now that the email infra exists).**
 
-Owner must provide: VPS, domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production/sandbox keys, Google OAuth credentials, fresh production `AUTH_SECRET`. **Step-by-step owner guide with alternatives and costs: `docs/LAUNCH_GUIDE.md`** (fastest unblock: iyzico sandbox keys — 10 minutes, verifies the last untested code path). Then follow `docs/DEPLOY.md` top to bottom (Coolify setup → Cloudflare → first-deploy smoke → first backup verification). After deploy, close out the env-gated verification backlog: live R2 upload, iyzico sandbox card flow.
+**Owner side (Phase 1 step 10, unchanged):** VPS (see R10 — friend's box, confirm root/ports first), domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production keys, Google OAuth credentials, Resend API key + sender domain, fresh production `AUTH_SECRET`. (The step-by-step `docs/LAUNCH_GUIDE.md` was removed by the owner on 2026-07-05 with `docs/ADMIN_GUIDE.md` — `docs/DEPLOY.md` still covers Coolify → Cloudflare → smoke → backup.) After deploy, close out the env-gated verification backlog: live R2 upload, live Resend send.
+
+## Phase 2 — transactional email notes (landed 2026-07-05)
+
+- **Transport** (`src/lib/email.ts`): Resend, env-gated like R2/iyzico — dormant until `RESEND_API_KEY` + `EMAIL_FROM` are both set (`EMAIL_REPLY_TO` optional; see `.env.example`). `sendEmail()` NEVER throws: senders run inside `next/server` `after()` on payment paths, and a failed email must never look like a failed payment (verified: Resend 401 is logged, checkout/confirm responses unaffected).
+- **`@react-email/components` is deprecated upstream (April 2026) — do not add it.** Templates (`src/components/emails/order-emails.tsx`) are plain React + inline styles + tables; `@react-email/render` 2.x (alive, resend's peer dep) produces html + plainText. Copy in `src/lib/copy/emails.ts`; money arrives pre-formatted (`formatKurus`), kuruş never reaches templates.
+- **Two emails, three triggers** (`src/lib/order-emails.ts`): order-received → checkout manual branch (includes havale/EFT instructions from settings, `manualFallback` when blank); payment-confirmed → iyzico callback + admin manual confirm. All fire via `after(() => ...)` only when `markOrderPaid`'s guarded flip actually happened, so callback replays cannot double-send. Card orders get no placement email by design (they're either PAID moments later or abandoned).
+- **Shipping email deliberately deferred**: no FULFILLED transition exists in admin yet — it ships with the "full order management" roadmap item (the sender + template pattern makes it a small addition).
+- Wire-verified on the prod build (no-JS form posts, invalid Resend key): manual checkout → 303 + `after()` fires order-received; admin confirm → paid email fired, order PAID, single stock decrement. Templates eyeballed via rendered html/text output. **NOT verified: a real delivered email (no Resend account yet) — includes sender-domain/DKIM setup and real-client rendering (Gmail/Outlook).**
 
 ## Step 10 prep notes (landed 2026-07-05)
 
@@ -86,7 +94,8 @@ Owner must provide: VPS, domain purchase (reconfirm R8 first), R2 bucket + crede
 - [ ] **R2 credentials needed from the owner** (Cloudflare account → R2 bucket + API token): set all five `R2_*` vars per `.env.example`, then verify a real upload end-to-end (admin → product edit → Görseller). Also confirm `images.remotePatterns` picks up the public URL after env is set.
 - [x] **iyzico sandbox VERIFIED E2E (2026-07-05)** — owner's sandbox keys in local `.env` (gitignored, never commit). Full flow driven with a real browser against the hosted page: init → test card 5528790000000008 → callback → PAID, single stock decrement, idempotent replay, amount cross-check incl. live sale discount. **Found+fixed a real bug**: retrieve echoes the RETRIEVE request's `conversationId` (undefined), not the payment's — order id must come from `basketId`, else successful charges bounce as failures (and the failure branch cancels the order). Production merchant keys still pending owner (needs şahıs şirketi).
 - [ ] **Google OAuth credentials pending owner** — button hidden until `AUTH_GOOGLE_ID`/`AUTH_GOOGLE_SECRET`; callback `<origin>/api/auth/callback/google`.
-- [ ] **Local dev DB contains test data from step 8 verification**: users `admin@test.local` (ADMIN) / `customer@test.local` (password `test-password-1`), orders `MT-TEST-1` (PAID) / `MT-TEST-2` (CANCELLED), and settings changed to flat 79,50 TL / threshold 1.500 TL / low-stock 5 / manual payment ON with placeholder instructions. Owner: replace instructions with real bank details or disable before launch; re-run `npm run db:seed` any time (idempotent, restores seed sales).
+- [ ] **Resend credentials pending owner** (free tier: resend.com → API key; sender domain verification needs the domain/DNS first): set `RESEND_API_KEY` + `EMAIL_FROM` (e.g. `MofuTenshi <siparis@mofutenshi.com>`), then verify a real delivered email and check rendering in Gmail/Outlook.
+- [ ] **Local dev DB contains test data from step 8 verification**: users `admin@test.local` (ADMIN) / `customer@test.local` (password `test-password-1`), orders `MT-TEST-1` (PAID) / `MT-TEST-2` (CANCELLED) / `MT-000044` (PAID, email-feature wire test 2026-07-05; seed re-run restored the stock it consumed), and settings changed to flat 79,50 TL / threshold 1.500 TL / low-stock 5 / manual payment ON with placeholder instructions. Owner: replace instructions with real bank details or disable before launch; re-run `npm run db:seed` any time (idempotent, restores seed sales).
 - [ ] Admin delete/confirm dialogs use native `window.confirm` — pragmatic for v1 desktop-first admin; swap for Radix AlertDialog if the owner wants the animated overlay treatment in admin too.
 - [ ] CI: confirm green after next push (postgres service fix landed 2026-07-03; step 8 adds no build-time DB reads beyond existing patterns).
 - [x] Step 10 deploy prep done — build-time DB requirement is handled inside the Dockerfile (`migrate deploy` before `next build`); env provisioning on Coolify documented in `docs/DEPLOY.md`.

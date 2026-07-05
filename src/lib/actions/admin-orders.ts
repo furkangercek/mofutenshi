@@ -1,9 +1,11 @@
 "use server";
 
 import { refresh, updateTag as invalidateTag } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { assertAdmin } from "@/lib/admin-guard";
 import { adminCopy, adminOrdersCopy } from "@/lib/copy/admin";
+import { sendOrderPaidEmail } from "@/lib/order-emails";
 import { markOrderPaid } from "@/lib/order-paid";
 import { prisma } from "@/lib/prisma";
 import type { AdminFormState } from "@/lib/actions/admin-settings";
@@ -25,6 +27,8 @@ export async function confirmOrderPaidAction(
 
   const flipped = await markOrderPaid(id.data, `manual-admin:${admin.id}`);
   if (!flipped) return fail(adminOrdersCopy.alreadyTransitioned);
+
+  after(() => sendOrderPaidEmail(id.data));
 
   // Stock changed on PAID; storefront availability must follow.
   invalidateTag("catalog");
