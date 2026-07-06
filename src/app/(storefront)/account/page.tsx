@@ -54,6 +54,14 @@ export default async function AccountPage() {
                       )}
                     </span>
                   ) : null}
+                  {order.status === "PAID" || order.status === "FULFILLED" ? (
+                    <a
+                      href={`/api/orders/${order.id}/invoice`}
+                      className="text-muted hover:text-ink inline-flex min-h-11 items-center text-sm underline underline-offset-4"
+                    >
+                      {accountOrdersCopy.invoiceLink}
+                    </a>
+                  ) : null}
                 </span>
                 <span className="text-sm font-semibold whitespace-nowrap">
                   {formatKurus(order.totalCents)}

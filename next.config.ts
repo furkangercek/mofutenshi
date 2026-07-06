@@ -14,8 +14,14 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "10mb" },
   },
   // iyzipay self-assembles via fs.readdirSync + dynamic require; sharp is a
-  // native module — neither can be bundled, load them from node_modules.
-  serverExternalPackages: ["iyzipay", "sharp"],
+  // native module; pdfkit reads its font data files with fs — none can be
+  // bundled, load them from node_modules.
+  serverExternalPackages: ["iyzipay", "sharp", "pdfkit"],
+  // Invoice PDFs embed the Inter TTFs via fs at request time; without this
+  // the standalone output would not carry them.
+  outputFileTracingIncludes: {
+    "/*": ["src/assets/fonts/*.ttf"],
+  },
   images: {
     remotePatterns: r2PublicUrl ? [new URL(`${r2PublicUrl}/**`)] : [],
   },

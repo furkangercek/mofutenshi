@@ -183,6 +183,14 @@ export default async function AdminOrderDetailPage({
             </div>
           ) : null}
         </dl>
+        {order.status === "PAID" || order.status === "FULFILLED" ? (
+          <a
+            href={`/api/orders/${order.id}/invoice`}
+            className="text-muted hover:text-ink mt-2 inline-flex min-h-11 items-center text-sm underline underline-offset-4"
+          >
+            {adminOrdersCopy.invoiceDownload}
+          </a>
+        ) : null}
       </section>
     </div>
   );

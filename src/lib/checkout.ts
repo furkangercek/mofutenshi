@@ -22,6 +22,7 @@ export type CheckoutSettings = {
   flatShippingCents: number;
   freeShippingThresholdCents: number;
   manualPaymentEnabled: boolean;
+  kdvRatePercent: number;
 };
 
 export type CheckoutCart = {
@@ -96,6 +97,7 @@ export async function loadCheckoutCart(): Promise<CheckoutCartResult> {
       flatShippingCents: true,
       freeShippingThresholdCents: true,
       manualPaymentEnabled: true,
+      kdvRatePercent: true,
     },
   });
   if (!settings) throw new Error("Settings row missing — checkout cannot price shipping");

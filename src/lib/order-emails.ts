@@ -6,7 +6,9 @@ import {
   type OrderEmailProps,
 } from "@/components/emails/order-emails";
 import { emailCopy } from "@/lib/copy/emails";
-import { emailEnabled, sendEmail } from "@/lib/email";
+import { invoiceCopy } from "@/lib/copy/invoice";
+import { emailEnabled, sendEmail, type EmailAttachment } from "@/lib/email";
+import { generateInvoicePdf, loadInvoiceData } from "@/lib/invoice";
 import { formatKurus } from "@/lib/money";
 import { orderAccessToken } from "@/lib/order-token";
 import type { ShippingAddress } from "@/lib/payments/types";
@@ -129,10 +131,29 @@ export async function sendOrderPaidEmail(orderId: string): Promise<void> {
   try {
     const loaded = await loadOrderEmail(orderId);
     if (!loaded) return;
+
+    // The invoice PDF rides along (R15), but a rendering failure must not
+    // cost the customer their confirmation email.
+    let attachments: EmailAttachment[] | undefined;
+    try {
+      const invoice = await loadInvoiceData(orderId);
+      if (invoice) {
+        attachments = [
+          {
+            filename: invoiceCopy.fileName(invoice.orderNumber),
+            content: await generateInvoicePdf(invoice),
+          },
+        ];
+      }
+    } catch (error) {
+      console.error(`invoice pdf generation threw for order ${orderId}`, error);
+    }
+
     await sendEmail(
       loaded.to,
       emailCopy.paidSubject(loaded.props.orderNumber),
       createElement(OrderPaidEmail, loaded.props),
+      attachments,
     );
   } catch (error) {
     console.error(`order paid email threw for order ${orderId}`, error);

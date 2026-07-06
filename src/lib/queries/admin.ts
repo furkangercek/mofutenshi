@@ -520,6 +520,7 @@ export type AdminSettings = {
   flatShippingCents: number;
   freeShippingThresholdCents: number;
   lowStockThreshold: number;
+  kdvRatePercent: number;
   manualPaymentEnabled: boolean;
   manualPaymentInstructions: string | null;
 };
@@ -531,6 +532,7 @@ export async function getAdminSettings(): Promise<AdminSettings> {
       flatShippingCents: true,
       freeShippingThresholdCents: true,
       lowStockThreshold: true,
+      kdvRatePercent: true,
       manualPaymentEnabled: true,
       manualPaymentInstructions: true,
     },
@@ -542,6 +544,7 @@ export async function getAdminSettings(): Promise<AdminSettings> {
       flatShippingCents: 0,
       freeShippingThresholdCents: 0,
       lowStockThreshold: 3,
+      kdvRatePercent: 20,
       manualPaymentEnabled: false,
       manualPaymentInstructions: null,
     }

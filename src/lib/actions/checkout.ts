@@ -71,6 +71,7 @@ async function createPendingOrder(
       discountCents: cart.discountCents,
       shippingCents: cart.shippingCents,
       totalCents: cart.totalCents,
+      kdvRatePercent: cart.settings.kdvRatePercent,
       shippingAddress,
       notes: input.notes || null,
       paymentProvider: provider,

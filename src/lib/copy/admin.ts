@@ -204,6 +204,7 @@ export const adminOrdersCopy = {
   providerLabel: "Yöntem",
   providerNames: { manual: "Havale / EFT", iyzico: "Kart (iyzico)" } as Record<string, string>,
   paymentRefLabel: "Ödeme referansı",
+  invoiceDownload: "Faturayı indir (PDF)",
   placedAtLabel: "Sipariş tarihi",
   statusLabel: "Durum",
   confirmPaidCta: "Ödemeyi onayla (PAID)",
@@ -264,8 +265,13 @@ export const adminSettingsCopy = {
   manualInstructionsLabel: "Havale / EFT talimatları",
   manualInstructionsHint:
     "Sipariş onay sayfasında gösterilir: banka, IBAN ve açıklama bilgilerini yazın.",
+  taxHeading: "Vergi",
+  kdvRateLabel: "KDV oranı (%)",
+  kdvRateHint:
+    "Fiyatlar KDV dahildir; bu oran yalnızca faturadaki KDV dökümünü belirler. Sipariş anındaki oran siparişe kaydedilir.",
   invalidMoney: "Geçerli bir tutar girin (örn. 149,90).",
   invalidThreshold: "Geçerli bir adet girin.",
+  invalidKdvRate: "0–99 arası bir tam sayı girin.",
 };
 
 export const adminDashboardCopy = {

@@ -31,7 +31,7 @@ Build order chosen so each step is testable against real data:
 - [x] Transactional emails (Resend, React templates) — landed 2026-07-05: order-received (manual payment, with instructions) + payment-confirmed on PAID, env-gated until the owner provisions Resend; the shipping email lands with the fulfillment transition in order management
 - [x] Email verification at registration (R11: blocks credentials login until verified, env-gated) — landed 2026-07-05
 - [x] Password reset via emailed link (R12, bundled with verification) — landed 2026-07-05
-- [ ] Automatic invoicing (server-side PDF, KDV breakdown line)
+- [x] Automatic invoicing (server-side PDF, KDV breakdown line) — landed 2026-07-06: invoice-styled PDF (R15, not a legal e-Arşiv), pdfkit + embedded Inter, KDV rate setting snapshotted per order (R16); paid-email attachment + account/admin downloads
 - [x] Full order management in admin (status transitions, fulfillment) — landed 2026-07-05: PAID→FULFILLED with optional tracking (R13) + shipped email, PAID→CANCELLED with restock (R14, refund manual)
 - [ ] Address book / saved addresses
 - [ ] Product reviews/ratings

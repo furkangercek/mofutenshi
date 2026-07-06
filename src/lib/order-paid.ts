@@ -13,7 +13,7 @@ export async function markOrderPaid(orderId: string, paymentRef: string | null):
   return prisma.$transaction(async (tx) => {
     const flipped = await tx.order.updateMany({
       where: { id: orderId, status: "PENDING_PAYMENT" },
-      data: { status: "PAID", ...(paymentRef ? { paymentRef } : {}) },
+      data: { status: "PAID", paidAt: new Date(), ...(paymentRef ? { paymentRef } : {}) },
     });
     if (flipped.count === 0) return false;
 

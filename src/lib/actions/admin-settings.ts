@@ -18,6 +18,11 @@ const settingsSchema = z.object({
   flatShipping: moneyField,
   freeShippingThreshold: moneyField,
   lowStockThreshold: z.coerce.number().int().min(0, adminSettingsCopy.invalidThreshold).max(10000),
+  kdvRatePercent: z.coerce
+    .number()
+    .int(adminSettingsCopy.invalidKdvRate)
+    .min(0, adminSettingsCopy.invalidKdvRate)
+    .max(99, adminSettingsCopy.invalidKdvRate),
   manualPaymentEnabled: z.literal("on").nullable(),
   manualPaymentInstructions: z.string().trim().max(2000),
 });
@@ -32,6 +37,7 @@ export async function saveSettings(
     flatShipping: formData.get("flatShipping"),
     freeShippingThreshold: formData.get("freeShippingThreshold"),
     lowStockThreshold: formData.get("lowStockThreshold"),
+    kdvRatePercent: formData.get("kdvRatePercent"),
     manualPaymentEnabled: formData.get("manualPaymentEnabled"),
     manualPaymentInstructions: formData.get("manualPaymentInstructions"),
   });
@@ -45,6 +51,7 @@ export async function saveSettings(
     flatShippingCents: parsed.data.flatShipping,
     freeShippingThresholdCents: parsed.data.freeShippingThreshold,
     lowStockThreshold: parsed.data.lowStockThreshold,
+    kdvRatePercent: parsed.data.kdvRatePercent,
     manualPaymentEnabled: parsed.data.manualPaymentEnabled === "on",
     manualPaymentInstructions: parsed.data.manualPaymentInstructions || null,
   };

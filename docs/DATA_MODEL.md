@@ -39,16 +39,17 @@ Entity reference for the Prisma schema, aligned to PRD v2 §6. Once `prisma/sche
 
 - **Cart** — `id, userId?, sessionToken?` (guest carts keyed by signed cookie; merged into user cart on login, quantities summed capped at stock).
 - **CartItem** — `id, cartId, variantId, quantity`; unique `(cartId, variantId)`.
-- **Order** — `id, orderNumber (human-readable, unique), userId?, email, status (PENDING_PAYMENT|PAID|CANCELLED|FULFILLED), subtotalCents, discountCents, shippingCents, totalCents, shippingAddress (JSON), notes?, paymentProvider?, paymentRef?, placedAt, carrier?, trackingNumber?, shippedAt?`
-  - `PAID` orders are created only on a verified gateway success callback/webhook.
+- **Order** — `id, orderNumber (human-readable, unique), userId?, email, status (PENDING_PAYMENT|PAID|CANCELLED|FULFILLED), subtotalCents, discountCents, shippingCents, totalCents, kdvRatePercent, shippingAddress (JSON), notes?, paymentProvider?, paymentRef?, placedAt, paidAt?, carrier?, trackingNumber?, shippedAt?`
+  - `PAID` orders are created only on a verified gateway success callback/webhook. `paidAt` is stamped by that transition and doubles as the invoice date.
   - `PENDING_PAYMENT` exists for the optional manual-payment fallback (admin toggle).
+  - `kdvRatePercent` (R16) snapshots the Setting rate at order creation so invoices survive statutory rate changes.
   - Tracking fields (R13) are set when the admin marks the order FULFILLED; all optional.
   - Cancelling a PAID order restocks its items (R14); the refund itself is manual.
 - **OrderItem** — `id, orderId, variantId? (nullable — survives catalog deletion), productNameSnapshot, variantLabelSnapshot, unitPriceCents, quantity, lineTotalCents`
 
 ### Settings
 
-- **Setting** — single-row or key-value: `flatShippingCents, freeShippingThresholdCents, lowStockThreshold, manualPaymentEnabled, manualPaymentInstructions?`
+- **Setting** — single-row or key-value: `flatShippingCents, freeShippingThresholdCents, lowStockThreshold, manualPaymentEnabled, manualPaymentInstructions?, kdvRatePercent`
 
 ### Auth
 

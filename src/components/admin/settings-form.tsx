@@ -12,6 +12,7 @@ export type SettingsFormValues = {
   flatShipping: string;
   freeShippingThreshold: string;
   lowStockThreshold: number;
+  kdvRatePercent: number;
   manualPaymentEnabled: boolean;
   manualPaymentInstructions: string;
 };
@@ -67,6 +68,27 @@ export function SettingsForm({ defaults }: { defaults: SettingsFormValues }) {
           />
           <span className="text-muted mt-1 block text-xs font-normal">
             {adminSettingsCopy.lowStockHint}
+          </span>
+        </label>
+      </section>
+
+      <section aria-labelledby="tax-settings" className="flex flex-col gap-4">
+        <h2 id="tax-settings" className="font-display text-xl">
+          {adminSettingsCopy.taxHeading}
+        </h2>
+        <label className="block text-sm font-medium">
+          {adminSettingsCopy.kdvRateLabel}
+          <input
+            name="kdvRatePercent"
+            type="number"
+            min={0}
+            max={99}
+            required
+            defaultValue={defaults.kdvRatePercent}
+            className={inputClass}
+          />
+          <span className="text-muted mt-1 block text-xs font-normal">
+            {adminSettingsCopy.kdvRateHint}
           </span>
         </label>
       </section>

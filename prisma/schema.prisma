@@ -286,7 +286,11 @@ model Order {
   notes           String?
   paymentProvider String?
   paymentRef      String?
+  // R16: KDV rate snapshot at creation — invoices for old orders must show
+  // the rate that applied then, not today's setting.
+  kdvRatePercent  Int         @default(20)
   placedAt        DateTime    @default(now())
+  paidAt          DateTime?
   updatedAt       DateTime    @updatedAt
   // R13: set when marked FULFILLED; all optional.
   carrier        String?
@@ -326,5 +330,6 @@ model Setting {
   lowStockThreshold          Int      @default(3)
   manualPaymentEnabled       Boolean  @default(false)
   manualPaymentInstructions  String?
+  kdvRatePercent             Int      @default(20)
   updatedAt                  DateTime @updatedAt
 }

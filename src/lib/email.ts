@@ -19,12 +19,15 @@ function resend(): Resend {
   return client;
 }
 
+export type EmailAttachment = { filename: string; content: Buffer };
+
 // Never throws: senders run inside next/server after() on payment paths, and
 // a failed email must never look like a failed payment.
 export async function sendEmail(
   to: string,
   subject: string,
   template: ReactElement,
+  attachments?: EmailAttachment[],
 ): Promise<void> {
   if (!emailEnabled) {
     console.log(`email disabled, skipping "${subject}" to ${to}`);
@@ -42,6 +45,7 @@ export async function sendEmail(
       html,
       text,
       ...(replyTo ? { replyTo } : {}),
+      ...(attachments?.length ? { attachments } : {}),
     });
     if (error) console.error(`email send failed for "${subject}" to ${to}`, error);
   } catch (error) {

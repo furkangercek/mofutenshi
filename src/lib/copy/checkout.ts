@@ -69,4 +69,5 @@ export const accountOrdersCopy = {
     FULFILLED: "Kargolandı",
   } as const,
   trackingLine: (carrier: string, trackingNumber: string) => `${carrier} · ${trackingNumber}`,
+  invoiceLink: "Faturayı indir (PDF)",
 };

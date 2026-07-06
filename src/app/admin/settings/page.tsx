@@ -20,6 +20,7 @@ export default async function AdminSettingsPage() {
             flatShipping: kurusToInputValue(settings.flatShippingCents),
             freeShippingThreshold: kurusToInputValue(settings.freeShippingThresholdCents),
             lowStockThreshold: settings.lowStockThreshold,
+            kdvRatePercent: settings.kdvRatePercent,
             manualPaymentEnabled: settings.manualPaymentEnabled,
             manualPaymentInstructions: settings.manualPaymentInstructions ?? "",
           }}
