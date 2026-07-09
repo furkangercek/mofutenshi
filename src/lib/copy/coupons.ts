@@ -1,0 +1,56 @@
+import { formatKurus } from "@/lib/money";
+
+export const couponCopy = {
+  heading: "İndirim kuponu",
+  inputLabel: "Kupon kodu",
+  apply: "Uygula",
+  applying: "Uygulanıyor…",
+  remove: "Kaldır",
+  appliedLabel: (code: string, percentOff: number) => `${code} (%${percentOff})`,
+  summaryLabel: (code: string) => `Kupon (${code})`,
+  notFound: "Bu kupon kodu geçerli değil.",
+  expired: "Bu kuponun kullanım süresi geçerli değil.",
+  belowMinimum: (minCents: number) =>
+    `Bu kupon en az ${formatKurus(minCents)} tutarındaki siparişlerde geçerlidir.`,
+  capReached: "Bu kuponun kullanım limiti doldu.",
+  alreadyUsed: "Bu kuponu daha önce kullandınız.",
+  invalidAtCheckout: "Sepetinizdeki kupon artık geçerli değil ve kaldırıldı.",
+  cartMissing: "Sepetiniz bulunamadı.",
+  tooManyAttempts: "Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.",
+};
+
+export const adminCouponsCopy = {
+  title: "Kuponlar",
+  empty: "Henüz kupon yok.",
+  newCta: "Yeni kupon",
+  newTitle: "Yeni kupon",
+  editTitle: "Kuponu düzenle",
+  codeLabel: "Kupon kodu",
+  codeHint: "3–32 karakter; büyük harf, rakam ve tire.",
+  percentLabel: "İndirim yüzdesi (%)",
+  startsAtLabel: "Başlangıç",
+  endsAtLabel: "Bitiş",
+  minSubtotalLabel: "Alt sipariş tutarı (TL, isteğe bağlı)",
+  maxRedemptionsLabel: "Toplam kullanım limiti (isteğe bağlı)",
+  activeLabel: "Aktif (kapatınca kupon hemen geçersiz olur)",
+  save: "Kaydet",
+  saving: "Kaydediliyor…",
+  delete: "Kuponu sil",
+  deleteConfirm: (code: string) =>
+    `${code} silinsin mi? Geçmiş siparişlerdeki kayıtlar etkilenmez.`,
+  usedSummary: (used: number, max: number | null) =>
+    max === null ? `${used} kullanım` : `${used} / ${max} kullanım`,
+  minSummary: (formatted: string) => `min ${formatted}`,
+  percentValue: (percent: number) => `%${percent}`,
+  statusActive: "Aktif",
+  statusInactive: "Pasif",
+  statusPlanned: "Planlandı",
+  statusExpired: "Süresi doldu",
+  invalidCode: "Kupon kodu 3–32 karakter olmalı; sadece harf, rakam ve tire.",
+  invalidPercent: "Yüzde 1–99 arası tam sayı olmalı.",
+  invalidDates: "Bitiş, başlangıçtan sonra olmalı.",
+  invalidMin: "Alt tutar geçersiz.",
+  invalidMax: "Kullanım limiti pozitif tam sayı olmalı.",
+  duplicateCode: "Bu kodla bir kupon zaten var.",
+  notFound: "Kupon bulunamadı.",
+};

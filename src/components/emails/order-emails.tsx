@@ -25,6 +25,7 @@ export type OrderEmailProps = {
   lines: OrderEmailLine[];
   subtotal: string;
   discount: string | null;
+  coupon: { label: string; amount: string } | null;
   shipping: string;
   total: string;
   addressLines: string[];
@@ -140,6 +141,7 @@ function OrderEmail({
           ))}
           <SummaryRow label={emailCopy.subtotal} value={order.subtotal} />
           {order.discount && <SummaryRow label={emailCopy.discount} value={order.discount} />}
+          {order.coupon && <SummaryRow label={order.coupon.label} value={order.coupon.amount} />}
           <SummaryRow label={emailCopy.shipping} value={order.shipping} />
           <SummaryRow label={emailCopy.total} value={order.total} bold />
         </tbody>

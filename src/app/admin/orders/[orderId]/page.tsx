@@ -4,6 +4,7 @@ import { FulfillActions, OrderActions } from "@/components/admin/order-actions";
 import { requireAdmin } from "@/lib/admin-guard";
 import { adminOrdersCopy } from "@/lib/copy/admin";
 import { accountOrdersCopy } from "@/lib/copy/checkout";
+import { couponCopy } from "@/lib/copy/coupons";
 import { formatKurus } from "@/lib/money";
 import { getAdminOrder } from "@/lib/queries/admin";
 
@@ -118,6 +119,12 @@ export default async function AdminOrderDetailPage({
             <div className="flex justify-between">
               <dt className="text-muted">{adminOrdersCopy.discount}</dt>
               <dd>−{formatKurus(order.discountCents)}</dd>
+            </div>
+          ) : null}
+          {order.couponCode && order.couponDiscountCents > 0 ? (
+            <div className="flex justify-between">
+              <dt className="text-muted">{couponCopy.summaryLabel(order.couponCode)}</dt>
+              <dd>−{formatKurus(order.couponDiscountCents)}</dd>
             </div>
           ) : null}
           <div className="flex justify-between">

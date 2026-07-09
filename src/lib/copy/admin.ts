@@ -7,6 +7,7 @@ export const adminCopy = {
     products: "Ürünler",
     tags: "Etiketler",
     sales: "İndirimler",
+    coupons: "Kuponlar",
     inventory: "Stok",
     orders: "Siparişler",
     reviews: "Yorumlar",

@@ -9,6 +9,8 @@ export type ConfirmationOrder = {
   paymentProvider: string | null;
   subtotalCents: number;
   discountCents: number;
+  couponCode: string | null;
+  couponDiscountCents: number;
   shippingCents: number;
   totalCents: number;
   items: { id: string; name: string; label: string; quantity: number; lineTotalCents: number }[];
@@ -24,6 +26,8 @@ export async function getConfirmationOrder(orderId: string): Promise<Confirmatio
       paymentProvider: true,
       subtotalCents: true,
       discountCents: true,
+      couponCode: true,
+      couponDiscountCents: true,
       shippingCents: true,
       totalCents: true,
       items: {

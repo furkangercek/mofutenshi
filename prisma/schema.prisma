@@ -288,12 +288,48 @@ model SaleTag {
   @@index([tagId])
 }
 
+// ---------- Coupons (R23) ----------
+
+// Percent-only codes applied on top of sale pricing; one coupon per order.
+// A redemption "counts" while its order is not CANCELLED — cancelling frees
+// the slot for both the total cap and the once-per-customer rule.
+model Coupon {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  percentOff       Int
+  startsAt         DateTime
+  endsAt           DateTime
+  minSubtotalCents Int      @default(0)
+  maxRedemptions   Int?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  redemptions CouponRedemption[]
+}
+
+model CouponRedemption {
+  id        String   @id @default(cuid())
+  couponId  String
+  orderId   String   @unique
+  email     String
+  createdAt DateTime @default(now())
+
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  order  Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([couponId, email])
+}
+
 // ---------- Commerce ----------
 
 model Cart {
   id           String   @id @default(cuid())
   userId       String?  @unique
   sessionToken String?  @unique
+  // R23: normalized coupon code awaiting checkout — validated fresh on every
+  // read; deliberately not a foreign key so coupon deletion just invalidates.
+  couponCode   String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -334,6 +370,9 @@ model Order {
   totalCents      Int
   shippingAddress Json
   notes           String?
+  // R23 snapshots: what was charged must survive coupon edits/deletion.
+  couponCode          String?
+  couponDiscountCents Int     @default(0)
   paymentProvider String?
   paymentRef      String?
   // R16: KDV rate snapshot at creation — invoices for old orders must show
@@ -347,8 +386,9 @@ model Order {
   trackingNumber String?
   shippedAt      DateTime?
 
-  user  User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
-  items OrderItem[]
+  user             User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items            OrderItem[]
+  couponRedemption CouponRedemption?
 
   @@index([userId])
   @@index([status, placedAt])

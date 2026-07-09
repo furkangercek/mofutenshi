@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CheckoutForm } from "@/components/checkout/checkout-form";
+import { CouponBox } from "@/components/checkout/coupon-box";
 import { OrderSummary } from "@/components/checkout/order-summary";
 import { ButtonLink } from "@/components/ui/button";
 import { getAddressesForUser } from "@/lib/address-book";
@@ -71,8 +72,22 @@ export default async function CheckoutPage({
             }))}
             subtotalCents={cart.subtotalCents}
             discountCents={cart.discountCents}
+            couponCode={cart.coupon?.code ?? null}
+            couponDiscountCents={cart.coupon?.discountCents ?? 0}
             shippingCents={cart.shippingCents}
             totalCents={cart.totalCents}
+          />
+          <CouponBox
+            applied={
+              cart.coupon
+                ? {
+                    code: cart.coupon.code,
+                    percentOff: cart.coupon.percentOff,
+                    discountCents: cart.coupon.discountCents,
+                  }
+                : null
+            }
+            loadError={cart.couponError}
           />
         </div>
       </div>

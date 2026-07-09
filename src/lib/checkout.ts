@@ -1,4 +1,5 @@
 import { getCartIdentity } from "@/lib/cart-identity";
+import { accountEmail, checkCoupon } from "@/lib/coupons";
 import { resolveEffectivePrice } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 import { loadActiveSales } from "@/lib/queries/catalog";
@@ -25,10 +26,22 @@ export type CheckoutSettings = {
   kdvRatePercent: number;
 };
 
+export type CheckoutCoupon = {
+  couponId: string;
+  code: string;
+  percentOff: number;
+  discountCents: number;
+};
+
 export type CheckoutCart = {
   lines: CheckoutLine[];
   subtotalCents: number;
   discountCents: number;
+  coupon: CheckoutCoupon | null;
+  // Set when a code is on the cart but no longer valid (expired, cap hit,
+  // subtotal dropped below the minimum, ...) — the UI surfaces the message
+  // and placeOrder refuses until the code is removed.
+  couponError: string | null;
   shippingCents: number;
   totalCents: number;
   settings: CheckoutSettings;
@@ -45,6 +58,7 @@ export async function loadCheckoutCart(): Promise<CheckoutCartResult> {
     where: identity,
     select: {
       id: true,
+      couponCode: true,
       items: {
         orderBy: { createdAt: "asc" },
         select: {
@@ -126,8 +140,29 @@ export async function loadCheckoutCart(): Promise<CheckoutCartResult> {
     (sum, line) => sum + (line.unitOriginalCents - line.unitCents) * line.quantity,
     0,
   );
+  // Free-shipping threshold reads the PRE-coupon subtotal (customer-favorable
+  // and stable while codes are applied/removed).
   const shippingCents =
     subtotalCents >= settings.freeShippingThresholdCents ? 0 : settings.flatShippingCents;
+
+  // R23: coupon applies on top of sale pricing. Once-per-customer is checked
+  // with the account email here; guests are checked in placeOrder where the
+  // checkout email is known.
+  let coupon: CheckoutCoupon | null = null;
+  let couponError: string | null = null;
+  if (cart.couponCode) {
+    const check = await checkCoupon(cart.couponCode, subtotalCents, await accountEmail());
+    if (check.ok) {
+      coupon = {
+        couponId: check.couponId,
+        code: check.code,
+        percentOff: check.percentOff,
+        discountCents: check.discountCents,
+      };
+    } else {
+      couponError = check.error;
+    }
+  }
 
   return {
     ok: true,
@@ -135,8 +170,10 @@ export async function loadCheckoutCart(): Promise<CheckoutCartResult> {
       lines,
       subtotalCents,
       discountCents,
+      coupon,
+      couponError,
       shippingCents,
-      totalCents: subtotalCents + shippingCents,
+      totalCents: subtotalCents - (coupon?.discountCents ?? 0) + shippingCents,
       settings,
     },
   };

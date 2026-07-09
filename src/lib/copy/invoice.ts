@@ -33,6 +33,7 @@ export const invoiceCopy = {
     lineTotal: "Tutar",
   },
   shippingItem: "Kargo ücreti",
+  couponItem: (code: string) => `İskonto — kupon ${code}`,
   netTotalLabel: "Mal / Hizmet Toplam Tutarı",
   kdvTotalLabel: (ratePercent: number) => `Hesaplanan KDV (%${ratePercent})`,
   grossTotalLabel: "Vergiler Dahil Toplam Tutar",

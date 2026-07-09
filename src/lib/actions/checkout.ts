@@ -7,8 +7,11 @@ import { z } from "zod";
 import { saveAddressFromCheckout } from "@/lib/address-book";
 import { auth } from "@/lib/auth";
 import { clearCartAfterOrder } from "@/lib/cart-clear";
+import { getCartIdentity } from "@/lib/cart-identity";
 import { loadCheckoutCart, type CheckoutCart } from "@/lib/checkout";
 import { checkoutCopy } from "@/lib/copy/checkout";
+import { couponCopy } from "@/lib/copy/coupons";
+import { checkCoupon } from "@/lib/coupons";
 import { sendOrderReceivedEmail } from "@/lib/order-emails";
 import { nextOrderNumber } from "@/lib/order-number";
 import { orderAccessToken } from "@/lib/order-token";
@@ -74,12 +77,21 @@ async function createPendingOrder(
       status: "PENDING_PAYMENT",
       subtotalCents: cart.subtotalCents,
       discountCents: cart.discountCents,
+      couponCode: cart.coupon?.code ?? null,
+      couponDiscountCents: cart.coupon?.discountCents ?? 0,
       shippingCents: cart.shippingCents,
       totalCents: cart.totalCents,
       kdvRatePercent: cart.settings.kdvRatePercent,
       shippingAddress,
       notes: input.notes || null,
       paymentProvider: provider,
+      ...(cart.coupon
+        ? {
+            couponRedemption: {
+              create: { couponId: cart.coupon.couponId, email: input.email.toLowerCase() },
+            },
+          }
+        : {}),
       items: {
         create: cart.lines.map((line) => ({
           variantId: line.variantId,
@@ -133,6 +145,31 @@ export async function placeOrder(
   if (method === "card" && !gateway) return { error: checkoutCopy.noPaymentMethod };
   if (method === "manual" && !cart.settings.manualPaymentEnabled)
     return { error: checkoutCopy.noPaymentMethod };
+
+  // R23: a stale coupon must never silently change the charged amount —
+  // clear it and let the customer see the summary without it before retrying.
+  const dropCoupon = async () => {
+    const identity = await getCartIdentity();
+    if (identity) await prisma.cart.updateMany({ where: identity, data: { couponCode: null } });
+    refresh();
+  };
+  if (cart.couponError) {
+    await dropCoupon();
+    return { error: couponCopy.invalidAtCheckout };
+  }
+  // Guests: the once-per-customer rule is only checkable now, with the
+  // submitted email (logged-in carts were already checked in loadCheckoutCart).
+  if (cart.coupon) {
+    const recheck = await checkCoupon(
+      cart.coupon.code,
+      cart.subtotalCents,
+      parsed.data.email.toLowerCase(),
+    );
+    if (!recheck.ok) {
+      await dropCoupon();
+      return { error: recheck.error };
+    }
+  }
 
   const session = await auth();
   const userId = session?.user?.id ?? null;

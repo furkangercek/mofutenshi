@@ -37,9 +37,15 @@ Build order chosen so each step is testable against real data:
 - [x] Product reviews/ratings — landed 2026-07-09: verified-buyer, pre-moderated, 1–5 stars + optional text (R21); PDP section + AggregateRating JSON-LD, admin moderation queue at `/admin/reviews`
 - [x] Automatic Best-Sellers ranking (real order data replaces the manual tag) — landed 2026-07-09: units sold last 90 days over PAID/FULFILLED (R20), homepage section + `/best-sellers` derived view, manual tag kept as cold-start filler
 
-## Phase 3+
+## Phase 3+ (started 2026-07-09, R22)
 
-- Coupon codes, wishlist, multi-admin roles, analytics dashboard, i18n/multi-currency, inventory reservation with timeout, dark theme
+- [x] Coupon codes — landed 2026-07-09: percent-only on top of sale pricing (R23), one per order; window/min/cap/once-per-customer controls; admin CRUD at `/admin/coupons`, checkout apply/remove, invoice iskonto line
+- [ ] Wishlist / favorites
+- [ ] Multi-admin roles
+- [ ] Analytics dashboard
+- [ ] i18n / multi-currency
+- [ ] Inventory reservation with timeout
+- [ ] Dark theme
 
 ## Out of scope (v1)
 

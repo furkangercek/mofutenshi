@@ -80,6 +80,8 @@ export default async function ConfirmationPage({
           }))}
           subtotalCents={order.subtotalCents}
           discountCents={order.discountCents}
+          couponCode={order.couponCode}
+          couponDiscountCents={order.couponDiscountCents}
           shippingCents={order.shippingCents}
           totalCents={order.totalCents}
         />

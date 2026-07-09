@@ -37,15 +37,17 @@ Entity reference for the Prisma schema, aligned to PRD v2 §6. Once `prisma/sche
 
 ### Commerce
 
-- **Cart** — `id, userId?, sessionToken?` (guest carts keyed by signed cookie; merged into user cart on login, quantities summed capped at stock).
+- **Cart** — `id, userId?, sessionToken?, couponCode?` (guest carts keyed by signed cookie; merged into user cart on login, quantities summed capped at stock; `couponCode` is a normalized string, never an FK — validated fresh on every read, R23).
 - **CartItem** — `id, cartId, variantId, quantity`; unique `(cartId, variantId)`.
-- **Order** — `id, orderNumber (human-readable, unique), userId?, email, status (PENDING_PAYMENT|PAID|CANCELLED|FULFILLED), subtotalCents, discountCents, shippingCents, totalCents, kdvRatePercent, shippingAddress (JSON), notes?, paymentProvider?, paymentRef?, placedAt, paidAt?, carrier?, trackingNumber?, shippedAt?`
+- **Order** — `id, orderNumber (human-readable, unique), userId?, email, status (PENDING_PAYMENT|PAID|CANCELLED|FULFILLED), subtotalCents, discountCents, couponCode?, couponDiscountCents, shippingCents, totalCents, kdvRatePercent, shippingAddress (JSON), notes?, paymentProvider?, paymentRef?, placedAt, paidAt?, carrier?, trackingNumber?, shippedAt?`
   - `PAID` orders are created only on a verified gateway success callback/webhook. `paidAt` is stamped by that transition and doubles as the invoice date.
   - `PENDING_PAYMENT` exists for the optional manual-payment fallback (admin toggle).
   - `kdvRatePercent` (R16) snapshots the Setting rate at order creation so invoices survive statutory rate changes.
   - Tracking fields (R13) are set when the admin marks the order FULFILLED; all optional.
   - Cancelling a PAID order restocks its items (R14); the refund itself is manual.
 - **OrderItem** — `id, orderId, variantId? (nullable — survives catalog deletion), productNameSnapshot, variantLabelSnapshot, unitPriceCents, quantity, lineTotalCents`
+- **Coupon** — `id, code (unique), percentOff, startsAt, endsAt, minSubtotalCents, maxRedemptions?, isActive` (R23: percent-only, applied on top of sale pricing, one per order).
+- **CouponRedemption** — `id, couponId, orderId (unique), email`; a redemption counts toward the total cap and the once-per-customer rule while its order is NOT CANCELLED — cancelling frees the slot. Orders snapshot `couponCode`/`couponDiscountCents`, so coupon deletion never mutates order history.
 - **Review** — `id, productId, userId, rating (1–5), text?, status (PENDING|APPROVED|REJECTED)`; unique `(productId, userId)` (R21: verified buyers only — eligibility checked against PAID/FULFILLED orders at write time; pre-moderated, editing resets to PENDING; only APPROVED reviews are public). Cascades on user or product delete.
 
 ### Settings

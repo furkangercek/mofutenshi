@@ -1,4 +1,5 @@
 import { checkoutCopy } from "@/lib/copy/checkout";
+import { couponCopy } from "@/lib/copy/coupons";
 import { formatKurus } from "@/lib/money";
 
 export type SummaryLine = {
@@ -13,12 +14,16 @@ export function OrderSummary({
   lines,
   subtotalCents,
   discountCents,
+  couponCode = null,
+  couponDiscountCents = 0,
   shippingCents,
   totalCents,
 }: {
   lines: SummaryLine[];
   subtotalCents: number;
   discountCents: number;
+  couponCode?: string | null;
+  couponDiscountCents?: number;
   shippingCents: number;
   totalCents: number;
 }) {
@@ -47,6 +52,12 @@ export function OrderSummary({
           <div className="text-muted flex justify-between">
             <dt>{checkoutCopy.discount}</dt>
             <dd>−{formatKurus(discountCents)}</dd>
+          </div>
+        )}
+        {couponCode && couponDiscountCents > 0 && (
+          <div className="text-muted flex justify-between">
+            <dt>{couponCopy.summaryLabel(couponCode)}</dt>
+            <dd>−{formatKurus(couponDiscountCents)}</dd>
           </div>
         )}
         <div className="flex justify-between">

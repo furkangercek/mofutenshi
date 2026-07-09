@@ -441,6 +441,8 @@ export type AdminOrderDetail = {
   status: "PENDING_PAYMENT" | "PAID" | "CANCELLED" | "FULFILLED";
   subtotalCents: number;
   discountCents: number;
+  couponCode: string | null;
+  couponDiscountCents: number;
   shippingCents: number;
   totalCents: number;
   shippingAddress: Record<string, string>;
@@ -471,6 +473,8 @@ export async function getAdminOrder(id: string): Promise<AdminOrderDetail | null
       status: true,
       subtotalCents: true,
       discountCents: true,
+      couponCode: true,
+      couponDiscountCents: true,
       shippingCents: true,
       totalCents: true,
       shippingAddress: true,

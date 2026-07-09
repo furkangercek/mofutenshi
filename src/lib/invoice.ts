@@ -60,6 +60,18 @@ export async function loadInvoiceData(orderId: string): Promise<InvoiceData | nu
     unitNetCents: netOf(item.unitPriceCents, rate),
     netCents: netOf(item.lineTotalCents, rate),
   }));
+  // R23: a coupon is an iskonto — shown as a negative line so the KDV base
+  // (and the derived footer KDV) drops with the discount, and the totals
+  // still reconcile to the charged amount.
+  if (order.couponCode && order.couponDiscountCents > 0) {
+    const discountNet = -netOf(order.couponDiscountCents, rate);
+    lines.push({
+      name: invoiceCopy.couponItem(order.couponCode),
+      quantity: 1,
+      unitNetCents: discountNet,
+      netCents: discountNet,
+    });
+  }
   if (order.shippingCents > 0) {
     lines.push({
       name: invoiceCopy.shippingItem,

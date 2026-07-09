@@ -5,6 +5,7 @@ import {
   OrderShippedEmail,
   type OrderEmailProps,
 } from "@/components/emails/order-emails";
+import { couponCopy } from "@/lib/copy/coupons";
 import { emailCopy } from "@/lib/copy/emails";
 import { invoiceCopy } from "@/lib/copy/invoice";
 import { emailEnabled, sendEmail, type EmailAttachment } from "@/lib/email";
@@ -57,6 +58,13 @@ async function loadOrderEmail(orderId: string): Promise<LoadedOrder | null> {
       })),
       subtotal: formatKurus(order.subtotalCents),
       discount: order.discountCents > 0 ? `−${formatKurus(order.discountCents)}` : null,
+      coupon:
+        order.couponCode && order.couponDiscountCents > 0
+          ? {
+              label: couponCopy.summaryLabel(order.couponCode),
+              amount: `−${formatKurus(order.couponDiscountCents)}`,
+            }
+          : null,
       shipping:
         order.shippingCents === 0 ? emailCopy.shippingFree : formatKurus(order.shippingCents),
       total: formatKurus(order.totalCents),
