@@ -33,7 +33,7 @@ Build order chosen so each step is testable against real data:
 - [x] Password reset via emailed link (R12, bundled with verification) — landed 2026-07-05
 - [x] Automatic invoicing (server-side PDF, KDV breakdown line) — landed 2026-07-06: invoice-styled PDF (R15, not a legal e-Arşiv), pdfkit + embedded Inter, KDV rate setting snapshotted per order (R16); paid-email attachment + account/admin downloads
 - [x] Full order management in admin (status transitions, fulfillment) — landed 2026-07-05: PAID→FULFILLED with optional tracking (R13) + shipped email, PAID→CANCELLED with restock (R14, refund manual)
-- [ ] Address book / saved addresses
+- [x] Address book / saved addresses — landed 2026-07-09: `/account/addresses` CRUD with default flag (max 10), checkout prefill selector + save-at-checkout checkbox (R19: prefill convenience, payment path untouched)
 - [ ] Product reviews/ratings
 - [ ] Automatic Best-Sellers ranking (real order data replaces the manual tag)
 

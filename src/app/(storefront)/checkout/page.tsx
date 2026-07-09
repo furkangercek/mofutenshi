@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { CheckoutForm } from "@/components/checkout/checkout-form";
 import { OrderSummary } from "@/components/checkout/order-summary";
 import { ButtonLink } from "@/components/ui/button";
+import { getAddressesForUser } from "@/lib/address-book";
+import { MAX_ADDRESSES_PER_USER } from "@/lib/addresses";
 import { auth } from "@/lib/auth";
 import { loadCheckoutCart } from "@/lib/checkout";
 import { checkoutCopy } from "@/lib/copy/checkout";
@@ -39,6 +41,7 @@ export default async function CheckoutPage({
 
   const session = await auth();
   const { cart } = result;
+  const savedAddresses = session?.user ? await getAddressesForUser(session.user.id) : [];
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
@@ -54,6 +57,8 @@ export default async function CheckoutPage({
           prefillEmail={session?.user?.email ?? undefined}
           cardEnabled={getCardGateway() !== null}
           manualEnabled={cart.settings.manualPaymentEnabled}
+          savedAddresses={savedAddresses}
+          canSaveAddress={!!session?.user && savedAddresses.length < MAX_ADDRESSES_PER_USER}
         />
         <div className="lg:order-last">
           <OrderSummary

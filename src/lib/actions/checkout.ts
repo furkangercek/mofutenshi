@@ -4,6 +4,7 @@ import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { z } from "zod";
+import { saveAddressFromCheckout } from "@/lib/address-book";
 import { auth } from "@/lib/auth";
 import { clearCartAfterOrder } from "@/lib/cart-clear";
 import { loadCheckoutCart, type CheckoutCart } from "@/lib/checkout";
@@ -46,13 +47,8 @@ function confirmationPath(orderId: string): string {
   return `/checkout/confirmation?order=${orderId}&token=${orderAccessToken(orderId)}`;
 }
 
-async function createPendingOrder(
-  cart: CheckoutCart,
-  input: z.infer<typeof checkoutSchema>,
-  userId: string | null,
-  provider: string,
-) {
-  const shippingAddress: ShippingAddress = {
+function toShippingAddress(input: z.infer<typeof checkoutSchema>): ShippingAddress {
+  return {
     fullName: input.fullName,
     phone: input.phone,
     address: input.address,
@@ -60,6 +56,15 @@ async function createPendingOrder(
     district: input.district,
     ...(input.postalCode ? { postalCode: input.postalCode } : {}),
   };
+}
+
+async function createPendingOrder(
+  cart: CheckoutCart,
+  input: z.infer<typeof checkoutSchema>,
+  userId: string | null,
+  provider: string,
+) {
+  const shippingAddress = toShippingAddress(input);
 
   return prisma.order.create({
     data: {
@@ -132,6 +137,10 @@ export async function placeOrder(
   const session = await auth();
   const userId = session?.user?.id ?? null;
 
+  // R19 save-at-checkout: best-effort and independent of the payment outcome.
+  if (userId && formData.get("saveAddress") === "on")
+    await saveAddressFromCheckout(userId, toShippingAddress(parsed.data));
+
   if (method === "manual") {
     const order = await createPendingOrder(cart, parsed.data, userId, "manual");
     await clearCartAfterOrder(userId);
@@ -150,14 +159,7 @@ export async function placeOrder(
         buyerIp: ip,
         subtotalCents: cart.subtotalCents,
         totalCents: cart.totalCents,
-        shippingAddress: {
-          fullName: parsed.data.fullName,
-          phone: parsed.data.phone,
-          address: parsed.data.address,
-          city: parsed.data.city,
-          district: parsed.data.district,
-          ...(parsed.data.postalCode ? { postalCode: parsed.data.postalCode } : {}),
-        },
+        shippingAddress: toShippingAddress(parsed.data),
         items: cart.lines.map((line) => ({
           variantId: line.variantId,
           name: line.variantLabel ? `${line.productName} (${line.variantLabel})` : line.productName,

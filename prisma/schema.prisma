@@ -25,10 +25,32 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
-  orders   Order[]
-  cart     Cart?
+  accounts  Account[]
+  sessions  Session[]
+  orders    Order[]
+  cart      Cart?
+  addresses Address[]
+}
+
+// R19: saved addresses are a checkout prefill convenience — orders keep
+// storing the shippingAddress JSON snapshot, never a relation to this table.
+model Address {
+  id         String   @id @default(cuid())
+  userId     String
+  title      String
+  fullName   String
+  phone      String
+  address    String
+  city       String
+  district   String
+  postalCode String?
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Account {

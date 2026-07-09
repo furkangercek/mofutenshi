@@ -3,10 +3,12 @@ import { redirect } from "next/navigation";
 import { ButtonLink } from "@/components/ui/button";
 import { logoutAction } from "@/lib/actions/auth";
 import { auth } from "@/lib/auth";
+import { addressesCopy } from "@/lib/copy/addresses";
 import { authCopy } from "@/lib/copy/auth";
 import { accountOrdersCopy } from "@/lib/copy/checkout";
 import { formatKurus } from "@/lib/money";
 import { getOrdersForUser } from "@/lib/queries/orders";
+import { textLinkClass } from "@/components/ui/link";
 
 const dateFormatter = new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium" });
 
@@ -55,10 +57,7 @@ export default async function AccountPage() {
                     </span>
                   ) : null}
                   {order.status === "PAID" || order.status === "FULFILLED" ? (
-                    <a
-                      href={`/api/orders/${order.id}/invoice`}
-                      className="text-muted hover:text-ink inline-flex min-h-11 items-center text-sm underline underline-offset-4"
-                    >
+                    <a href={`/api/orders/${order.id}/invoice`} className={textLinkClass}>
                       {accountOrdersCopy.invoiceLink}
                     </a>
                   ) : null}
@@ -70,6 +69,14 @@ export default async function AccountPage() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="border-border mt-8 rounded-lg border p-6">
+        <h2 className="font-display text-xl">{addressesCopy.listTitle}</h2>
+        <p className="text-muted mt-2 text-sm">{addressesCopy.listLead}</p>
+        <ButtonLink href="/account/addresses" className="mt-4">
+          {addressesCopy.manageCta}
+        </ButtonLink>
       </section>
 
       <form action={logoutAction} className="mt-8">

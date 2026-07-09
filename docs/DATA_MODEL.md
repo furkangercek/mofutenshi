@@ -55,6 +55,7 @@ Entity reference for the Prisma schema, aligned to PRD v2 §6. Once `prisma/sche
 
 - **User** — `id, email (unique), passwordHash?, name, role (CUSTOMER|ADMIN), emailVerified?` (named to match the stock Auth.js Prisma adapter)
 - **Account / Session / VerificationToken** — standard Auth.js Prisma adapter tables.
+- **Address** — `id, userId, title, fullName, phone, address, city, district, postalCode?, isDefault` (R19: checkout prefill convenience, max 10 per user; orders keep snapshotting `shippingAddress` JSON — never a relation to this table). Cascades on user delete.
 
 ## Indexes
 
