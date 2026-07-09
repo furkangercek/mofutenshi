@@ -136,6 +136,50 @@ export async function getCatalog(): Promise<ProductCardData[]> {
     });
 }
 
+// R20 automatic best-sellers: rank by units sold in the trailing window over
+// PAID/FULFILLED orders (CANCELLED restocks drop out by status). Snapshots
+// whose variant was deleted (variantId SetNull) can no longer be attributed
+// to a product and are excluded. Tagged "catalog" — every paid/cancelled
+// transition already invalidates it.
+const BEST_SELLER_WINDOW_DAYS = 90;
+
+export async function getBestSellerRanking(): Promise<string[]> {
+  "use cache";
+  cacheTag("catalog");
+  cacheLife({ revalidate: 300, expire: 3600 });
+
+  const since = new Date(Date.now() - BEST_SELLER_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  const grouped = await prisma.orderItem.groupBy({
+    by: ["variantId"],
+    where: {
+      variantId: { not: null },
+      order: { status: { in: ["PAID", "FULFILLED"] }, placedAt: { gte: since } },
+    },
+    _sum: { quantity: true, lineTotalCents: true },
+  });
+  if (grouped.length === 0) return [];
+
+  const variants = await prisma.variant.findMany({
+    where: { id: { in: grouped.map((g) => g.variantId).filter((id) => id !== null) } },
+    select: { id: true, productId: true },
+  });
+  const productByVariant = new Map(variants.map((v) => [v.id, v.productId]));
+
+  const byProduct = new Map<string, { units: number; revenueCents: number }>();
+  for (const group of grouped) {
+    const productId = group.variantId ? productByVariant.get(group.variantId) : undefined;
+    if (!productId) continue;
+    const acc = byProduct.get(productId) ?? { units: 0, revenueCents: 0 };
+    acc.units += group._sum.quantity ?? 0;
+    acc.revenueCents += group._sum.lineTotalCents ?? 0;
+    byProduct.set(productId, acc);
+  }
+
+  return [...byProduct.entries()]
+    .sort(([, a], [, b]) => b.units - a.units || b.revenueCents - a.revenueCents)
+    .map(([productId]) => productId);
+}
+
 export async function getProductDetail(slug: string): Promise<ProductDetailData | null> {
   "use cache";
   cacheTag("catalog");

@@ -2,7 +2,7 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-09 (Phase 2: address book landed)
+**Last updated:** 2026-07-09 (Phase 2: address book + automatic best-sellers landed)
 
 ## Where we are
 
@@ -12,9 +12,15 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Code side: continue Phase 2 per R18 order — next item is automatic best-sellers, then product reviews (reviews need owner decisions on gating/moderation first).**
+**Code side: continue Phase 2 per R18 order — last remaining item is product reviews, which needs owner decisions first (purchase gating? moderation? ratings-only or text?). Ask before building.**
 
 **Owner side (Phase 1 step 10, unchanged):** VPS (see R10 — friend's box, confirm root/ports first), domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production keys, Google OAuth credentials, Resend API key + sender domain, fresh production `AUTH_SECRET`. (The step-by-step `docs/LAUNCH_GUIDE.md` was removed by the owner on 2026-07-05 with `docs/ADMIN_GUIDE.md` — `docs/DEPLOY.md` still covers Coolify → Cloudflare → smoke → backup.) After deploy, close out the env-gated verification backlog: live R2 upload, live Resend send.
+
+## Phase 2 — automatic best-sellers notes (landed 2026-07-09)
+
+- **R20**: rank = Σ units sold per product, trailing 90 days, orders in PAID/FULFILLED (CANCELLED drops out by status — cancel-paid restock therefore also removes rank credit), tie-break revenue. `getBestSellerRanking()` in `src/lib/queries/catalog.ts` — `"use cache"` + `cacheTag("catalog")`, so paid/cancel transitions already invalidate it (admin `updateTag`, iyzico callback `revalidateTag max`). OrderItems whose variant was deleted (SetNull) are unattributable and excluded.
+- **Surfaces**: homepage "Çok Satanlar" (ranked first, manual `best-seller` tag pads the tail for cold start — `selectBestSellers()` in `src/lib/best-sellers.ts`) now links to the new `/best-sellers` derived page (rank order, plain card grid — deliberately NOT the filter/sort listing machinery, rank is not a listing sort). Sitemap + canonical + brand-suffixed Turkish metadata done; nav unchanged.
+- Wire-verified on the prod build: cold start (empty ranking → filler only), full flip (miku x1 + angel x2 manual orders admin-confirmed → page and homepage reorder to angel>miku with no filler duplicate), query params ignored, cancel-paid removes rank credit step by step and falls back to filler, stock restored exactly (5/10) after both cancels. Test orders `MT-000050`/`MT-000051` left CANCELLED.
 
 ## Phase 2 — address book notes (landed 2026-07-09)
 

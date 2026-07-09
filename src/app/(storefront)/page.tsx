@@ -3,10 +3,11 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ProductRow } from "@/components/product/product-row";
 import { ButtonLink } from "@/components/ui/button";
+import { selectBestSellers } from "@/lib/best-sellers";
 import { toCardView } from "@/lib/card-view";
 import { homeSectionCopy } from "@/lib/copy/catalog";
 import { homeCopy, siteCopy } from "@/lib/copy/common";
-import { getCatalog } from "@/lib/queries/catalog";
+import { getBestSellerRanking, getCatalog } from "@/lib/queries/catalog";
 import { getNavTags } from "@/lib/queries/tags";
 
 // Pastel gradient stand-ins for tile photography — swap for next/image
@@ -25,17 +26,19 @@ export const metadata: Metadata = {
 const SECTION_SIZE = 4;
 
 export default async function Home() {
-  const [tags, catalog] = await Promise.all([getNavTags(), getCatalog()]);
+  const [tags, catalog, bestSellerRanking] = await Promise.all([
+    getNavTags(),
+    getCatalog(),
+    getBestSellerRanking(),
+  ]);
 
   // All sections are data-driven (PRD US-01): sale schedule, createdAt,
-  // best-seller tag, isFeatured flag.
+  // order-data ranking (R20, manual tag as cold-start filler), isFeatured.
   const onSale = catalog.filter((p) => p.onSale).slice(0, SECTION_SIZE);
   const newArrivals = [...catalog]
     .sort((a, b) => b.createdAtMs - a.createdAtMs)
     .slice(0, SECTION_SIZE);
-  const bestSellers = catalog
-    .filter((p) => p.tagSlugs.includes("best-seller"))
-    .slice(0, SECTION_SIZE);
+  const bestSellers = selectBestSellers(catalog, bestSellerRanking, SECTION_SIZE);
   const featured = catalog.filter((p) => p.isFeatured).slice(0, SECTION_SIZE);
 
   return (
@@ -76,7 +79,7 @@ export default async function Home() {
       />
       <ProductRow
         title={homeSectionCopy.bestSellers}
-        href="/t/best-seller"
+        href="/best-sellers"
         products={bestSellers.map(toCardView)}
       />
       <ProductRow

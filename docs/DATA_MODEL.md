@@ -11,7 +11,7 @@ Entity reference for the Prisma schema, aligned to PRD v2 §6. Once `prisma/sche
 5. One cart line per (cart, variant): unique composite key, quantity increments, capped at stock.
 6. Stock decrements ONLY on verified successful payment (`PAID`) — never on order creation, never on client-side success alone.
 7. Navigation is tags, not categories: products ↔ tags are many-to-many; a product tagged with a child tag also appears on its parent tag's page.
-8. Sales, New Arrivals, and (Phase 2) automatic Best Sellers are DERIVED views — never tags the owner maintains. Manual v1 exception: `best-seller` is a flat tag.
+8. Sales, New Arrivals, and automatic Best Sellers (landed 2026-07-09, R20: units sold in trailing 90 days over PAID/FULFILLED orders) are DERIVED views — never tags the owner maintains. The `best-seller` flat tag survives only as cold-start filler until real sales exist.
 
 ## Entities
 

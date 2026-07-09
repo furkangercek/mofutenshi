@@ -141,7 +141,7 @@ Marketplace/multi-vendor, subscriptions, digital-goods delivery, marketing autom
 ### 3.2 Special cases
 
 - **Sales is NOT a tag.** It is an automatic view powered by the scheduled-sales system (Section 7). Any product on an active sale appears in the Sales view automatically — the owner never manually tags/untags for sales. Route: `/sales`.
-- **Best Sellers is a manual flat tag in v1.** The owner tags products they want featured. In Phase 2 this becomes automatic (ranked by real order data).
+- **Best Sellers is a manual flat tag in v1.** The owner tags products they want featured. In Phase 2 this becomes automatic (ranked by real order data). `LANDED 2026-07-09 (R20):` automatic ranking (units sold, trailing 90 days, PAID/FULFILLED) drives the homepage section and the `/best-sellers` derived view; the manual tag remains only as cold-start filler.
 - **New Arrivals** is an automatic view sorted by `Product.createdAt` — not a tag.
 
 ### 3.3 Seed tags (starting set)
@@ -214,8 +214,8 @@ AC:
 
 - Above the fold on desktop, and after minimal scroll on mobile, the homepage shows a hero/featured block plus clearly labeled "On Sale," "New Arrivals," and "Best Sellers" sections.
 - On-sale items render a sale badge and both original (strikethrough) and discounted price.
-- Each section links to its full view (`/sales`, `/products?sort=newest`, `/t/best-seller`).
-- Sections are data-driven (sale schedule, `createdAt`, `best-seller` tag), not hardcoded.
+- Each section links to its full view (`/sales`, `/products?sort=newest`, `/best-sellers` since R20 — was `/t/best-seller` in v1).
+- Sections are data-driven (sale schedule, `createdAt`, order-data ranking since R20 — was the `best-seller` tag in v1), not hardcoded.
 - LCP ≤ 2.5s on mid-tier mobile over 4G.
 
 **US-02 — Tag navigation from home**
@@ -761,4 +761,4 @@ A product "Miku Nendoroid" is tagged: `anime` (child of `figures`), `best-seller
 - Appears on `/t/figures` (parent of `anime`).
 - Appears on `/t/best-seller`.
 - If put on an active sale, also appears on `/sales` automatically (not via a tag).
-- Appears in homepage "Best Sellers" (driven by the `best-seller` tag) and, if recently created, in "New Arrivals" (driven by `createdAt`).
+- Appears in homepage "Best Sellers" (driven by order-data ranking since R20; the `best-seller` tag now only fills the section before real sales exist) and, if recently created, in "New Arrivals" (driven by `createdAt`).

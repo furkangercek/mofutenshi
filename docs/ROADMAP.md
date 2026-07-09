@@ -35,7 +35,7 @@ Build order chosen so each step is testable against real data:
 - [x] Full order management in admin (status transitions, fulfillment) — landed 2026-07-05: PAID→FULFILLED with optional tracking (R13) + shipped email, PAID→CANCELLED with restock (R14, refund manual)
 - [x] Address book / saved addresses — landed 2026-07-09: `/account/addresses` CRUD with default flag (max 10), checkout prefill selector + save-at-checkout checkbox (R19: prefill convenience, payment path untouched)
 - [ ] Product reviews/ratings
-- [ ] Automatic Best-Sellers ranking (real order data replaces the manual tag)
+- [x] Automatic Best-Sellers ranking (real order data replaces the manual tag) — landed 2026-07-09: units sold last 90 days over PAID/FULFILLED (R20), homepage section + `/best-sellers` derived view, manual tag kept as cold-start filler
 
 ## Phase 3+
 

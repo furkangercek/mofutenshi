@@ -2,6 +2,11 @@ export const listingCopy = {
   allProductsTitle: "Tüm Ürünler",
   salesTitle: "İndirimler",
   salesDescription: "Şu anda indirimde olan tüm ürünler — kampanyalar otomatik güncellenir.",
+  bestSellersTitle: "Çok Satanlar",
+  bestSellersDescription:
+    "En çok tercih edilen ürünler — sipariş verilerine göre otomatik sıralanır.",
+  bestSellersEmpty: "Henüz çok satan ürün yok. Koleksiyonlara göz atın.",
+  bestSellersEmptyCta: "Alışverişe başla",
   searchTitle: (q: string) => `"${q}" için sonuçlar`,
   tagDescription: (name: string) =>
     `${name} koleksiyonu — MofuTenshi atölyesinden el yapımı sanat ürünleri.`,
