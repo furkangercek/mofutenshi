@@ -9,6 +9,7 @@ export const adminCopy = {
     sales: "İndirimler",
     inventory: "Stok",
     orders: "Siparişler",
+    reviews: "Yorumlar",
     settings: "Ayarlar",
   },
   common: {

@@ -34,7 +34,7 @@ Build order chosen so each step is testable against real data:
 - [x] Automatic invoicing (server-side PDF, KDV breakdown line) — landed 2026-07-06: invoice-styled PDF (R15, not a legal e-Arşiv), pdfkit + embedded Inter, KDV rate setting snapshotted per order (R16); paid-email attachment + account/admin downloads
 - [x] Full order management in admin (status transitions, fulfillment) — landed 2026-07-05: PAID→FULFILLED with optional tracking (R13) + shipped email, PAID→CANCELLED with restock (R14, refund manual)
 - [x] Address book / saved addresses — landed 2026-07-09: `/account/addresses` CRUD with default flag (max 10), checkout prefill selector + save-at-checkout checkbox (R19: prefill convenience, payment path untouched)
-- [ ] Product reviews/ratings
+- [x] Product reviews/ratings — landed 2026-07-09: verified-buyer, pre-moderated, 1–5 stars + optional text (R21); PDP section + AggregateRating JSON-LD, admin moderation queue at `/admin/reviews`
 - [x] Automatic Best-Sellers ranking (real order data replaces the manual tag) — landed 2026-07-09: units sold last 90 days over PAID/FULFILLED (R20), homepage section + `/best-sellers` derived view, manual tag kept as cold-start filler
 
 ## Phase 3+

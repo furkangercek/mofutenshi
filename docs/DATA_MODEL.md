@@ -46,6 +46,7 @@ Entity reference for the Prisma schema, aligned to PRD v2 §6. Once `prisma/sche
   - Tracking fields (R13) are set when the admin marks the order FULFILLED; all optional.
   - Cancelling a PAID order restocks its items (R14); the refund itself is manual.
 - **OrderItem** — `id, orderId, variantId? (nullable — survives catalog deletion), productNameSnapshot, variantLabelSnapshot, unitPriceCents, quantity, lineTotalCents`
+- **Review** — `id, productId, userId, rating (1–5), text?, status (PENDING|APPROVED|REJECTED)`; unique `(productId, userId)` (R21: verified buyers only — eligibility checked against PAID/FULFILLED orders at write time; pre-moderated, editing resets to PENDING; only APPROVED reviews are public). Cascades on user or product delete.
 
 ### Settings
 

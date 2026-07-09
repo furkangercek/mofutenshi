@@ -30,6 +30,7 @@ model User {
   orders    Order[]
   cart      Cart?
   addresses Address[]
+  reviews   Review[]
 }
 
 // R19: saved addresses are a checkout prefill convenience — orders keep
@@ -143,7 +144,34 @@ model Product {
   variants    Variant[]
   tags        ProductTag[]
   sales       SaleProduct[]
+  reviews     Review[]
 
+  @@index([status, createdAt])
+}
+
+// R21: verified-buyer reviews, pre-moderated. One review per product per
+// customer; editing resets status to PENDING for re-approval.
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Review {
+  id        String       @id @default(cuid())
+  productId String
+  userId    String
+  rating    Int
+  text      String?
+  status    ReviewStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@index([productId, status])
   @@index([status, createdAt])
 }
 

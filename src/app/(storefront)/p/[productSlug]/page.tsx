@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ProductReviews } from "@/components/product/product-reviews";
 import { ProductView } from "@/components/product/product-view";
 import { siteCopy } from "@/lib/copy/common";
 import { getProductDetail, getSitemapData } from "@/lib/queries/catalog";
+import { getProductReviews, type ProductReviewData } from "@/lib/queries/reviews";
 
 type Props = { params: Promise<{ productSlug: string }> };
 
@@ -33,7 +35,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 // schema.org Product/Offer — price is the EFFECTIVE (sale-aware) price in
 // decimal lira (JSON-LD wants decimal units; view-layer conversion only).
-function jsonLd(product: NonNullable<Awaited<ReturnType<typeof getProductDetail>>>) {
+function jsonLd(
+  product: NonNullable<Awaited<ReturnType<typeof getProductDetail>>>,
+  reviewData: ProductReviewData,
+) {
   const prices = product.variants.map((variant) => variant.effectiveCents);
   const low = Math.min(...prices);
   const high = Math.max(...prices);
@@ -46,6 +51,16 @@ function jsonLd(product: NonNullable<Awaited<ReturnType<typeof getProductDetail>
     name: product.name,
     description: product.description,
     ...(image ? { image } : {}),
+    ...(reviewData.count > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            // schema.org wants machine-format decimals, not tr-TR commas.
+            ratingValue: reviewData.average.toFixed(1),
+            reviewCount: reviewData.count,
+          },
+        }
+      : {}),
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: "TRY",
@@ -62,13 +77,16 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProductDetail(productSlug);
   if (!product) notFound();
 
+  const reviewData = await getProductReviews(product.id);
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(product)) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(product, reviewData)) }}
       />
       <ProductView product={product} />
+      <ProductReviews productId={product.id} productSlug={product.slug} data={reviewData} />
     </div>
   );
 }

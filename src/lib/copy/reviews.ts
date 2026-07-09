@@ -1,0 +1,41 @@
+export const reviewsCopy = {
+  heading: "Değerlendirmeler",
+  averageLabel: (average: string, count: number) =>
+    `5 üzerinden ${average} — ${count} değerlendirme`,
+  starsLabel: (rating: number) => `5 üzerinden ${rating} yıldız`,
+  empty: "Bu ürün için henüz değerlendirme yok.",
+  anonymousName: "MofuTenshi müşterisi",
+  guestHint: "Satın aldığınız ürünleri giriş yaparak değerlendirebilirsiniz.",
+  guestLoginCta: "Giriş yap",
+  notEligible: "Bu ürünü satın alanlar değerlendirme yazabilir.",
+  formHeading: "Ürünü değerlendirin",
+  editFormHeading: "Değerlendirmenizi güncelleyin",
+  pendingNote: "Değerlendirmeniz onay bekliyor. Güncellerseniz yeniden onaya gönderilir.",
+  approvedNote: "Değerlendirmeniz yayında. Güncellerseniz yeniden onaya gönderilir.",
+  rejectedNote: "Değerlendirmeniz yayınlanmadı. Güncelleyip yeniden gönderebilirsiniz.",
+  ratingLegend: "Puanınız",
+  ratingOption: (rating: number) => `${rating} yıldız`,
+  textLabel: "Yorumunuz (isteğe bağlı)",
+  submit: "Gönder",
+  submitting: "Gönderiliyor…",
+  submitted: "Değerlendirmeniz alındı. Onaylandıktan sonra yayınlanacak.",
+  invalidInput: "Lütfen bilgileri kontrol edin.",
+  ratingRequired: "Bir puan seçin.",
+  textTooLong: "Yorum en fazla 1000 karakter olabilir.",
+  notAllowed: "Bu ürünü değerlendirme yetkiniz yok.",
+  tooManyAttempts: "Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.",
+};
+
+export const adminReviewsCopy = {
+  title: "Yorumlar",
+  empty: "Henüz değerlendirme yok.",
+  pendingHeading: "Onay bekleyenler",
+  decidedHeading: "Sonuçlananlar",
+  statusLabels: {
+    PENDING: "Onay bekliyor",
+    APPROVED: "Yayında",
+    REJECTED: "Reddedildi",
+  } as const,
+  approve: "Onayla",
+  reject: "Reddet",
+};
