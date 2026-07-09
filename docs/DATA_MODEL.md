@@ -48,6 +48,7 @@ Entity reference for the Prisma schema, aligned to PRD v2 §6. Once `prisma/sche
 - **OrderItem** — `id, orderId, variantId? (nullable — survives catalog deletion), productNameSnapshot, variantLabelSnapshot, unitPriceCents, quantity, lineTotalCents`
 - **Coupon** — `id, code (unique), percentOff, startsAt, endsAt, minSubtotalCents, maxRedemptions?, isActive` (R23: percent-only, applied on top of sale pricing, one per order).
 - **CouponRedemption** — `id, couponId, orderId (unique), email`; a redemption counts toward the total cap and the once-per-customer rule while its order is NOT CANCELLED — cancelling frees the slot. Orders snapshot `couponCode`/`couponDiscountCents`, so coupon deletion never mutates order history.
+- **WishlistItem** — `id, userId, productId`; unique `(userId, productId)` (R24: logged-in, product-level favorites; cascades on user or product delete).
 - **Review** — `id, productId, userId, rating (1–5), text?, status (PENDING|APPROVED|REJECTED)`; unique `(productId, userId)` (R21: verified buyers only — eligibility checked against PAID/FULFILLED orders at write time; pre-moderated, editing resets to PENDING; only APPROVED reviews are public). Cascades on user or product delete.
 
 ### Settings

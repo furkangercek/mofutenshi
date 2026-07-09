@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { FavoriteToggle } from "@/components/product/favorite-toggle";
 import { ProductReviews } from "@/components/product/product-reviews";
 import { ProductView } from "@/components/product/product-view";
 import { siteCopy } from "@/lib/copy/common";
@@ -85,7 +87,14 @@ export default async function ProductPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(product, reviewData)) }}
       />
-      <ProductView product={product} />
+      <ProductView
+        product={product}
+        favoriteSlot={
+          <Suspense fallback={null}>
+            <FavoriteToggle productId={product.id} productSlug={product.slug} />
+          </Suspense>
+        }
+      />
       <ProductReviews productId={product.id} productSlug={product.slug} data={reviewData} />
     </div>
   );

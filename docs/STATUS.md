@@ -2,7 +2,7 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-09 (Phase 2 COMPLETE + Phase 3 started: coupon codes landed)
+**Last updated:** 2026-07-09 (Phase 2 COMPLETE; Phase 3: coupon codes + wishlist landed)
 
 ## Where we are
 
@@ -12,9 +12,15 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Code side: Phase 2 COMPLETE; Phase 3 started with coupon codes (R22, landed 2026-07-09). Remaining Phase 3 items: wishlist, multi-admin, analytics dashboard, i18n, inventory reservation, dark theme — owner picks (2026-07-09 standing delegation: agent may proceed on its own judgment and report).** The launch blocker remains owner provisioning (below).
+**Code side: Phase 3 coupon codes + wishlist landed 2026-07-09. Remaining Phase 3 items are all blocked or owner-shaped: dark theme (designer), analytics dashboard (wants real order data post-launch), i18n / inventory-reservation (big architecture commitments — discuss first), multi-admin (unneeded for a single owner). Recommendation: STOP building features; the launch blocker is owner provisioning (below).**
 
 **Owner side (Phase 1 step 10, unchanged):** VPS (see R10 — friend's box, confirm root/ports first), domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production keys, Google OAuth credentials, Resend API key + sender domain, fresh production `AUTH_SECRET`. (The step-by-step `docs/LAUNCH_GUIDE.md` was removed by the owner on 2026-07-05 with `docs/ADMIN_GUIDE.md` — `docs/DEPLOY.md` still covers Coolify → Cloudflare → smoke → backup.) After deploy, close out the env-gated verification backlog: live R2 upload, live Resend send.
+
+## Phase 3 — wishlist notes (landed 2026-07-09)
+
+- **R24**: logged-in, product-level favorites (`WishlistItem`, unique user+product, migration `20260709…add_wishlist`). PDP gets a heart toggle streamed through the session Suspense hole and passed INTO the client `ProductView` as a `favoriteSlot` server-component prop (pattern: server slot inside client component — keeps the PDP prerendered). Guests see a login link. Toggle is a plain form post (`toggleWishlistAction`: auth + zod + PUBLISHED check; replaying the same post just flips back by design).
+- `/account/favorites`: fresh per-user ids joined against the cached catalog snapshot — unpublished/deleted products drop out silently; per-card remove; account page section links to it. **Deliberately NO hearts on listing cards** (per-user state on cached/PPR listing surfaces).
+- Wire-verified on the prod build: guest hint + no form, add/remove flip from PDP and from the list page, anonymous forged toggle no-op, bogus productId no-op, anonymous page leaks nothing. Test data: miku favorited by `customer@test.local`.
 
 ## Phase 3 — coupon codes notes (landed 2026-07-09)
 

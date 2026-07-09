@@ -6,6 +6,7 @@ import { auth } from "@/lib/auth";
 import { addressesCopy } from "@/lib/copy/addresses";
 import { authCopy } from "@/lib/copy/auth";
 import { accountOrdersCopy } from "@/lib/copy/checkout";
+import { wishlistCopy } from "@/lib/copy/wishlist";
 import { formatKurus } from "@/lib/money";
 import { getOrdersForUser } from "@/lib/queries/orders";
 import { textLinkClass } from "@/components/ui/link";
@@ -76,6 +77,14 @@ export default async function AccountPage() {
         <p className="text-muted mt-2 text-sm">{addressesCopy.listLead}</p>
         <ButtonLink href="/account/addresses" className="mt-4">
           {addressesCopy.manageCta}
+        </ButtonLink>
+      </section>
+
+      <section className="border-border mt-8 rounded-lg border p-6">
+        <h2 className="font-display text-xl">{wishlistCopy.pageTitle}</h2>
+        <p className="text-muted mt-2 text-sm">{wishlistCopy.accountSectionLead}</p>
+        <ButtonLink href="/account/favorites" className="mt-4">
+          {wishlistCopy.accountCta}
         </ButtonLink>
       </section>
 

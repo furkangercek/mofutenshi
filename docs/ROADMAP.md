@@ -40,7 +40,7 @@ Build order chosen so each step is testable against real data:
 ## Phase 3+ (started 2026-07-09, R22)
 
 - [x] Coupon codes — landed 2026-07-09: percent-only on top of sale pricing (R23), one per order; window/min/cap/once-per-customer controls; admin CRUD at `/admin/coupons`, checkout apply/remove, invoice iskonto line
-- [ ] Wishlist / favorites
+- [x] Wishlist / favorites — landed 2026-07-09: logged-in product-level favorites (R24), PDP toggle + `/account/favorites`; no hearts on listing cards (cached surfaces)
 - [ ] Multi-admin roles
 - [ ] Analytics dashboard
 - [ ] i18n / multi-currency

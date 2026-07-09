@@ -16,7 +16,13 @@ function defaultVariant(variants: Variant[]): Variant {
   return pool.reduce((min, v) => (v.effectiveCents < min.effectiveCents ? v : min));
 }
 
-export function ProductView({ product }: { product: ProductDetailData }) {
+export function ProductView({
+  product,
+  favoriteSlot,
+}: {
+  product: ProductDetailData;
+  favoriteSlot?: React.ReactNode;
+}) {
   const initial = useMemo(() => defaultVariant(product.variants), [product.variants]);
   const [selected, setSelected] = useState<Record<string, string>>(() => {
     const map: Record<string, string> = {};
@@ -125,6 +131,7 @@ export function ProductView({ product }: { product: ProductDetailData }) {
           variantId={selectedVariant?.id}
           disabled={selectedVariant === undefined || outOfStock}
         />
+        {favoriteSlot}
 
         <p className="text-muted leading-relaxed whitespace-pre-line">{product.description}</p>
       </div>
