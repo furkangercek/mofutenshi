@@ -374,7 +374,7 @@ AC:
 - Inventory view lists variants with current stock, product, and low-stock highlight below the configurable threshold.
 - Stock editable inline.
 - Out-of-stock variants are non-purchasable on the storefront.
-- `NOTE (decrement timing — deferred detail):` Stock decrements on successful payment (`PAID`) in v1. Reservation-on-add-to-cart with timeout is Phase 3.
+- `NOTE (decrement timing — deferred detail):` Stock decrements on successful payment (`PAID`) in v1. Reservation with timeout is Phase 3 — **revised by R26 (2026-07-11)**: reservations start at order creation (not add-to-cart), and made-to-order variants ("stok takibi" off) have no stock count at all.
 
 ### 5.10 Admin — dashboard & settings
 
