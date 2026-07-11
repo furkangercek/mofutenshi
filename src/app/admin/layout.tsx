@@ -21,6 +21,7 @@ const navItems: AdminNavItem[] = [
   { href: "/admin/coupons", label: adminCopy.nav.coupons },
   { href: "/admin/inventory", label: adminCopy.nav.inventory },
   { href: "/admin/orders", label: adminCopy.nav.orders },
+  { href: "/admin/analytics", label: adminCopy.nav.analytics },
   { href: "/admin/reviews", label: adminCopy.nav.reviews },
   { href: "/admin/settings", label: adminCopy.nav.settings },
 ];

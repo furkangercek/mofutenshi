@@ -2,7 +2,7 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-09 (Phase 2 COMPLETE; Phase 3: coupon codes + wishlist landed)
+**Last updated:** 2026-07-11 (Phase 3: analytics dashboard landed)
 
 ## Where we are
 
@@ -12,9 +12,16 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Code side: Phase 3 coupon codes + wishlist landed 2026-07-09. Remaining Phase 3 items are all blocked or owner-shaped: dark theme (designer), analytics dashboard (wants real order data post-launch), i18n / inventory-reservation (big architecture commitments — discuss first), multi-admin (unneeded for a single owner). Recommendation: STOP building features; the launch blocker is owner provisioning (below).**
+**Code side: Phase 3 analytics dashboard landed 2026-07-11 (R25, owner picked it over the parked items). Remaining Phase 3 items are all blocked or owner-shaped: dark theme (designer), i18n / inventory-reservation (big architecture commitments — discuss first), multi-admin (unneeded for a single owner). Recommendation: STOP building features; the launch blocker is owner provisioning (below).**
 
 **Owner side (Phase 1 step 10, unchanged):** VPS (see R10 — friend's box, confirm root/ports first), domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production keys, Google OAuth credentials, Resend API key + sender domain, fresh production `AUTH_SECRET`. (The step-by-step `docs/LAUNCH_GUIDE.md` was removed by the owner on 2026-07-05 with `docs/ADMIN_GUIDE.md` — `docs/DEPLOY.md` still covers Coolify → Cloudflare → smoke → backup.) After deploy, close out the env-gated verification backlog: live R2 upload, live Resend send.
+
+## Phase 3 — analytics dashboard notes (landed 2026-07-11)
+
+- **R25**: `/admin/analytics` (nav "Raporlar"), read-only, no schema change. Period-scoped 7/30/90 gün via `?period=` SSR link chips (bogus values fall back to 30); all queries fresh (no `"use cache"`) in `src/lib/queries/admin-analytics.ts`.
+- **Conventions**: revenue = charged `totalCents` (post-coupon, shipping included) of PAID/FULFILLED orders windowed by `placedAt` — same status/timestamp convention as R20 best-sellers so the surfaces agree. Days bucket in Istanbul time (`+03:00` fixed). AOV floors in customer favor. Top products group by `productNameSnapshot` (deleted products still report; a rename splits rows — accepted). Status breakdown counts ALL statuses placed in the window; coupon card sums `couponDiscountCents` over coupon orders.
+- **Chart** (`src/components/admin/revenue-chart.tsx`): pure SSR inline SVG, zero client JS — single hue `--color-ring` bars (validated ≥3:1 on surface), native per-day `<title>` tooltips as the hover layer, `<details>` table as the accessible fallback, recessive dashed max/mid gridlines. Rasterized and eyeballed via sharp during verification.
+- Wire-verified on the prod build: 30d/7d KPIs + status counts match DB-computed expectations exactly; bogus `?period=` falls back to 30; coupon card verified by flipping `MT-000053` CANCELLED→PAID (revenue rose exactly +10168, "1 siparişte kupon kullanıldı", −₺2,47) then reverting; anonymous → login marker with zero data, customer role → 404 with zero data.
 
 ## Phase 3 — wishlist notes (landed 2026-07-09)
 
@@ -151,7 +158,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## Reminders / open items
 
-- [ ] **Owner review pending (2026-07-09 session ran on standing delegation while owner was busy)**: review decision rows R18–R24 in `docs/DECISIONS.md` and the day's commits (address book, best-sellers, reviews, coupons, wishlist), then push. Skipped-by-choice scope to reconsider later: fixed-amount/free-shipping coupons, coupon field on the cart page, guest wishlist, transactional coupon-cap check (small overshoot race accepted for v1).
+- [ ] **Owner review pending (2026-07-09 session ran on standing delegation while owner was busy)**: review decision rows R18–R25 in `docs/DECISIONS.md` and the commits of 2026-07-09 (address book, best-sellers, reviews, coupons, wishlist) + 2026-07-11 (analytics dashboard), then push. Skipped-by-choice scope to reconsider later: fixed-amount/free-shipping coupons, coupon field on the cart page, guest wishlist, transactional coupon-cap check (small overshoot race accepted for v1).
 - [ ] **iyzico + coupon NOT sandbox-verified**: a couponed card payment sends `paidPrice` below the basket-sum `price` — documented as supported by iyzico but never driven against the hosted sandbox page (needs a real browser; the 2026-07-05 E2E predates coupons). Do ONE manual sandbox purchase with a test coupon before launch.
 - [ ] **Legal texts DRAFTED (2026-07-05), not lawyer-reviewed**: full mesafeli satış sözleşmesi + ön bilgilendirme (`src/lib/copy/legal.ts`, drafted against 6502/Yönetmelik incl. the 2026-effective seller-pays-return-shipping rule) and KVKK aydınlatma metni + çerez (`static-pages.ts`). Checkout now REQUIRES consent (checkbox + zod `legalConsent`, wire-verified). Before launch the owner must: fill the `[BRACKETED]` company fields (unvan, adres, vergi, kargo firması) — now ALSO in `src/lib/copy/invoice.ts` (invoice seller block, R15) — set up the real `destek@` email, and get a lawyer's review — these are drafts, not legal advice.
 - [ ] **VPS plan (2026-07-05): owner will likely get SSH access on a friend's VPS.** Caveat flagged: `docs/DEPLOY.md` assumes Coolify, which needs root and owns ports 80/443 via its proxy — not viable on a shared box or a non-root SSH user. Owner should confirm with the friend: root access? anything already on 80/443? If shared, fall back to plain `docker compose` behind the existing reverse proxy (runbook adjustment needed then).

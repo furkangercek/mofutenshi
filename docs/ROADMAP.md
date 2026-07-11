@@ -41,8 +41,8 @@ Build order chosen so each step is testable against real data:
 
 - [x] Coupon codes — landed 2026-07-09: percent-only on top of sale pricing (R23), one per order; window/min/cap/once-per-customer controls; admin CRUD at `/admin/coupons`, checkout apply/remove, invoice iskonto line
 - [x] Wishlist / favorites — landed 2026-07-09: logged-in product-level favorites (R24), PDP toggle + `/account/favorites`; no hearts on listing cards (cached surfaces)
+- [x] Analytics dashboard — landed 2026-07-11: `/admin/analytics` (nav "Raporlar"), period-scoped (7/30/90 gün) revenue KPIs + SSR SVG daily-revenue chart + top products from order snapshots + status/coupon breakdowns (R25)
 - [ ] Multi-admin roles
-- [ ] Analytics dashboard
 - [ ] i18n / multi-currency
 - [ ] Inventory reservation with timeout
 - [ ] Dark theme
