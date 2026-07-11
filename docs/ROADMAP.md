@@ -43,8 +43,8 @@ Build order chosen so each step is testable against real data:
 - [x] Wishlist / favorites — landed 2026-07-09: logged-in product-level favorites (R24), PDP toggle + `/account/favorites`; no hearts on listing cards (cached surfaces)
 - [x] Analytics dashboard — landed 2026-07-11: `/admin/analytics` (nav "Raporlar"), period-scoped (7/30/90 gün) revenue KPIs + SSR SVG daily-revenue chart + top products from order snapshots + status/coupon breakdowns (R25)
 - [ ] Multi-admin roles
+- [x] Inventory reservation with timeout + made-to-order variants — landed 2026-07-11 (R26): per-variant "stok takibi" flag (off = made-to-order, no stock semantics); tracked stock reserved at order creation under row locks (card ~30 min, havale 24 h holds), expiry frees stock lazily
 - [ ] i18n / multi-currency
-- [ ] Inventory reservation with timeout
 - [ ] Dark theme
 
 ## Out of scope (v1)

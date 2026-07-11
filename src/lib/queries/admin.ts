@@ -139,7 +139,7 @@ export async function getAdminProducts(): Promise<AdminProductRow[]> {
       slug: true,
       status: true,
       updatedAt: true,
-      variants: { select: { priceCents: true, stock: true } },
+      variants: { select: { priceCents: true, stock: true, trackStock: true } },
     },
   });
 
@@ -152,7 +152,8 @@ export async function getAdminProducts(): Promise<AdminProductRow[]> {
       status: product.status,
       updatedAt: product.updatedAt,
       variantCount: product.variants.length,
-      stockTotal: product.variants.reduce((sum, v) => sum + v.stock, 0),
+      // Made-to-order variants (R26) have no stock count to add.
+      stockTotal: product.variants.reduce((sum, v) => sum + (v.trackStock ? v.stock : 0), 0),
       minPriceCents: prices.length ? Math.min(...prices) : null,
       maxPriceCents: prices.length ? Math.max(...prices) : null,
     };
@@ -177,6 +178,7 @@ export type AdminProductDetail = {
     sku: string | null;
     priceCents: number;
     stock: number;
+    trackStock: boolean;
     isActive: boolean;
     optionValueIds: string[];
   }[];
@@ -208,6 +210,7 @@ export async function getAdminProduct(id: string): Promise<AdminProductDetail | 
           sku: true,
           priceCents: true,
           stock: true,
+          trackStock: true,
           isActive: true,
           optionValues: { select: { optionValueId: true } },
         },
@@ -228,6 +231,7 @@ export async function getAdminProduct(id: string): Promise<AdminProductDetail | 
       sku: variant.sku,
       priceCents: variant.priceCents,
       stock: variant.stock,
+      trackStock: variant.trackStock,
       isActive: variant.isActive,
       optionValueIds: variant.optionValues.map((v) => v.optionValueId),
     })),
@@ -349,6 +353,7 @@ export type AdminInventoryRow = {
   sku: string | null;
   priceCents: number;
   stock: number;
+  trackStock: boolean;
   isActive: boolean;
 };
 
@@ -364,6 +369,7 @@ export async function getAdminInventory(): Promise<{
         sku: true,
         priceCents: true,
         stock: true,
+        trackStock: true,
         isActive: true,
         product: { select: { id: true, name: true, status: true } },
         optionValues: {
@@ -388,6 +394,7 @@ export async function getAdminInventory(): Promise<{
       sku: variant.sku,
       priceCents: variant.priceCents,
       stock: variant.stock,
+      trackStock: variant.trackStock,
       isActive: variant.isActive,
     })),
     lowStockThreshold: settings?.lowStockThreshold ?? 3,
@@ -570,7 +577,10 @@ export async function getAdminDashboard(): Promise<AdminDashboard> {
       prisma.sale.count({
         where: { endedEarly: false, startsAt: { lte: now }, endsAt: { gte: now } },
       }),
-      prisma.variant.count({ where: { isActive: true, stock: { lt: lowStockThreshold } } }),
+      // Made-to-order variants (R26) have no stock to run low on.
+      prisma.variant.count({
+        where: { isActive: true, trackStock: true, stock: { lt: lowStockThreshold } },
+      }),
       prisma.order.count({ where: { status: "PENDING_PAYMENT" } }),
       prisma.order.findMany({
         orderBy: { placedAt: "desc" },

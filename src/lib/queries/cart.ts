@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { cartStockCap } from "@/lib/cart-constants";
 import { getCartIdentity } from "@/lib/cart-identity";
 import { imageUrl } from "@/lib/image";
 import { resolveEffectivePrice } from "@/lib/pricing";
@@ -50,6 +51,7 @@ export const getCartView = cache(async (): Promise<CartView> => {
               id: true,
               priceCents: true,
               stock: true,
+              trackStock: true,
               isActive: true,
               optionValues: {
                 select: {
@@ -105,7 +107,9 @@ export const getCartView = cache(async (): Promise<CartView> => {
         imageSrc: imageUrl(image?.key),
         imageAlt: image?.alt ?? null,
         quantity: item.quantity,
-        stock: variant.stock,
+        // R26: the view-model stock is the cart cap — made-to-order variants
+        // report MAX_CART_QUANTITY so out-of-stock UI never fires for them.
+        stock: cartStockCap(variant),
         unitCents: price.effectiveCents,
         unitOriginalCents: price.originalCents,
         onSale: price.onSale,

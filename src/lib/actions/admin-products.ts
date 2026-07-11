@@ -28,6 +28,7 @@ const variantSchema = z.object({
   sku: z.string().trim().max(60),
   price: z.string().trim(),
   stock: z.coerce.number().int(adminProductsCopy.invalidStock).min(0).max(1000000),
+  trackStock: z.boolean(),
   isActive: z.boolean(),
 });
 
@@ -274,6 +275,7 @@ export async function saveProductAction(
           sku: variant.sku || null,
           priceCents,
           stock: variant.stock,
+          trackStock: variant.trackStock,
           isActive: variant.isActive,
         };
         const valueIds = variant.valueKeys.map((key) => {

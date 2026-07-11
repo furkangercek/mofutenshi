@@ -61,7 +61,7 @@ export function InventoryTable({
         </thead>
         <tbody>
           {rows.map((row) => {
-            const low = row.stock < lowStockThreshold;
+            const low = row.trackStock && row.stock < lowStockThreshold;
             return (
               <tr key={row.variantId} className="border-border border-b last:border-0">
                 <th scope="row" className="px-3 py-2 text-left font-medium">
@@ -95,7 +95,13 @@ export function InventoryTable({
                 <td className="text-muted px-3 py-2">{row.sku ?? "—"}</td>
                 <td className="px-3 py-2 whitespace-nowrap">{formatKurus(row.priceCents)}</td>
                 <td className="px-3 py-2">
-                  <StockCellForm row={row} />
+                  {row.trackStock ? (
+                    <StockCellForm row={row} />
+                  ) : (
+                    <span className="bg-ghost text-muted rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap">
+                      {adminInventoryCopy.madeToOrderBadge}
+                    </span>
+                  )}
                 </td>
               </tr>
             );

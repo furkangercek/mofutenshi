@@ -1,4 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
+import { cartStockCap } from "@/lib/cart-constants";
 import { imageUrl } from "@/lib/image";
 import { prisma } from "@/lib/prisma";
 import { resolveEffectivePrice, type ActiveSale } from "@/lib/pricing";
@@ -100,7 +101,7 @@ export async function getCatalog(): Promise<ProductCardData[]> {
         tags: { select: { tag: { select: { id: true, slug: true } } } },
         variants: {
           where: { isActive: true },
-          select: { priceCents: true, stock: true },
+          select: { priceCents: true, stock: true, trackStock: true },
         },
       },
     }),
@@ -126,7 +127,8 @@ export async function getCatalog(): Promise<ProductCardData[]> {
         priceCents: best.effectiveCents,
         originalCents: best.originalCents,
         onSale: best.onSale,
-        inStock: product.variants.some((variant) => variant.stock > 0),
+        // R26: made-to-order variants are in stock by definition.
+        inStock: product.variants.some((variant) => !variant.trackStock || variant.stock > 0),
         isFeatured: product.isFeatured,
         createdAtMs: product.createdAt.getTime(),
         tagIds,
@@ -212,6 +214,7 @@ export async function getProductDetail(slug: string): Promise<ProductDetailData 
           id: true,
           priceCents: true,
           stock: true,
+          trackStock: true,
           optionValues: { select: { optionValueId: true } },
         },
       },
@@ -245,7 +248,9 @@ export async function getProductDetail(slug: string): Promise<ProductDetailData 
         priceCents: variant.priceCents,
         effectiveCents: price.effectiveCents,
         onSale: price.onSale,
-        stock: variant.stock,
+        // R26: view-model stock is the purchasable cap — made-to-order
+        // variants report MAX_CART_QUANTITY and never read as sold out.
+        stock: cartStockCap(variant),
         optionValueIds: variant.optionValues.map((v) => v.optionValueId),
       };
     }),

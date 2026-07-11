@@ -13,7 +13,14 @@ const initialState: AdminFormState = { error: null, saved: false };
 
 type OptionValueState = { key: string; id?: string; value: string };
 type OptionTypeState = { key: string; id?: string; name: string; values: OptionValueState[] };
-type VariantCell = { id?: string; sku: string; price: string; stock: number; isActive: boolean };
+type VariantCell = {
+  id?: string;
+  sku: string;
+  price: string;
+  stock: number;
+  trackStock: boolean;
+  isActive: boolean;
+};
 
 export type ProductFormValues = {
   id?: string;
@@ -29,12 +36,13 @@ export type ProductFormValues = {
     sku: string;
     price: string;
     stock: number;
+    trackStock: boolean;
     isActive: boolean;
     optionValueIds: string[];
   }[];
 };
 
-const emptyCell: VariantCell = { sku: "", price: "", stock: 0, isActive: true };
+const emptyCell: VariantCell = { sku: "", price: "", stock: 0, trackStock: true, isActive: true };
 
 function signatureOf(keys: string[]): string {
   return [...keys].sort().join("|");
@@ -84,6 +92,7 @@ export function ProductForm({
           sku: variant.sku,
           price: variant.price,
           stock: variant.stock,
+          trackStock: variant.trackStock,
           isActive: variant.isActive,
         },
       ]),
@@ -112,6 +121,7 @@ export function ProductForm({
             sku: cell.sku,
             price: cell.price,
             stock: cell.stock,
+            trackStock: cell.trackStock,
             isActive: cell.isActive,
           };
         }),
@@ -362,6 +372,7 @@ export function ProductForm({
                 <th className="px-3 py-2 font-medium">{adminProductsCopy.variantsHeading}</th>
                 <th className="px-3 py-2 font-medium">{adminProductsCopy.skuLabel}</th>
                 <th className="px-3 py-2 font-medium">{adminProductsCopy.priceLabel}</th>
+                <th className="px-3 py-2 font-medium">{adminProductsCopy.trackStockLabel}</th>
                 <th className="px-3 py-2 font-medium">{adminProductsCopy.stockLabel}</th>
                 <th className="px-3 py-2 font-medium">{adminProductsCopy.activeLabel}</th>
               </tr>
@@ -396,16 +407,33 @@ export function ProductForm({
                     </td>
                     <td className="px-3 py-2">
                       <input
-                        type="number"
-                        min={0}
-                        max={1000000}
-                        value={cell.stock}
-                        aria-label={`${label} ${adminProductsCopy.stockLabel}`}
+                        type="checkbox"
+                        checked={cell.trackStock}
+                        aria-label={`${label} ${adminProductsCopy.trackStockLabel}`}
                         onChange={(event) =>
-                          updateCell(signature, { stock: Number(event.target.value) })
+                          updateCell(signature, { trackStock: event.target.checked })
                         }
-                        className={`${inputClass} mt-0 min-w-20`}
+                        className="accent-ring size-4"
                       />
+                    </td>
+                    <td className="px-3 py-2">
+                      {cell.trackStock ? (
+                        <input
+                          type="number"
+                          min={0}
+                          max={1000000}
+                          value={cell.stock}
+                          aria-label={`${label} ${adminProductsCopy.stockLabel}`}
+                          onChange={(event) =>
+                            updateCell(signature, { stock: Number(event.target.value) })
+                          }
+                          className={`${inputClass} mt-0 min-w-20`}
+                        />
+                      ) : (
+                        <span className="text-muted text-xs whitespace-nowrap">
+                          {adminProductsCopy.madeToOrderNote}
+                        </span>
+                      )}
                     </td>
                     <td className="px-3 py-2">
                       <input

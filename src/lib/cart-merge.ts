@@ -1,4 +1,4 @@
-import { MAX_CART_QUANTITY } from "@/lib/cart-constants";
+import { cartStockCap, MAX_CART_QUANTITY } from "@/lib/cart-constants";
 import { clearCartToken, readCartToken } from "@/lib/cart-cookie";
 import { prisma } from "@/lib/prisma";
 
@@ -14,7 +14,11 @@ export async function mergeGuestCartIntoUserCart(userId: string): Promise<void> 
     select: {
       id: true,
       items: {
-        select: { variantId: true, quantity: true, variant: { select: { stock: true } } },
+        select: {
+          variantId: true,
+          quantity: true,
+          variant: { select: { stock: true, trackStock: true } },
+        },
       },
     },
   });
@@ -32,7 +36,7 @@ export async function mergeGuestCartIntoUserCart(userId: string): Promise<void> 
     });
 
     for (const item of guestCart.items) {
-      const stock = Math.max(item.variant.stock, 0);
+      const stock = cartStockCap(item.variant);
       if (stock === 0) continue;
       const existing = await tx.cartItem.findUnique({
         where: { cartId_variantId: { cartId: userCart.id, variantId: item.variantId } },

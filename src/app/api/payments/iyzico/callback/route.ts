@@ -6,6 +6,7 @@ import { markOrderPaid } from "@/lib/order-paid";
 import { orderAccessToken } from "@/lib/order-token";
 import { getCardGateway } from "@/lib/payments";
 import { prisma } from "@/lib/prisma";
+import { releaseOrderReservations } from "@/lib/stock";
 
 // iyzico redirects the buyer's browser here with a token after the hosted
 // payment page. The token is only a lookup key — payment state is verified
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
 
   if (!verification.ok) {
     if (verification.orderId) {
-      await prisma.order.updateMany({
+      const cancelled = await prisma.order.updateMany({
         where: {
           id: verification.orderId,
           status: "PENDING_PAYMENT",
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
         },
         data: { status: "CANCELLED" },
       });
+      if (cancelled.count > 0) await releaseOrderReservations(verification.orderId);
     }
     return redirectTo(request, "/checkout?error=payment");
   }

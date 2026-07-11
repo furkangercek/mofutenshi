@@ -8,6 +8,7 @@ import { adminCopy, adminOrdersCopy } from "@/lib/copy/admin";
 import { sendOrderPaidEmail, sendOrderShippedEmail } from "@/lib/order-emails";
 import { markOrderPaid } from "@/lib/order-paid";
 import { prisma } from "@/lib/prisma";
+import { releaseOrderReservations } from "@/lib/stock";
 import type { AdminFormState } from "@/lib/actions/admin-settings";
 
 function fail(error: string): AdminFormState {
@@ -86,7 +87,7 @@ export async function cancelPaidOrderAction(
 
   const items = await prisma.orderItem.findMany({
     where: { orderId: id.data },
-    select: { variantId: true, quantity: true },
+    select: { variantId: true, quantity: true, variant: { select: { trackStock: true } } },
   });
 
   const cancelled = await prisma.$transaction(async (tx) => {
@@ -97,9 +98,10 @@ export async function cancelPaidOrderAction(
     if (flipped.count === 0) return false;
 
     // Mirror of markOrderPaid's decrement; deleted variants (null) are gone
-    // from the catalog and get nothing back.
+    // from the catalog and made-to-order variants (R26) were never
+    // decremented, so neither gets anything back.
     for (const item of items) {
-      if (!item.variantId) continue;
+      if (!item.variantId || !item.variant?.trackStock) continue;
       await tx.variant.updateMany({
         where: { id: item.variantId },
         data: { stock: { increment: item.quantity } },
@@ -125,12 +127,14 @@ export async function cancelOrderAction(
   if (!id.success) return fail(adminCopy.common.invalidInput);
 
   // Only never-paid orders can be cancelled here — stock was not decremented
-  // for them, so no restock logic is needed (refund flows are Phase 2).
+  // for them, so no restock logic is needed (refund flows are Phase 2). Their
+  // reservation hold (R26) is released so the stock frees immediately.
   const cancelled = await prisma.order.updateMany({
     where: { id: id.data, status: "PENDING_PAYMENT" },
     data: { status: "CANCELLED" },
   });
   if (cancelled.count === 0) return fail(adminOrdersCopy.alreadyTransitioned);
+  await releaseOrderReservations(id.data);
 
   refresh();
   return { error: null, saved: true };

@@ -236,12 +236,16 @@ model Variant {
   priceCents Int
   stock      Int     @default(0)
   isActive   Boolean @default(true)
+  // R26: false = made to order — sellable while isActive, stock ignored,
+  // never decremented, never reserved.
+  trackStock Boolean @default(true)
 
   product      Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
   optionValues VariantOptionValue[]
   images       ProductImage[]
   cartItems    CartItem[]
   orderItems   OrderItem[]
+  reservations StockReservation[]
 
   @@index([productId])
 }
@@ -401,9 +405,10 @@ model Order {
   trackingNumber String?
   shippedAt      DateTime?
 
-  user             User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user             User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
   items            OrderItem[]
   couponRedemption CouponRedemption?
+  reservations     StockReservation[]
 
   @@index([userId])
   @@index([status, placedAt])
@@ -422,6 +427,24 @@ model OrderItem {
   order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   variant Variant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
+  @@index([orderId])
+}
+
+// R26: a pending order's hold on tracked stock. Availability = stock − active
+// (unexpired) reservations; rows are deleted on PAID/cancel and lazily once
+// expired. Never money, never a snapshot — safe to cascade away.
+model StockReservation {
+  id        String   @id @default(cuid())
+  orderId   String
+  variantId String
+  quantity  Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant Variant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@index([variantId, expiresAt])
   @@index([orderId])
 }
 

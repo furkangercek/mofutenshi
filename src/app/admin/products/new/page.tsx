@@ -25,7 +25,15 @@ export default async function AdminNewProductPage() {
             tagIds: [],
             optionTypes: [],
             variants: [
-              { id: "", sku: "", price: "", stock: 0, isActive: true, optionValueIds: [] },
+              {
+                id: "",
+                sku: "",
+                price: "",
+                stock: 0,
+                trackStock: true,
+                isActive: true,
+                optionValueIds: [],
+              },
             ],
           }}
           tagOptions={tagOptions}

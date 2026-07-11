@@ -20,6 +20,13 @@ import type { ShippingAddress } from "@/lib/payments/types";
 import { prisma } from "@/lib/prisma";
 import { consumeRateLimit } from "@/lib/rate-limit";
 import { clientIp, requestOrigin } from "@/lib/request-context";
+import {
+  CARD_HOLD_MS,
+  InsufficientStockError,
+  MANUAL_HOLD_MS,
+  releaseOrderReservations,
+  reserveStock,
+} from "@/lib/stock";
 
 export type CheckoutFormState = { error: string | null };
 
@@ -61,50 +68,69 @@ function toShippingAddress(input: z.infer<typeof checkoutSchema>): ShippingAddre
   };
 }
 
+// Creates the order and reserves tracked stock atomically (R26): if another
+// pending order holds the last units, the whole creation rolls back and the
+// customer sees the "cart changed" flow. Returns null in that case.
 async function createPendingOrder(
   cart: CheckoutCart,
   input: z.infer<typeof checkoutSchema>,
   userId: string | null,
   provider: string,
+  holdMs: number,
 ) {
   const shippingAddress = toShippingAddress(input);
+  const orderNumber = await nextOrderNumber();
 
-  return prisma.order.create({
-    data: {
-      orderNumber: await nextOrderNumber(),
-      userId,
-      email: input.email.toLowerCase(),
-      status: "PENDING_PAYMENT",
-      subtotalCents: cart.subtotalCents,
-      discountCents: cart.discountCents,
-      couponCode: cart.coupon?.code ?? null,
-      couponDiscountCents: cart.coupon?.discountCents ?? 0,
-      shippingCents: cart.shippingCents,
-      totalCents: cart.totalCents,
-      kdvRatePercent: cart.settings.kdvRatePercent,
-      shippingAddress,
-      notes: input.notes || null,
-      paymentProvider: provider,
-      ...(cart.coupon
-        ? {
-            couponRedemption: {
-              create: { couponId: cart.coupon.couponId, email: input.email.toLowerCase() },
-            },
-          }
-        : {}),
-      items: {
-        create: cart.lines.map((line) => ({
-          variantId: line.variantId,
-          productNameSnapshot: line.productName,
-          variantLabelSnapshot: line.variantLabel ?? "",
-          unitPriceCents: line.unitCents,
-          quantity: line.quantity,
-          lineTotalCents: line.lineCents,
-        })),
-      },
-    },
-    select: { id: true },
-  });
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const order = await tx.order.create({
+        data: {
+          orderNumber,
+          userId,
+          email: input.email.toLowerCase(),
+          status: "PENDING_PAYMENT",
+          subtotalCents: cart.subtotalCents,
+          discountCents: cart.discountCents,
+          couponCode: cart.coupon?.code ?? null,
+          couponDiscountCents: cart.coupon?.discountCents ?? 0,
+          shippingCents: cart.shippingCents,
+          totalCents: cart.totalCents,
+          kdvRatePercent: cart.settings.kdvRatePercent,
+          shippingAddress,
+          notes: input.notes || null,
+          paymentProvider: provider,
+          ...(cart.coupon
+            ? {
+                couponRedemption: {
+                  create: { couponId: cart.coupon.couponId, email: input.email.toLowerCase() },
+                },
+              }
+            : {}),
+          items: {
+            create: cart.lines.map((line) => ({
+              variantId: line.variantId,
+              productNameSnapshot: line.productName,
+              variantLabelSnapshot: line.variantLabel ?? "",
+              unitPriceCents: line.unitCents,
+              quantity: line.quantity,
+              lineTotalCents: line.lineCents,
+            })),
+          },
+        },
+        select: { id: true },
+      });
+      await reserveStock(
+        tx,
+        order.id,
+        cart.lines.map((line) => ({ variantId: line.variantId, quantity: line.quantity })),
+        holdMs,
+      );
+      return order;
+    });
+  } catch (error) {
+    if (error instanceof InsufficientStockError) return null;
+    throw error;
+  }
 }
 
 export async function placeOrder(
@@ -179,14 +205,22 @@ export async function placeOrder(
     await saveAddressFromCheckout(userId, toShippingAddress(parsed.data));
 
   if (method === "manual") {
-    const order = await createPendingOrder(cart, parsed.data, userId, "manual");
+    const order = await createPendingOrder(cart, parsed.data, userId, "manual", MANUAL_HOLD_MS);
+    if (!order) {
+      refresh();
+      return { error: checkoutCopy.cartChanged };
+    }
     await clearCartAfterOrder(userId);
     after(() => sendOrderReceivedEmail(order.id));
     refresh();
     redirect(confirmationPath(order.id));
   }
 
-  const order = await createPendingOrder(cart, parsed.data, userId, gateway!.id);
+  const order = await createPendingOrder(cart, parsed.data, userId, gateway!.id, CARD_HOLD_MS);
+  if (!order) {
+    refresh();
+    return { error: checkoutCopy.cartChanged };
+  }
   let init;
   try {
     init = await gateway!.initPayment(
@@ -212,8 +246,10 @@ export async function placeOrder(
   }
 
   if (!init.ok) {
-    // Nothing was charged; the cart is untouched, the order leaves the flow.
+    // Nothing was charged; the cart is untouched, the order leaves the flow
+    // and its stock hold is released.
     await prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED" } });
+    await releaseOrderReservations(order.id);
     return { error: checkoutCopy.paymentInitFailed };
   }
 

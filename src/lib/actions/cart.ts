@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { MAX_CART_QUANTITY } from "@/lib/cart-constants";
+import { cartStockCap, MAX_CART_QUANTITY } from "@/lib/cart-constants";
 import { issueCartToken } from "@/lib/cart-cookie";
 import { getCartIdentity, ownsCart } from "@/lib/cart-identity";
 import { cartCopy } from "@/lib/copy/cart";
@@ -22,11 +22,16 @@ export async function addCartItem(input: unknown): Promise<CartActionResult> {
 
   const variant = await prisma.variant.findUnique({
     where: { id: variantId },
-    select: { stock: true, isActive: true, product: { select: { status: true } } },
+    select: {
+      stock: true,
+      trackStock: true,
+      isActive: true,
+      product: { select: { status: true } },
+    },
   });
   if (!variant?.isActive || variant.product.status !== "PUBLISHED")
     return { ok: false, error: cartCopy.addError };
-  if (variant.stock < 1) return { ok: false, error: cartCopy.addOutOfStock };
+  if (cartStockCap(variant) < 1) return { ok: false, error: cartCopy.addOutOfStock };
 
   const identity = await getCartIdentity();
   let cart = identity
@@ -43,7 +48,7 @@ export async function addCartItem(input: unknown): Promise<CartActionResult> {
     select: { quantity: true },
   });
   const requested = (existing?.quantity ?? 0) + quantity;
-  const nextQuantity = Math.min(requested, variant.stock, MAX_CART_QUANTITY);
+  const nextQuantity = Math.min(requested, cartStockCap(variant), MAX_CART_QUANTITY);
   await prisma.cartItem.upsert({
     where: { cartId_variantId: { cartId: cart.id, variantId } },
     create: { cartId: cart.id, variantId, quantity: nextQuantity },
@@ -69,7 +74,7 @@ async function findOwnedItem(itemId: string) {
     select: {
       id: true,
       cart: { select: { userId: true, sessionToken: true } },
-      variant: { select: { stock: true } },
+      variant: { select: { stock: true, trackStock: true } },
     },
   });
   if (!item || !ownsCart(identity, item.cart)) return null;
@@ -84,7 +89,7 @@ export async function updateCartItemQuantity(input: unknown): Promise<CartAction
   const item = await findOwnedItem(itemId);
   if (!item) return { ok: false, error: cartCopy.updateError };
 
-  const nextQuantity = Math.min(quantity, Math.max(item.variant.stock, 0));
+  const nextQuantity = Math.min(quantity, cartStockCap(item.variant));
   if (nextQuantity === 0) {
     await prisma.cartItem.delete({ where: { id: item.id } });
   } else {

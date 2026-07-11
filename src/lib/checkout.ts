@@ -3,6 +3,7 @@ import { accountEmail, checkCoupon } from "@/lib/coupons";
 import { resolveEffectivePrice } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 import { loadActiveSales } from "@/lib/queries/catalog";
+import { activeReservationTotals } from "@/lib/stock";
 import { variantLabel } from "@/lib/variant-label";
 
 // Checkout is the money boundary: everything here reads FRESH DB state
@@ -69,6 +70,7 @@ export async function loadCheckoutCart(): Promise<CheckoutCartResult> {
               priceCents: true,
               stock: true,
               isActive: true,
+              trackStock: true,
               optionValues: {
                 select: {
                   optionValue: {
@@ -99,9 +101,17 @@ export async function loadCheckoutCart(): Promise<CheckoutCartResult> {
   );
   if (visible.length === 0) return { ok: false, reason: "empty" };
 
-  // A quantity above current stock would silently change the amount charged —
-  // reject instead and let the customer re-check their cart.
-  if (visible.some((item) => item.quantity > item.variant.stock)) {
+  // A quantity above current availability (stock minus other pending orders'
+  // reservations, R26) would silently change the amount charged — reject and
+  // let the customer re-check their cart. Made-to-order variants have no
+  // stock semantics; reserveStock re-checks tracked lines under row locks.
+  const tracked = visible.filter((item) => item.variant.trackStock);
+  const reserved = await activeReservationTotals(tracked.map((item) => item.variant.id));
+  if (
+    tracked.some(
+      (item) => item.quantity > item.variant.stock - (reserved.get(item.variant.id) ?? 0),
+    )
+  ) {
     return { ok: false, reason: "changed" };
   }
 

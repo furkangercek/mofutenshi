@@ -9,7 +9,7 @@ Entity reference for the Prisma schema, aligned to PRD v2 §6. Once `prisma/sche
 3. `OrderItem` snapshots product name, variant label, and unit price at order creation. Orders never change when the catalog changes.
 4. Every product has ≥1 variant. A no-options product gets one default variant. All price/stock lives on variants, never on `Product`.
 5. One cart line per (cart, variant): unique composite key, quantity increments, capped at stock.
-6. Stock decrements ONLY on verified successful payment (`PAID`) — never on order creation, never on client-side success alone.
+6. Stock decrements ONLY on verified successful payment (`PAID`) — never on order creation, never on client-side success alone. Since R26, order creation additionally RESERVES tracked stock (`StockReservation`, timeout by payment method); availability = stock − active reservations. Made-to-order variants (`trackStock = false`) have no stock semantics at all: sellable while `isActive`, never decremented, never reserved.
 7. Navigation is tags, not categories: products ↔ tags are many-to-many; a product tagged with a child tag also appears on its parent tag's page.
 8. Sales, New Arrivals, and automatic Best Sellers (landed 2026-07-09, R20: units sold in trailing 90 days over PAID/FULFILLED orders) are DERIVED views — never tags the owner maintains. The `best-seller` flat tag survives only as cold-start filler until real sales exist.
 
@@ -26,7 +26,7 @@ Entity reference for the Prisma schema, aligned to PRD v2 §6. Once `prisma/sche
 - **ProductImage** — `id, productId, key (R2), alt, sortOrder, isPrimary, variantId?`
 - **OptionType** — `id, productId, name, sortOrder` (e.g., "Finish", "Size")
 - **OptionValue** — `id, optionTypeId, value, sortOrder` (e.g., "Painted")
-- **Variant** — `id, productId, sku? (unique), priceCents, stock, isActive`
+- **Variant** — `id, productId, sku? (unique), priceCents, stock, isActive, trackStock` (R26: `trackStock = false` marks a made-to-order variant — figures/handcrafts made on demand; `stock` is ignored for it)
 - **VariantOptionValue** — join (`variantId, optionValueId`); one value per option type per variant.
 
 ### Sales
@@ -48,6 +48,7 @@ Entity reference for the Prisma schema, aligned to PRD v2 §6. Once `prisma/sche
 - **OrderItem** — `id, orderId, variantId? (nullable — survives catalog deletion), productNameSnapshot, variantLabelSnapshot, unitPriceCents, quantity, lineTotalCents`
 - **Coupon** — `id, code (unique), percentOff, startsAt, endsAt, minSubtotalCents, maxRedemptions?, isActive` (R23: percent-only, applied on top of sale pricing, one per order).
 - **CouponRedemption** — `id, couponId, orderId (unique), email`; a redemption counts toward the total cap and the once-per-customer rule while its order is NOT CANCELLED — cancelling frees the slot. Orders snapshot `couponCode`/`couponDiscountCents`, so coupon deletion never mutates order history.
+- **StockReservation** — `id, orderId, variantId, quantity, expiresAt, createdAt` (R26: a pending order's hold on tracked stock, created in the order-creation transaction — card orders hold ~30 min, havale/EFT 24 h; deleted on PAID/cancel, ignored once expired and lazily cleaned up; cascades on order or variant delete). Index `(variantId, expiresAt)`.
 - **WishlistItem** — `id, userId, productId`; unique `(userId, productId)` (R24: logged-in, product-level favorites; cascades on user or product delete).
 - **Review** — `id, productId, userId, rating (1–5), text?, status (PENDING|APPROVED|REJECTED)`; unique `(productId, userId)` (R21: verified buyers only — eligibility checked against PAID/FULFILLED orders at write time; pre-moderated, editing resets to PENDING; only APPROVED reviews are public). Cascades on user or product delete.
 

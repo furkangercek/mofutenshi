@@ -59,6 +59,7 @@ export default async function AdminEditProductPage({
               sku: variant.sku ?? "",
               price: kurusToInputValue(variant.priceCents),
               stock: variant.stock,
+              trackStock: variant.trackStock,
               isActive: variant.isActive,
               optionValueIds: variant.optionValueIds,
             })),
