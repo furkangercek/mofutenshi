@@ -77,6 +77,7 @@ async function createPendingOrder(
   userId: string | null,
   provider: string,
   holdMs: number,
+  couponIdentityEmail: string,
 ) {
   const shippingAddress = toShippingAddress(input);
   const orderNumber = await nextOrderNumber();
@@ -102,7 +103,7 @@ async function createPendingOrder(
           ...(cart.coupon
             ? {
                 couponRedemption: {
-                  create: { couponId: cart.coupon.couponId, email: input.email.toLowerCase() },
+                  create: { couponId: cart.coupon.couponId, email: couponIdentityEmail },
                 },
               }
             : {}),
@@ -183,29 +184,37 @@ export async function placeOrder(
     await dropCoupon();
     return { error: couponCopy.invalidAtCheckout };
   }
-  // Guests: the once-per-customer rule is only checkable now, with the
-  // submitted email (logged-in carts were already checked in loadCheckoutCart).
+
+  const session = await auth();
+  const userId = session?.user?.id ?? null;
+  // R23 once-per-customer identity: bind to the ACCOUNT for logged-in users
+  // (the session email is immutable within the request, so the form email
+  // cannot be varied to farm an uncapped code) and to the submitted email for
+  // guests. Must match loadCheckoutCart, which checks logged-in carts against
+  // accountEmail() — and the redemption row is stored under the same identity.
+  const couponIdentityEmail = (session?.user?.email ?? parsed.data.email).toLowerCase();
+
   if (cart.coupon) {
-    const recheck = await checkCoupon(
-      cart.coupon.code,
-      cart.subtotalCents,
-      parsed.data.email.toLowerCase(),
-    );
+    const recheck = await checkCoupon(cart.coupon.code, cart.subtotalCents, couponIdentityEmail);
     if (!recheck.ok) {
       await dropCoupon();
       return { error: recheck.error };
     }
   }
 
-  const session = await auth();
-  const userId = session?.user?.id ?? null;
-
   // R19 save-at-checkout: best-effort and independent of the payment outcome.
   if (userId && formData.get("saveAddress") === "on")
     await saveAddressFromCheckout(userId, toShippingAddress(parsed.data));
 
   if (method === "manual") {
-    const order = await createPendingOrder(cart, parsed.data, userId, "manual", MANUAL_HOLD_MS);
+    const order = await createPendingOrder(
+      cart,
+      parsed.data,
+      userId,
+      "manual",
+      MANUAL_HOLD_MS,
+      couponIdentityEmail,
+    );
     if (!order) {
       refresh();
       return { error: checkoutCopy.cartChanged };
@@ -216,7 +225,14 @@ export async function placeOrder(
     redirect(confirmationPath(order.id));
   }
 
-  const order = await createPendingOrder(cart, parsed.data, userId, gateway!.id, CARD_HOLD_MS);
+  const order = await createPendingOrder(
+    cart,
+    parsed.data,
+    userId,
+    gateway!.id,
+    CARD_HOLD_MS,
+    couponIdentityEmail,
+  );
   if (!order) {
     refresh();
     return { error: checkoutCopy.cartChanged };
