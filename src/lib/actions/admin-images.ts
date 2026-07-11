@@ -7,7 +7,7 @@ import { z } from "zod";
 import { assertAdmin } from "@/lib/admin-guard";
 import { adminCopy, adminImagesCopy } from "@/lib/copy/admin";
 import { prisma } from "@/lib/prisma";
-import { r2Delete, r2Enabled, r2Put } from "@/lib/r2";
+import { storageDelete, storagePut, uploadsEnabled } from "@/lib/storage";
 import type { AdminFormState } from "@/lib/actions/admin-settings";
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
@@ -27,7 +27,7 @@ export async function uploadImageAction(
   formData: FormData,
 ): Promise<AdminFormState> {
   await assertAdmin();
-  if (!r2Enabled) return fail(adminImagesCopy.r2Missing);
+  if (!uploadsEnabled) return fail(adminImagesCopy.r2Missing);
 
   const parsed = z
     .object({
@@ -65,9 +65,9 @@ export async function uploadImageAction(
 
   const key = `products/${product.id}/${randomUUID()}.webp`;
   try {
-    await r2Put(key, optimized, "image/webp");
+    await storagePut(key, optimized, "image/webp");
   } catch (error) {
-    console.error("R2 upload failed", error);
+    console.error("image upload failed", error);
     return fail(adminImagesCopy.uploadFailed);
   }
 
@@ -207,12 +207,12 @@ export async function deleteImageAction(
       await prisma.productImage.update({ where: { id: next.id }, data: { isPrimary: true } });
   }
 
-  // Storage cleanup is best-effort: a stray R2 object is harmless, a broken
-  // DB row is not.
+  // Storage cleanup is best-effort: a stray object/file is harmless, a
+  // broken DB row is not.
   try {
-    await r2Delete(image.key);
+    await storageDelete(image.key);
   } catch (error) {
-    console.error("R2 delete failed", error);
+    console.error("image delete failed", error);
   }
 
   invalidateTag("catalog");

@@ -7,7 +7,7 @@ import { adminProductsCopy } from "@/lib/copy/admin";
 import { imageUrl } from "@/lib/image";
 import { kurusToInputValue } from "@/lib/money";
 import { getAdminProduct, getTagCheckboxOptions } from "@/lib/queries/admin";
-import { r2Enabled } from "@/lib/r2";
+import { uploadsEnabled } from "@/lib/storage";
 
 export const metadata: Metadata = { title: adminProductsCopy.title };
 
@@ -34,7 +34,7 @@ export default async function AdminEditProductPage({
       <div className="mt-8">
         <ProductImagesSection
           productId={product.id}
-          uploadEnabled={r2Enabled}
+          uploadEnabled={uploadsEnabled}
           images={product.images.map((image) => ({
             id: image.id,
             src: imageUrl(image.key),

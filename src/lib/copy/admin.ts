@@ -104,7 +104,7 @@ export const adminImagesCopy = {
   altSave: "Alt metni kaydet",
   empty: "Henüz görsel yüklenmedi.",
   r2Missing:
-    "Görsel deposu henüz yapılandırılmadı: .env dosyasındaki R2_* değişkenleri ayarlanınca yükleme açılır.",
+    "Görsel deposu henüz yapılandırılmadı: .env dosyasında R2_* değişkenlerini (veya yerel geliştirme için LOCAL_UPLOAD_DIR) ayarlayınca yükleme açılır.",
   invalidFile: "Geçersiz dosya. JPEG, PNG veya WebP yükleyin (en fazla 10 MB).",
   altRequired: "Alt metin girin — erişilebilirlik için zorunludur.",
   uploadFailed: "Yükleme başarısız oldu. Lütfen tekrar deneyin.",

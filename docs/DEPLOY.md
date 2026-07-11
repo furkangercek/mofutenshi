@@ -48,6 +48,9 @@ build-time variable. Consequences:
    | `IYZICO_API_KEY/SECRET_KEY/BASE_URL`                              | production keys + `https://api.iyzipay.com`                |
    | `AUTH_GOOGLE_ID/SECRET`                                           | callback `https://mofutenshi.com/api/auth/callback/google` |
 
+   **Never set `LOCAL_UPLOAD_DIR` in production** (R28 local-dev fallback):
+   uploads would land on the ephemeral container disk and vanish on redeploy.
+
 5. **Domain**: assign `mofutenshi.com` to the app in Coolify (it provisions
    the origin cert / proxy).
 6. Deploy. First-deploy smoke: `/`, `/products`, a PDP, `/sitemap.xml`,
