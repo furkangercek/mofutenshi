@@ -12,7 +12,7 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Code side: Phase 3 analytics dashboard (R25) + inventory reservation/made-to-order (R26) landed 2026-07-11. Remaining Phase 3 items: dark theme (designer-blocked), i18n (big commitment, low pre-launch value), multi-admin (unneeded for a single owner). Recommendation: STOP building features; the launch blocker is owner provisioning (below).**
+**Code side: Phase 3 analytics dashboard (R25) + inventory reservation/made-to-order (R26) landed 2026-07-11. Remaining Phase 3 items: dark theme (R27 — owner deferred until the design is finalized; do NOT build a provisional palette), i18n (big commitment, low pre-launch value), multi-admin (unneeded for a single owner). Feature work is DONE for now; the launch blocker is owner provisioning (below).**
 
 **Owner side (Phase 1 step 10, unchanged):** VPS (see R10 — friend's box, confirm root/ports first), domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production keys, Google OAuth credentials, Resend API key + sender domain, fresh production `AUTH_SECRET`. (The step-by-step `docs/LAUNCH_GUIDE.md` was removed by the owner on 2026-07-05 with `docs/ADMIN_GUIDE.md` — `docs/DEPLOY.md` still covers Coolify → Cloudflare → smoke → backup.) After deploy, close out the env-gated verification backlog: live R2 upload, live Resend send.
 
