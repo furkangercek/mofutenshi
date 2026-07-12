@@ -31,8 +31,13 @@ rtk proxy npm run start            # run in background; wait for /robots.txt = 2
 - **POST as `multipart/form-data`** (node `FormData`) to the page URL —
   server-action forms degrade to multipart, urlencoded bodies parse as EMPTY
   and the action just re-renders with a validation error.
-- Success with `redirect()` → 303 + `location`; validation error → 200 HTML
-  containing the Turkish error copy.
+- Success with `redirect()` → 303 + `location`; validation error → 200.
+- `$ACTION_REF_x` inputs render with NO `value` attribute — a parser that
+  requires `value="…"` drops them and the post 500s with "Failed to find
+  Server Action". Treat a missing value as `""`.
+- A 200 action response body is the RSC FLIGHT payload, not HTML — assert
+  errors by searching the raw stream for the Turkish copy string, not by
+  parsing `role="alert"` markup.
 
 ## Gotchas
 

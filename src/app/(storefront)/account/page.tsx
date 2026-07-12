@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ButtonLink } from "@/components/ui/button";
 import { logoutAction } from "@/lib/actions/auth";
 import { auth } from "@/lib/auth";
+import { accountSecurityCopy } from "@/lib/copy/account-security";
 import { addressesCopy } from "@/lib/copy/addresses";
 import { authCopy } from "@/lib/copy/auth";
 import { accountOrdersCopy } from "@/lib/copy/checkout";
@@ -85,6 +86,14 @@ export default async function AccountPage() {
         <p className="text-muted mt-2 text-sm">{wishlistCopy.accountSectionLead}</p>
         <ButtonLink href="/account/favorites" className="mt-4">
           {wishlistCopy.accountCta}
+        </ButtonLink>
+      </section>
+
+      <section className="border-border mt-8 rounded-lg border p-6">
+        <h2 className="font-display text-xl">{accountSecurityCopy.pageTitle}</h2>
+        <p className="text-muted mt-2 text-sm">{accountSecurityCopy.accountSectionLead}</p>
+        <ButtonLink href="/account/security" className="mt-4">
+          {accountSecurityCopy.accountCta}
         </ButtonLink>
       </section>
 

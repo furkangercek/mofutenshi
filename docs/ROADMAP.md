@@ -46,7 +46,7 @@ Build order chosen so each step is testable against real data:
 - [x] Admin new-order notification email (R29.1) — landed 2026-07-12: `EMAIL_ADMIN` env target; fires on havale/EFT placement and verified card payment; nothing on admin manual confirm
 - [x] Sentry + Cloudflare Web Analytics (R29.2 — R4 commitment) — landed 2026-07-12: `SENTRY_DSN`-gated server-error reporting via `instrumentation.ts` (envelope API, no SDK); CF Web Analytics = dashboard auto-injection, documented in DEPLOY.md
 - [x] Launch-checklist hardening (R29.3) — landed 2026-07-12 in DEPLOY.md: uptime pinger, backup success-ping alerting, prod restore drill schedule, Search Console steps, charged-but-PENDING iyzico reconciliation procedure
-- [ ] Account deletion + password change (R29.4)
+- [x] Account deletion + password change (R29.4) — landed 2026-07-12: `/account/security`; password change (current-password gate), self-serve KVKK deletion (orders detach and are retained; admin accounts blocked server-side)
 - [x] Inventory reservation with timeout + made-to-order variants — landed 2026-07-11 (R26): per-variant "stok takibi" flag (off = made-to-order, no stock semantics); tracked stock reserved at order creation under row locks (card ~30 min, havale 24 h holds), expiry frees stock lazily
 - [ ] i18n / multi-currency
 - [ ] Dark theme
