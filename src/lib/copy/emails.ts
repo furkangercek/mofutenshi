@@ -43,3 +43,15 @@ export const emailCopy = {
   resetExpiry: "Bu bağlantı 1 saat geçerlidir.",
   notYouNote: "Bu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz.",
 };
+
+// Owner-facing new-order notifications (R29.1).
+export const adminEmailCopy = {
+  placedSubject: (orderNumber: string) => `Yeni sipariş, ödeme bekleniyor — ${orderNumber}`,
+  paidSubject: (orderNumber: string) => `Yeni sipariş, ödeme alındı — ${orderNumber}`,
+  title: "Yeni sipariş",
+  placedLead:
+    "Havale/EFT ile yeni bir sipariş oluşturuldu. Ödeme geldiğinde admin panelinden onaylayın.",
+  paidLead: "Kart ödemesi doğrulandı; sipariş hazırlanmaya hazır.",
+  customerHeading: "Müşteri",
+  viewInAdmin: "Siparişi admin panelinde aç",
+};

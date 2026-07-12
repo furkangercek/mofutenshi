@@ -39,14 +39,16 @@ build-time variable. Consequences:
    **Dockerfile**. Port 3000.
 4. **Environment variables** (mark `DATABASE_URL` also as build variable):
 
-   | Var                                                               | Notes                                                      |
-   | ----------------------------------------------------------------- | ---------------------------------------------------------- |
-   | `DATABASE_URL`                                                    | internal Coolify Postgres URL                              |
-   | `AUTH_SECRET`                                                     | fresh 32-byte secret, never reuse dev                      |
-   | `SITE_URL`                                                        | `https://mofutenshi.com` (R8)                              |
-   | `R2_ACCOUNT_ID/ACCESS_KEY_ID/SECRET_ACCESS_KEY/BUCKET/PUBLIC_URL` | image storage (R2 bucket with public custom domain)        |
-   | `IYZICO_API_KEY/SECRET_KEY/BASE_URL`                              | production keys + `https://api.iyzipay.com`                |
-   | `AUTH_GOOGLE_ID/SECRET`                                           | callback `https://mofutenshi.com/api/auth/callback/google` |
+   | Var                                                               | Notes                                                       |
+   | ----------------------------------------------------------------- | ----------------------------------------------------------- |
+   | `DATABASE_URL`                                                    | internal Coolify Postgres URL                               |
+   | `AUTH_SECRET`                                                     | fresh 32-byte secret, never reuse dev                       |
+   | `SITE_URL`                                                        | `https://mofutenshi.com` (R8)                               |
+   | `R2_ACCOUNT_ID/ACCESS_KEY_ID/SECRET_ACCESS_KEY/BUCKET/PUBLIC_URL` | image storage (R2 bucket with public custom domain)         |
+   | `IYZICO_API_KEY/SECRET_KEY/BASE_URL`                              | production keys + `https://api.iyzipay.com`                 |
+   | `AUTH_GOOGLE_ID/SECRET`                                           | callback `https://mofutenshi.com/api/auth/callback/google`  |
+   | `RESEND_API_KEY` + `EMAIL_FROM` (`EMAIL_REPLY_TO` optional)       | transactional emails; FROM must be a verified Resend sender |
+   | `EMAIL_ADMIN`                                                     | owner inbox for new-order notifications (R29.1)             |
 
    **Never set `LOCAL_UPLOAD_DIR` in production** (R28 local-dev fallback):
    uploads would land on the ephemeral container disk and vanish on redeploy.

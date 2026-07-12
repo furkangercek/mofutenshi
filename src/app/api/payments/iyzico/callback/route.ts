@@ -1,7 +1,7 @@
 import { revalidateTag } from "next/cache";
 import { after, NextResponse, type NextRequest } from "next/server";
 import { clearCartAfterOrder } from "@/lib/cart-clear";
-import { sendOrderPaidEmail } from "@/lib/order-emails";
+import { sendAdminNewOrderEmail, sendOrderPaidEmail } from "@/lib/order-emails";
 import { markOrderPaid } from "@/lib/order-paid";
 import { orderAccessToken } from "@/lib/order-token";
 import { getCardGateway } from "@/lib/payments";
@@ -65,7 +65,9 @@ export async function POST(request: NextRequest) {
   if (becamePaid) {
     await clearCartAfterOrder(order.userId);
     revalidateTag("catalog", "max");
-    after(() => sendOrderPaidEmail(order.id));
+    after(() =>
+      Promise.all([sendOrderPaidEmail(order.id), sendAdminNewOrderEmail(order.id, "paid")]),
+    );
   }
   return redirectTo(
     request,

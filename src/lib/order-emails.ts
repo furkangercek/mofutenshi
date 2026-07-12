@@ -1,14 +1,15 @@
 import { createElement } from "react";
 import {
+  AdminNewOrderEmail,
   OrderPaidEmail,
   OrderReceivedEmail,
   OrderShippedEmail,
   type OrderEmailProps,
 } from "@/components/emails/order-emails";
 import { couponCopy } from "@/lib/copy/coupons";
-import { emailCopy } from "@/lib/copy/emails";
+import { adminEmailCopy, emailCopy } from "@/lib/copy/emails";
 import { invoiceCopy } from "@/lib/copy/invoice";
-import { emailEnabled, sendEmail, type EmailAttachment } from "@/lib/email";
+import { adminEmail, emailEnabled, sendEmail, type EmailAttachment } from "@/lib/email";
 import { generateInvoicePdf, loadInvoiceData } from "@/lib/invoice";
 import { formatKurus } from "@/lib/money";
 import { orderAccessToken } from "@/lib/order-token";
@@ -102,6 +103,40 @@ export async function sendOrderReceivedEmail(orderId: string): Promise<void> {
     );
   } catch (error) {
     console.error(`order received email threw for order ${orderId}`, error);
+  }
+}
+
+// Owner-facing new-order notification (R29.1): fires at placement for manual
+// (havale/EFT) orders and on the verified PAID flip for card orders. Admin
+// manual confirmation sends nothing — the owner performed it. Dormant unless
+// EMAIL_ADMIN is set on top of the Resend pair.
+export async function sendAdminNewOrderEmail(
+  orderId: string,
+  kind: "placed" | "paid",
+): Promise<void> {
+  if (!emailEnabled || !adminEmail) {
+    console.log(`admin email disabled, skipping new order notification for ${orderId}`);
+    return;
+  }
+  try {
+    const loaded = await loadOrderEmail(orderId);
+    if (!loaded) return;
+    const subject =
+      kind === "placed"
+        ? adminEmailCopy.placedSubject(loaded.props.orderNumber)
+        : adminEmailCopy.paidSubject(loaded.props.orderNumber);
+    await sendEmail(
+      adminEmail,
+      subject,
+      createElement(AdminNewOrderEmail, {
+        ...loaded.props,
+        customerEmail: loaded.to,
+        adminUrl: `${siteUrl}/admin/orders/${orderId}`,
+        kind,
+      }),
+    );
+  } catch (error) {
+    console.error(`admin new order email threw for order ${orderId}`, error);
   }
 }
 

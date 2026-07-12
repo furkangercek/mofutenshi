@@ -11,6 +11,10 @@ const replyTo = process.env.EMAIL_REPLY_TO;
 
 export const emailEnabled = Boolean(apiKey && from);
 
+// Owner-facing notifications (R29.1): optional on top of the Resend pair —
+// customer emails keep working without it.
+export const adminEmail = process.env.EMAIL_ADMIN || null;
+
 let client: Resend | null = null;
 
 function resend(): Resend {

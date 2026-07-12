@@ -12,7 +12,7 @@ import { loadCheckoutCart, type CheckoutCart } from "@/lib/checkout";
 import { checkoutCopy } from "@/lib/copy/checkout";
 import { couponCopy } from "@/lib/copy/coupons";
 import { checkCoupon } from "@/lib/coupons";
-import { sendOrderReceivedEmail } from "@/lib/order-emails";
+import { sendAdminNewOrderEmail, sendOrderReceivedEmail } from "@/lib/order-emails";
 import { nextOrderNumber } from "@/lib/order-number";
 import { orderAccessToken } from "@/lib/order-token";
 import { getCardGateway } from "@/lib/payments";
@@ -220,7 +220,9 @@ export async function placeOrder(
       return { error: checkoutCopy.cartChanged };
     }
     await clearCartAfterOrder(userId);
-    after(() => sendOrderReceivedEmail(order.id));
+    after(() =>
+      Promise.all([sendOrderReceivedEmail(order.id), sendAdminNewOrderEmail(order.id, "placed")]),
+    );
     refresh();
     redirect(confirmationPath(order.id));
   }

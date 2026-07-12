@@ -7,7 +7,7 @@ import {
   palette,
   text,
 } from "@/components/emails/shared";
-import { emailCopy } from "@/lib/copy/emails";
+import { adminEmailCopy, emailCopy } from "@/lib/copy/emails";
 
 // Order lifecycle templates. All money values arrive pre-formatted — kuruş
 // never reaches the templates.
@@ -57,7 +57,6 @@ function OrderEmail({
   lead: string;
   order: OrderEmailProps;
 }) {
-  const cellBorder = `1px solid ${palette.border}`;
   return (
     <EmailShell title={title}>
       <h1 style={headingText}>{title}</h1>
@@ -117,6 +116,24 @@ function OrderEmail({
         </table>
       )}
 
+      <OrderSummaryTable order={order} />
+
+      <p style={{ ...text, fontWeight: "bold", marginTop: "24px" }}>{emailCopy.addressHeading}</p>
+      {order.addressLines.map((line, index) => (
+        <p key={index} style={{ ...mutedText, marginTop: index === 0 ? "8px" : 0 }}>
+          {line}
+        </p>
+      ))}
+
+      <EmailButton href={order.confirmationUrl} label={emailCopy.viewOrder} />
+    </EmailShell>
+  );
+}
+
+function OrderSummaryTable({ order }: { order: OrderEmailProps }) {
+  const cellBorder = `1px solid ${palette.border}`;
+  return (
+    <>
       <p style={{ ...text, fontWeight: "bold", marginTop: "24px" }}>{emailCopy.itemsHeading}</p>
       <table role="presentation" width="100%" cellPadding={0} cellSpacing={0}>
         <tbody>
@@ -147,16 +164,7 @@ function OrderEmail({
         </tbody>
       </table>
       <p style={{ ...mutedText, fontSize: "12px", marginTop: "8px" }}>{emailCopy.kdvNote}</p>
-
-      <p style={{ ...text, fontWeight: "bold", marginTop: "24px" }}>{emailCopy.addressHeading}</p>
-      {order.addressLines.map((line, index) => (
-        <p key={index} style={{ ...mutedText, marginTop: index === 0 ? "8px" : 0 }}>
-          {line}
-        </p>
-      ))}
-
-      <EmailButton href={order.confirmationUrl} label={emailCopy.viewOrder} />
-    </EmailShell>
+    </>
   );
 }
 
@@ -180,6 +188,41 @@ export function OrderReceivedEmail(order: OrderEmailProps) {
 
 export function OrderPaidEmail(order: OrderEmailProps) {
   return <OrderEmail title={emailCopy.paidTitle} lead={emailCopy.paidLead} order={order} />;
+}
+
+// Owner-facing notification (R29.1): no greeting, customer contact up top,
+// button into the admin order detail instead of the confirmation page.
+type AdminNewOrderEmailProps = OrderEmailProps & {
+  customerEmail: string;
+  adminUrl: string;
+  kind: "placed" | "paid";
+};
+
+export function AdminNewOrderEmail(order: AdminNewOrderEmailProps) {
+  const lead = order.kind === "placed" ? adminEmailCopy.placedLead : adminEmailCopy.paidLead;
+  return (
+    <EmailShell title={adminEmailCopy.title}>
+      <h1 style={headingText}>{adminEmailCopy.title}</h1>
+      <p style={{ ...mutedText, marginTop: "8px" }}>{lead}</p>
+      <p style={{ ...text, marginTop: "16px" }}>
+        {emailCopy.orderNumberLabel}: <strong>{order.orderNumber}</strong>
+      </p>
+
+      <p style={{ ...text, fontWeight: "bold", marginTop: "24px" }}>
+        {adminEmailCopy.customerHeading}
+      </p>
+      <p style={{ ...mutedText, marginTop: "8px" }}>{order.customerEmail}</p>
+      {order.addressLines.map((line, index) => (
+        <p key={index} style={mutedText}>
+          {line}
+        </p>
+      ))}
+
+      <OrderSummaryTable order={order} />
+
+      <EmailButton href={order.adminUrl} label={adminEmailCopy.viewInAdmin} />
+    </EmailShell>
+  );
 }
 
 export function OrderShippedEmail(order: OrderEmailProps) {
