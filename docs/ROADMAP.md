@@ -43,6 +43,10 @@ Build order chosen so each step is testable against real data:
 - [x] Wishlist / favorites — landed 2026-07-09: logged-in product-level favorites (R24), PDP toggle + `/account/favorites`; no hearts on listing cards (cached surfaces)
 - [x] Analytics dashboard — landed 2026-07-11: `/admin/analytics` (nav "Raporlar"), period-scoped (7/30/90 gün) revenue KPIs + SSR SVG daily-revenue chart + top products from order snapshots + status/coupon breakdowns (R25)
 - [ ] Multi-admin roles
+- [ ] Admin new-order notification email (R29.1)
+- [ ] Sentry + Cloudflare Web Analytics (R29.2 — R4 commitment, never built)
+- [ ] Launch-checklist hardening: uptime monitor, backup failure alerting, prod restore drill, Search Console, PENDING-order reconciliation procedure in DEPLOY.md (R29.3)
+- [ ] Account deletion + password change (R29.4)
 - [x] Inventory reservation with timeout + made-to-order variants — landed 2026-07-11 (R26): per-variant "stok takibi" flag (off = made-to-order, no stock semantics); tracked stock reserved at order creation under row locks (card ~30 min, havale 24 h holds), expiry frees stock lazily
 - [ ] i18n / multi-currency
 - [ ] Dark theme
