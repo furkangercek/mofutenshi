@@ -2,7 +2,7 @@
 
 The single source for "where we are, what's next, what to remember." **AI agents: read this first every session; update it in every commit checkpoint** (state what landed, move the Next Action pointer, prune stale reminders).
 
-**Last updated:** 2026-07-12 (R29 gap backlog approved; R29.1 admin order notification landed)
+**Last updated:** 2026-07-12 (R29 gap backlog: R29.1 admin order notification + R29.2 error reporting landed)
 
 ## Where we are
 
@@ -12,9 +12,15 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Code side: working through the R29 gap backlog in order (owner approved 2026-07-12). (1) admin order notification — DONE 2026-07-12; (2) Sentry + Cloudflare Web Analytics — NEXT; (3) launch-checklist hardening in DEPLOY.md; (4) account deletion + password change. Still parked: dark theme (R27), i18n, multi-admin. The launch blocker remains owner provisioning (below).**
+**Code side: working through the R29 gap backlog in order (owner approved 2026-07-12). (1) admin order notification — DONE; (2) Sentry + CF Web Analytics — DONE 2026-07-12; (3) launch-checklist hardening in DEPLOY.md — NEXT; (4) account deletion + password change. Still parked: dark theme (R27), i18n, multi-admin. The launch blocker remains owner provisioning (below).**
 
 **Owner side (Phase 1 step 10, unchanged):** VPS (see R10 — friend's box, confirm root/ports first), domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production keys, Google OAuth credentials, Resend API key + sender domain, fresh production `AUTH_SECRET`. (The step-by-step `docs/LAUNCH_GUIDE.md` was removed by the owner on 2026-07-05 with `docs/ADMIN_GUIDE.md` — `docs/DEPLOY.md` still covers Coolify → Cloudflare → smoke → backup.) After deploy, close out the env-gated verification backlog: live R2 upload, live Resend send.
+
+## Server-error reporting + web analytics (R29.2, landed 2026-07-12)
+
+- **Sentry WITHOUT the SDK**: `src/instrumentation.ts` `onRequestError` (native Next hook, covers renders/route handlers/server actions) → `src/lib/error-reporting.ts` posts a minimal event to Sentry's envelope HTTP API. Env-gated by `SENTRY_DSN` (dormant unset). Deliberate trade-off vs `@sentry/nextjs`: no next.config wrapping, no client bundle, no Next-16 compat surface — but also no breadcrumbs/source maps; swapping to the SDK later only replaces the reporter file. Request headers/cookies deliberately never forwarded; in-memory cap 30 events/min protects the free tier. **Owner may veto for the full SDK — say so and it's a contained swap.**
+- **Cloudflare Web Analytics = dashboard auto-injection at the edge** (documented in DEPLOY.md Cloudflare section), NOT a code snippet: `NEXT_PUBLIC_*` tokens bake at image build, which runs without runtime secrets (the R11/R12 build-time env trap), and edge injection adds zero bundle cost. Nothing to verify until the site is behind Cloudflare.
+- Wire-verified on the prod build against a local fake ingest (`http://testkey@localhost:9999/42` + scratch crash route, both deleted): envelope hits `/api/42/envelope/` with the right `X-Sentry-Auth`, exception type/value, oldest-first stack frames, routeType/routePath tags, request url/method, no header/cookie leakage; ingest DOWN → "error report send failed" logged and the 500 response unaffected (3s timeout); DSN unset → zero report activity. **NOT verified: a real Sentry-hosted ingest** (no account yet — add DSN at provisioning, then confirm one event renders in the Sentry UI with sane grouping).
 
 ## Admin new-order notification (R29.1, landed 2026-07-12)
 

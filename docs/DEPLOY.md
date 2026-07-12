@@ -49,6 +49,7 @@ build-time variable. Consequences:
    | `AUTH_GOOGLE_ID/SECRET`                                           | callback `https://mofutenshi.com/api/auth/callback/google`  |
    | `RESEND_API_KEY` + `EMAIL_FROM` (`EMAIL_REPLY_TO` optional)       | transactional emails; FROM must be a verified Resend sender |
    | `EMAIL_ADMIN`                                                     | owner inbox for new-order notifications (R29.1)             |
+   | `SENTRY_DSN`                                                      | server-error reporting (R29.2, free-tier Sentry project)    |
 
    **Never set `LOCAL_UPLOAD_DIR` in production** (R28 local-dev fallback):
    uploads would land on the ephemeral container disk and vanish on redeploy.
@@ -74,6 +75,11 @@ build-time variable. Consequences:
 - WAF: default managed rules; rate-limit `/api/*` and `/login` modestly.
 - iyzico callback `POST /api/payments/iyzico/callback` must not be
   challenged — add a WAF skip rule for that exact path if challenges appear.
+- **Web Analytics** (R29.2): Cloudflare dashboard → Web Analytics → enable
+  for the site with **automatic setup** (the beacon is injected at the edge
+  on proxied HTML — zero code, nothing in the bundle). Do NOT add the beacon
+  snippet to the app: `NEXT_PUBLIC_*` tokens bake at image build, which runs
+  without runtime secrets (see the R11/R12 build-time env trap in STATUS).
 
 ## Backups (nightly `pg_dump` → R2)
 

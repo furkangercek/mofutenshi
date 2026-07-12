@@ -44,7 +44,7 @@ Build order chosen so each step is testable against real data:
 - [x] Analytics dashboard — landed 2026-07-11: `/admin/analytics` (nav "Raporlar"), period-scoped (7/30/90 gün) revenue KPIs + SSR SVG daily-revenue chart + top products from order snapshots + status/coupon breakdowns (R25)
 - [ ] Multi-admin roles
 - [x] Admin new-order notification email (R29.1) — landed 2026-07-12: `EMAIL_ADMIN` env target; fires on havale/EFT placement and verified card payment; nothing on admin manual confirm
-- [ ] Sentry + Cloudflare Web Analytics (R29.2 — R4 commitment, never built)
+- [x] Sentry + Cloudflare Web Analytics (R29.2 — R4 commitment) — landed 2026-07-12: `SENTRY_DSN`-gated server-error reporting via `instrumentation.ts` (envelope API, no SDK); CF Web Analytics = dashboard auto-injection, documented in DEPLOY.md
 - [ ] Launch-checklist hardening: uptime monitor, backup failure alerting, prod restore drill, Search Console, PENDING-order reconciliation procedure in DEPLOY.md (R29.3)
 - [ ] Account deletion + password change (R29.4)
 - [x] Inventory reservation with timeout + made-to-order variants — landed 2026-07-11 (R26): per-variant "stok takibi" flag (off = made-to-order, no stock semantics); tracked stock reserved at order creation under row locks (card ~30 min, havale 24 h holds), expiry frees stock lazily
