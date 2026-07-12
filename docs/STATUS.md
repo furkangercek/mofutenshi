@@ -12,9 +12,9 @@ The single source for "where we are, what's next, what to remember." **AI agents
 
 ## NEXT ACTION
 
-**Code side: working through the R29 gap backlog in order (owner approved 2026-07-12). (1) admin order notification — DONE; (2) Sentry + CF Web Analytics — DONE 2026-07-12; (3) launch-checklist hardening in DEPLOY.md — NEXT; (4) account deletion + password change. Still parked: dark theme (R27), i18n, multi-admin. The launch blocker remains owner provisioning (below).**
+**Code side: working through the R29 gap backlog in order (owner approved 2026-07-12). (1) admin order notification — DONE; (2) Sentry + CF Web Analytics — DONE; (3) launch-checklist hardening in DEPLOY.md — DONE 2026-07-12 (uptime pinger, backup success-ping via healthchecks.io, restore drill, Search Console, charged-but-PENDING iyzico reconciliation — owner provisioning now includes these); (4) account deletion + password change — NEXT. Still parked: dark theme (R27), i18n, multi-admin. The launch blocker remains owner provisioning (below).**
 
-**Owner side (Phase 1 step 10, unchanged):** VPS (see R10 — friend's box, confirm root/ports first), domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production keys, Google OAuth credentials, Resend API key + sender domain, fresh production `AUTH_SECRET`. (The step-by-step `docs/LAUNCH_GUIDE.md` was removed by the owner on 2026-07-05 with `docs/ADMIN_GUIDE.md` — `docs/DEPLOY.md` still covers Coolify → Cloudflare → smoke → backup.) After deploy, close out the env-gated verification backlog: live R2 upload, live Resend send.
+**Owner side (Phase 1 step 10, unchanged):** VPS (see R10 — friend's box, confirm root/ports first), domain purchase (reconfirm R8 first), R2 bucket + credentials, iyzico production keys, Google OAuth credentials, Resend API key + sender domain, fresh production `AUTH_SECRET`, plus the R29.3 monitoring accounts (uptime pinger, healthchecks.io check for the backup cron, Sentry project/DSN, Search Console after DNS). (The step-by-step `docs/LAUNCH_GUIDE.md` was removed by the owner on 2026-07-05 with `docs/ADMIN_GUIDE.md` — `docs/DEPLOY.md` still covers Coolify → Cloudflare → smoke → backup.) After deploy, close out the env-gated verification backlog: live R2 upload, live Resend send.
 
 ## Server-error reporting + web analytics (R29.2, landed 2026-07-12)
 

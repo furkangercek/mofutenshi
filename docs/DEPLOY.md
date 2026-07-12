@@ -87,15 +87,53 @@ Uploader: `scripts/backup-db.mjs`, baked into the app image; uses the app's
 R2 env vars, keeps the newest `BACKUP_KEEP` (default 14) dumps under
 `backups/` in the bucket.
 
-Coolify **Scheduled Task** (or host cron), nightly ~04:00 Istanbul:
+Coolify **Scheduled Task** (or host cron), nightly ~04:00 Istanbul. The
+trailing ping is the failure alarm (R29.3): create a free healthchecks.io
+check with a ~26h grace period — it emails when the nightly ping STOPS
+arriving, which is the only way a silently dead backup cron gets noticed.
 
 ```sh
 docker exec <db-container> pg_dump -U mofutenshi -Fc mofutenshi \
-  | docker exec -i <app-container> node scripts/backup-db.mjs
+  | docker exec -i <app-container> node scripts/backup-db.mjs \
+  && curl -fsS -m 10 https://hc-ping.com/<check-uuid>
 ```
 
 Verify after the first run: object appears in R2 `backups/`, size plausible
-(local DB dumps at ~44 KB with seed data; production grows).
+(local DB dumps at ~44 KB with seed data; production grows), healthchecks.io
+shows the ping.
+
+## Monitoring & alerting (R29.3, provisioning day)
+
+- **Uptime**: free external pinger (e.g. UptimeRobot, 5-min interval) on
+  `https://mofutenshi.com/robots.txt` (same cheap route as the container
+  healthcheck), alerting to the owner's email. A friend's VPS has no SLA and
+  nobody else is watching.
+- **Server errors**: set `SENTRY_DSN` (free-tier Sentry project), then
+  confirm one real event renders in the Sentry UI — trigger any 500 once and
+  check grouping. The reporter is dormant without the DSN.
+- **Traffic**: Cloudflare Web Analytics via dashboard auto-injection (see
+  the Cloudflare section) — nothing to deploy.
+
+## Post-launch checklist (R29.3, first week)
+
+- **Google Search Console**: verify the domain (DNS TXT record via
+  Cloudflare), submit `https://mofutenshi.com/sitemap.xml`, and after a few
+  days confirm key pages index while `/admin`, `/account`, `/checkout` stay
+  out (they are robots-disallowed and noindexed).
+- **Restore drill on the real box**: run the restore procedure below against
+  a scratch DB from a real nightly dump within the first week, then
+  quarterly. A backup that has never been restored is a hope, not a backup.
+- **Reconcile charged-but-PENDING card orders (daily until the webhook
+  exists)**: the iyzico callback arrives via the buyer's browser redirect —
+  a buyer who pays and closes the tab leaves a captured charge with the
+  order still PENDING_PAYMENT and its stock hold expiring after ~30 min.
+  Procedure: for any card-provider order sitting in PENDING_PAYMENT older
+  than an hour, check the iyzico merchant panel for a matching successful
+  payment (order id = basketId). If charged and the amount matches: admin →
+  order → confirm (re-checks stock; the R26 oversell clamp covers
+  confirm-after-expiry). If stock is genuinely gone or the amount mismatches:
+  refund via the iyzico panel and cancel the order. Post-launch backlog:
+  iyzico's notification webhook removes this manual loop.
 
 ## Restore procedure (verified locally 2026-07-05)
 
